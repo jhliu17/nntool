@@ -15,6 +15,8 @@ setup(
         "jax[cpu]>=0.4.0",
         "seaborn>=0.13.2",
         "pytest>=8.0.2",
+        "torch>=1.13.0",
+        "wandb>=0.15.0",
     ],
     # Additional metadata
     author="Junhao Liu",
