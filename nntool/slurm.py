@@ -78,6 +78,10 @@ def slurm_launcher(ArgsType, slurm_key="slurm"):
     :return: decorator function with main entry
     """
     args: ArgsType = tyro.cli(ArgsType)
+    if not hasattr(args, slurm_key):
+        raise ValueError(
+            f"ArgsType should have a field named `{slurm_key}` to use `slurm_launcher` decorator."
+        )
 
     def decorator(main_fn):
         def wrapper():
