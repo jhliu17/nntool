@@ -12,12 +12,10 @@ setup(
         "submitit>=1.5.0",
         "tyro>=0.7.0",
         "matplotlib>=3.8.0",
-        "jax[cpu]>=0.4.0",
         "seaborn>=0.13.2",
-        "pytest>=8.0.2",
-        "torch>=1.13.0",
         "wandb>=0.15.0",
     ],
+    extras_require={"dev": ["pytest>=8.0.2", "jax[cpu]>=0.4.0", "torch>=2.2.0"]},
     # Additional metadata
     author="Junhao Liu",
     author_email="junhaoliu17@gmail.com",

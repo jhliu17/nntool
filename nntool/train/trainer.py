@@ -50,7 +50,8 @@ class BaseTrainer(object):
 
     def load(self, milestone: str):
         state = torch.load(
-            str(self.output_folder / f"model-{milestone}.pt"), map_location=self.device
+            str(self.output_folder / f"model-{milestone}.pt"),
+            map_location=self.device,
         )
         self.load_state(state)
 

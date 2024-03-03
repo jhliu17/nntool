@@ -12,8 +12,22 @@ pip install git+https://github.com/jhliu17/nntool.git
 pip install --ignore-installed git+https://github.com/jhliu17/nntool.git
 ```
 
-## Testing
+## Development
+
+### Development Installation
+
+```bash
+pip install ".[dev]"
+```
+
+### Testing
 
 ```bash
 python -m pytest
+```
+
+### Build Wheel
+
+```bash
+python setup.py sdist bdist_wheel
 ```
