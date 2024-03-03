@@ -11,6 +11,10 @@ setup(
         "setuptools>=68.0.0",
         "submitit>=1.5.0",
         "tyro>=0.7.0",
+        "matplotlib>=3.8.0",
+        "jax[cpu]>=0.4.0",
+        "seaborn>=0.13.2",
+        "pytest>=8.0.2",
     ],
     # Additional metadata
     author="Junhao Liu",

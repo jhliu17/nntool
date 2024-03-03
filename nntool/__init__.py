@@ -1,4 +1,5 @@
 from . import slurm
+from . import plot
 
 
 def test_import():
