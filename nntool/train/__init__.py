@@ -18,8 +18,8 @@ def is_torch_available():
 if is_torch_available():
     from .trainer import BaseTrainer
 else:
-    # Inherits from a dummy `object` if accelerate is not available, so that python
+    # Inherits from a dummy `object` if torch is not available, so that python
     # succeeds to import this file.
-    # Deepspeed glue code will never inherit this dummy object as it checks if
-    # accelerate is available.
+    # BaseTrainer abstraction code will never inherit this dummy object as it checks if
+    # torch is available.
     from builtins import object as BaseTrainer
