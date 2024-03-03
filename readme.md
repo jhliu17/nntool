@@ -1,5 +1,7 @@
 # 🚂 NNTool
 
+"nicely neat tool" and "neural network tool"
+
 ## Installation
 
 ```bash
