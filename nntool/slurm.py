@@ -1,9 +1,10 @@
 import sys
-import tyro
 import submitit
 
+from typing import Union, Callable, Type, Any
 from dataclasses import dataclass
 from typing import Literal
+from .parser import parse_from_cli
 
 
 @dataclass
@@ -70,14 +71,22 @@ def get_slurm_executor(slurm_config: SlurmArgs):
     return executor
 
 
-def slurm_launcher(ArgsType, slurm_key="slurm"):
+def slurm_launcher(
+    ArgsType: Type[Any],
+    slurm_key: str = "slurm",
+    parser: Union[str, Callable] = "tyro",
+    *args,
+    **kwargs,
+):
     """A slurm launcher decorator
 
     :param ArgsType: the experiment arguments type, which should be a dataclass (it
                      mush have a slurm field)
     :return: decorator function with main entry
     """
-    args: ArgsType = tyro.cli(ArgsType)
+    args = parse_from_cli(ArgsType, parser, *args, **kwargs)
+
+    # check if args have slurm field
     if not hasattr(args, slurm_key):
         raise ValueError(
             f"ArgsType should have a field named `{slurm_key}` to use `slurm_launcher` decorator."
