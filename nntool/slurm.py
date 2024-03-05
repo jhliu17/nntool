@@ -39,6 +39,9 @@ class SlurmArgs:
     # number of cpus per task to request
     cpus_per_task: int = 1
 
+    # memory to request (leave black to use all memory in the node)
+    mem: str = ""
+
     # time out min
     timeout_min: int = sys.maxsize
 
@@ -55,6 +58,8 @@ def get_slurm_executor(slurm_config: SlurmArgs):
         slurm_additional_parameters["nodelist"] = slurm_config.node_list
     if slurm_config.node_list_exclude:
         slurm_additional_parameters["exclude"] = slurm_config.node_list_exclude
+    if slurm_config.mem:
+        slurm_additional_parameters["mem"] = slurm_config.mem
 
     # set slurm parameters
     executor.update_parameters(
