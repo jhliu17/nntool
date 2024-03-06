@@ -28,7 +28,7 @@ class SlurmArgs:
     node_list_exclude: str = ""
 
     # number of nodes to request
-    req_num_of_node: int = 1
+    num_of_node: int = 1
 
     # tasks per node
     tasks_per_node: int = 1
@@ -39,14 +39,18 @@ class SlurmArgs:
     # number of cpus per task to request
     cpus_per_task: int = 1
 
-    # memory to request (leave black to use all memory in the node)
+    # memory to request (leave black to use default memory configurations in the node)
     mem: str = ""
 
     # time out min
     timeout_min: int = sys.maxsize
 
 
-def get_slurm_executor(slurm_config: SlurmArgs):
+def get_slurm_executor(
+    slurm_config: SlurmArgs,
+    slurm_parameters_kwargs: dict = {},
+    slurm_submission_kwargs: dict = {},
+):
     executor = submitit.AutoExecutor(
         folder=slurm_config.slurm_output_folder,
         cluster=None if slurm_config.mode == "slurm" else slurm_config.mode,
@@ -60,17 +64,19 @@ def get_slurm_executor(slurm_config: SlurmArgs):
         slurm_additional_parameters["exclude"] = slurm_config.node_list_exclude
     if slurm_config.mem:
         slurm_additional_parameters["mem"] = slurm_config.mem
+    slurm_additional_parameters.update(slurm_parameters_kwargs)
 
     # set slurm parameters
     executor.update_parameters(
         name=slurm_config.slurm_job_name,
         slurm_partition=slurm_config.slurm_partition,
-        nodes=slurm_config.req_num_of_node,
+        nodes=slurm_config.num_of_node,
         tasks_per_node=slurm_config.tasks_per_node,
         cpus_per_task=slurm_config.cpus_per_task,
         gpus_per_node=slurm_config.gpus_per_node,
         timeout_min=slurm_config.timeout_min,
         slurm_additional_parameters=slurm_additional_parameters,
+        **slurm_submission_kwargs,
     )
 
     return executor
@@ -78,8 +84,10 @@ def get_slurm_executor(slurm_config: SlurmArgs):
 
 def slurm_launcher(
     ArgsType: Type[Any],
-    slurm_key: str = "slurm",
     parser: Union[str, Callable] = "tyro",
+    slurm_key: str = "slurm",
+    slurm_params_kwargs: dict = {},
+    slurm_submit_kwargs: dict = {},
     *args,
     **kwargs,
 ):
@@ -100,7 +108,11 @@ def slurm_launcher(
     def decorator(main_fn):
         def wrapper():
             slurm_config = getattr(args, slurm_key)
-            executor = get_slurm_executor(slurm_config)
+            executor = get_slurm_executor(
+                slurm_config,
+                slurm_parameters_kwargs=slurm_params_kwargs,
+                slurm_submission_kwargs=slurm_submit_kwargs,
+            )
             job = executor.submit(main_fn, args)
 
             # get result to run program in debug mode
