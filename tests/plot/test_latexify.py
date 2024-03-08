@@ -4,7 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from jax.scipy.stats import t, norm, laplace
-from nntool.plot import latexify, savefig, is_latexify_enabled
+from nntool.plot import latexify, savefig, is_latexify_enabled, enable_latexify
 
 
 def test_latexify():
@@ -89,3 +89,68 @@ def test_latexify():
     )
     sns.despine()
     savefig("studentLaplaceLogpdf3.pdf", fig_dir="tests/plot/")
+
+
+def test_context():
+    with enable_latexify(fig_width=0.45 * 6, fig_height=1.5) as ctx:
+        x = jnp.linspace(-4, 4, 100)
+        normal = norm.pdf(x, loc=0, scale=1)
+        laplace_ = laplace.pdf(x, loc=0, scale=1 / (2**0.5))
+        student_t1 = t.pdf(x, df=1, loc=0, scale=1)
+        student_t2 = t.pdf(x, df=2, loc=0, scale=1)
+        LEGEND_SIZE = ctx.legend_size
+
+        plt.figure()
+
+        ax = plt.gca()
+        (t1_plot,) = plt.plot(x, student_t1, "b--", label="Student\n" + r"$(\nu=1)$")
+        (t2_plot,) = plt.plot(x, student_t2, "g--", label="Student\n" + r"$(\nu=2)$")
+        (norm_plot,) = plt.plot(x, normal, "k:", label="Gaussian")
+        (laplace_plot,) = plt.plot(x, laplace_, "r-", label="Laplace")
+
+        legend1 = plt.legend(
+            handles=[t1_plot, norm_plot], loc="upper right", prop={"size": LEGEND_SIZE}
+        )
+        ax.add_artist(legend1)
+        legend2 = plt.legend(
+            handles=[t2_plot, laplace_plot],
+            loc="upper left",
+            prop={"size": LEGEND_SIZE},
+        )
+        ax.add_artist(legend2)
+
+        plt.ylabel("pdf")
+        plt.xlabel("$x$")
+
+        ctx.savefig("in_context_studentLaplacePdf2.pdf", fig_dir="tests/plot")
+
+    x = jnp.linspace(-4, 4, 100)
+    normal = norm.pdf(x, loc=0, scale=1)
+    laplace_ = laplace.pdf(x, loc=0, scale=1 / (2**0.5))
+    student_t1 = t.pdf(x, df=1, loc=0, scale=1)
+    student_t2 = t.pdf(x, df=2, loc=0, scale=1)
+    LEGEND_SIZE = None
+
+    plt.figure()
+
+    ax = plt.gca()
+    (t1_plot,) = plt.plot(x, student_t1, "b--", label="Student\n" + r"$(\nu=1)$")
+    (t2_plot,) = plt.plot(x, student_t2, "g--", label="Student\n" + r"$(\nu=2)$")
+    (norm_plot,) = plt.plot(x, normal, "k:", label="Gaussian")
+    (laplace_plot,) = plt.plot(x, laplace_, "r-", label="Laplace")
+
+    legend1 = plt.legend(
+        handles=[t1_plot, norm_plot], loc="upper right", prop={"size": LEGEND_SIZE}
+    )
+    ax.add_artist(legend1)
+    legend2 = plt.legend(
+        handles=[t2_plot, laplace_plot],
+        loc="upper left",
+        prop={"size": LEGEND_SIZE},
+    )
+    ax.add_artist(legend2)
+
+    plt.ylabel("pdf")
+    plt.xlabel("$x$")
+
+    ctx.savefig("out_context_studentLaplacePdf2.pdf", fig_dir="tests/plot")
