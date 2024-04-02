@@ -1,6 +1,7 @@
 import os
 import git
 import wandb
+import toml
 
 from dataclasses import dataclass, field
 
@@ -31,10 +32,19 @@ class WandbConfig:
     # code file extensions
     code_ext: list[str] = field(default_factory=lambda: [".py", ".sh"])
 
+    # wandb api key (toml file with [wandb] key field)
+    api_key_config_file: str = ""
+
 
 def init_wandb(args: WandbConfig, run_config: dict):
     if "WANDB_API_KEY" in os.environ["WANDB_API_KEY"]:
         wandb.login(key=os.environ["WANDB_API_KEY"])
+    elif args.api_key_config_file:
+        with open(args.api_key_config_file, "r") as config_file:
+            config_data = toml.load(config_file)
+        wandb.login(key=config_data["wandb"]["key"])
+    else:
+        pass
 
     if args.log_git_hash:
         repo = git.Repo(search_parent_directories=True)

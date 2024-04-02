@@ -15,6 +15,7 @@ setup(
         "matplotlib>=3.8.0",
         "seaborn>=0.13.2",
         "wandb>=0.15.0",
+        "toml>=0.10",
     ],
     extras_require={"dev": ["pytest>=8.0.2", "jax[cpu]>=0.4.0", "torch>=2.2.0"]},
     # Additional metadata
