@@ -2,7 +2,7 @@ import os
 import random
 
 import submitit
-
+from dataclasses import dataclass
 from .args import SlurmArgs
 from ..accelerator.utils import nvidia_smi_gpu_memory_stats
 
@@ -19,19 +19,21 @@ class Task:
 
         print(msg)
 
-    def command(self):
-        is_python_module = not self.argv[0].endswith(".py")
-
-        cmd = ""
-        if is_python_module:
-            cmd = f"-m {' '.join(self.argv)}"
-        else:
-            cmd = " ".join(self.argv)
-        return cmd
+    def command(self) -> str:
+        raise NotImplementedError
 
     def checkpoint(self):
         print("checkpointing")
         return submitit.helpers.DelayedSubmission(self)
+
+
+@dataclass
+class DistributedArgs:
+    num_processes: int
+    num_machines: int
+    machine_rank: int
+    main_process_ip: str
+    main_process_port: int
 
 
 class PyTorchDistributedTask(Task):
@@ -42,7 +44,23 @@ class PyTorchDistributedTask(Task):
 
     """
 
-    def __call__(self):
+    def __init__(
+        self,
+        launch_cmd: str,
+        argv: list[str],
+        slurm_args: SlurmArgs,
+        verbose: bool = False,
+    ):
+        self.launch_cmd = launch_cmd
+        self.argv = argv
+        self.slurm_args = slurm_args
+        self.verbose = verbose
+
+        # to be set up in the dist_set_up method
+        self.dist_args = DistributedArgs(None, None, None, None, None)
+        self.dist_env = None
+
+    def dist_set_up(self):
         self.log("running task on slurm")
         self.log("exporting PyTorch distributed environment variables")
 
@@ -69,13 +87,34 @@ class PyTorchDistributedTask(Task):
             f"local rank {dist_env.local_rank}: {os.environ['CUDA_VISIBLE_DEVICES']=}"
         )
 
-        num_processes = self.cfg.slurm.n_processes * self.cfg.slurm.n_nodes
-        machine_rank = dist_env.rank // self.cfg.slurm.n_processes
-        cmd = f"accelerate launch --dynamo_backend no --num_processes {num_processes} --num_machines {self.cfg.slurm.n_nodes} --use_deepspeed --machine_rank {machine_rank} --main_process_ip {dist_env.master_addr} --main_process_port {dist_env.master_port} trainer/scripts/train.py {self.cfg.slurm.cmd}"
+        # set distributed arguments
+        num_processes = self.slurm_args.tasks_per_node * self.slurm_args.num_of_node
+        machine_rank = dist_env.rank // self.slurm_args.tasks_per_node
+        self.dist_args = DistributedArgs(
+            num_processes=num_processes,
+            num_machines=self.slurm_args.num_of_node,
+            machine_rank=machine_rank,
+            main_process_ip=dist_env.master_addr,
+            main_process_port=dist_env.master_port,
+        )
+        self.dist_env = dist_env
 
-        self.log(f"running command:\n{cmd}")
+    def command(self) -> str:
+        return self.launch_cmd
 
-        if dist_env.local_rank == 0:
-            os.system(cmd)
+    def __call__(self):
+        # set up distributed environment
+        self.dist_set_up()
+
+        # run command
+        cmd = self.command()
+
+        if self.dist_env.local_rank == 0:
+            print(f"running command: {cmd}")
+            exit_code = os.system(cmd)
         else:
-            self.log("Waiting for master to finish")
+            exit_code = 0
+            print("waiting for master to finish")
+
+        if exit_code != 0:
+            raise RuntimeError(f"command {cmd} failed with exit code {exit_code}")

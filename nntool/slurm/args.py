@@ -1,6 +1,6 @@
 import sys
 from dataclasses import dataclass
-from typing import Any, Callable, Literal, Type, Union
+from typing import Literal
 
 
 @dataclass
@@ -29,8 +29,8 @@ class SlurmArgs:
     # tasks per node
     tasks_per_node: int = 1
 
-    # number of gpus per node to request
-    gpus_per_node: int = 0
+    # number of gpus per task to request
+    gpus_per_task: int = 0
 
     # number of cpus per task to request
     cpus_per_task: int = 1
@@ -40,3 +40,12 @@ class SlurmArgs:
 
     # time out min
     timeout_min: int = sys.maxsize
+
+    # use distributed backend
+    distributed_env: bool = False
+
+    # distributed launch command
+    distributed_launch_command: str = ""
+
+    # guard for slurm environment set up
+    slurm_has_been_set_up: bool = False

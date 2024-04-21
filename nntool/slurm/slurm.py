@@ -1,10 +1,12 @@
 import sys
 from typing import Any, Callable, Type, Union
+from functools import wraps
 
 import submitit
 
 from .args import SlurmArgs
 from ..parser import parse_from_cli
+from .task import PyTorchDistributedTask
 
 
 def get_slurm_executor(
@@ -34,7 +36,7 @@ def get_slurm_executor(
         nodes=slurm_config.num_of_node,
         tasks_per_node=slurm_config.tasks_per_node,
         cpus_per_task=slurm_config.cpus_per_task,
-        gpus_per_node=slurm_config.gpus_per_node,
+        gpus_per_task=slurm_config.gpus_per_task,
         timeout_min=slurm_config.timeout_min,
         slurm_additional_parameters=slurm_additional_parameters,
         **slurm_submission_kwargs,
@@ -47,7 +49,6 @@ def slurm_launcher(
     ArgsType: Type[Any],
     parser: Union[str, Callable] = "tyro",
     slurm_key: str = "slurm",
-    slurm_distributed_env: bool = False,
     slurm_params_kwargs: dict = {},
     slurm_submit_kwargs: dict = {},
     *extra_args,
@@ -59,7 +60,8 @@ def slurm_launcher(
                      mush have a slurm field)
     :return: decorator function with main entry
     """
-    argv: list[str] = list(sys.argv)
+    sys_argv = list(sys.argv)
+    sys_arg_str = " ".join(sys_argv)
     args = parse_from_cli(ArgsType, parser, *extra_args, **extra_kwargs)
 
     # check if args have slurm field
@@ -67,21 +69,61 @@ def slurm_launcher(
         raise ValueError(
             f"ArgsType should have a field named `{slurm_key}` to use `slurm_launcher` decorator."
         )
+    slurm_config: SlurmArgs = getattr(args, slurm_key)
 
     def decorator(main_fn):
         def wrapper():
-            slurm_config = getattr(args, slurm_key)
-            executor = get_slurm_executor(
-                slurm_config,
-                slurm_parameters_kwargs=slurm_params_kwargs,
-                slurm_submission_kwargs=slurm_submit_kwargs,
-            )
-            job = executor.submit(main_fn, args)
+            if not slurm_config.slurm_has_been_set_up:
+                executor = get_slurm_executor(
+                    slurm_config,
+                    slurm_parameters_kwargs=slurm_params_kwargs,
+                    slurm_submission_kwargs=slurm_submit_kwargs,
+                )
 
-            # get result to run program in debug mode
-            if args.slurm.mode != "slurm":
-                job.result()
+                if not slurm_config.distributed_env:
+                    job = executor.submit(main_fn, args)
+                else:
+                    task = PyTorchDistributedTask(
+                        f"{slurm_config.distributed_launch_command} {sys_argv}",
+                        sys_argv,
+                        slurm_config,
+                        verbose=True,
+                    )
+                    job = executor.submit(task)
+
+                # get result to run program in debug mode
+                if slurm_config.mode != "slurm":
+                    job.result()
+            else:
+                main_fn(args)
 
         return wrapper
 
     return decorator
+
+
+def slurm_function(
+    submit_fn: Callable,
+):
+    """A decorator to annoate a function to be run in slurm"""
+
+    @wraps(submit_fn)
+    def wrapper(
+        slurm_config: SlurmArgs,
+        slurm_params_kwargs: dict = {},
+        slurm_submit_kwargs: dict = {},
+        *to_run_args,
+        **to_run_kwargs,
+    ):
+        executor = get_slurm_executor(
+            slurm_config,
+            slurm_parameters_kwargs=slurm_params_kwargs,
+            slurm_submission_kwargs=slurm_submit_kwargs,
+        )
+        job = executor.submit(submit_fn, *to_run_args, **to_run_kwargs)
+
+        # get result to run program in debug mode
+        if slurm_config.mode != "slurm":
+            job.result()
+
+    return wrapper
