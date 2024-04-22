@@ -1,6 +1,6 @@
 import sys
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Union
 
 
 @dataclass
@@ -36,7 +36,7 @@ class SlurmArgs:
     cpus_per_task: int = 1
 
     # number of gpus per node to request (if this is set, gpus_per_task will be ignored)
-    gpus_per_node: int | None = None
+    gpus_per_node: Union[int, None] = None
 
     # memory to request (leave black to use default memory configurations in the node)
     mem: str = ""
