@@ -40,3 +40,8 @@ python -m build
 # or
 python setup.py sdist bdist_wheel
 ```
+
+## Pre-built Download
+```bash
+pip install https://jhliu17.github.io/nntool/wheel/nntool-0.2.0-py3-none-any.whl
+```
