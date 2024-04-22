@@ -1,7 +1,8 @@
 import torch
 import time
 import accelerate
-from nntool.slurm import SlurmArgs, slurm_launcher
+import tyro
+from nntool.slurm import SlurmArgs, slurm_launcher, slurm_function
 from dataclasses import dataclass
 
 
@@ -12,8 +13,8 @@ class ExperimentArgs:
     experiment_name: str = "slurm_experiment_name"
 
 
-@slurm_launcher(ExperimentArgs)
-def main(args: ExperimentArgs):
+@slurm_function
+def distributed_fn(args: ExperimentArgs):
     accelerator = accelerate.Accelerator()
     device = accelerator.device
     if accelerator.is_main_process:
@@ -27,6 +28,28 @@ def main(args: ExperimentArgs):
         print(torch.cuda.device_count())
         a = torch.randn(1000, 1000).to(device)
         time.sleep(60)
+
+
+@slurm_launcher(ExperimentArgs)
+def slurm_main(args: ExperimentArgs):
+    accelerator = accelerate.Accelerator()
+    device = accelerator.device
+    if accelerator.is_main_process:
+        print("I am the main process")
+        print(torch.cuda.device_count())
+        print(args)
+        a = torch.randn(1000, 1000).to(device)
+        time.sleep(60)
+    else:
+        print("I am a worker process")
+        print(torch.cuda.device_count())
+        a = torch.randn(1000, 1000).to(device)
+        time.sleep(60)
+
+
+def main():
+    args = tyro.cli(ExperimentArgs)
+    distributed_fn(args.slurm, args)
 
 
 if __name__ == "__main__":

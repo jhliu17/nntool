@@ -217,25 +217,72 @@ def slurm_distributed_launcher(
 def slurm_function(
     submit_fn: Callable,
 ):
-    """A decorator to annoate a function to be run in slurm"""
+    """A decorator to annoate a function to be run in slurm, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in slurm field)"""
 
-    @wraps(submit_fn)
     def wrapper(
         slurm_config: SlurmArgs,
+        *submit_fn_args,
         slurm_params_kwargs: dict = {},
         slurm_submit_kwargs: dict = {},
-        *submit_fn_args,
+        system_argv: Union[list[str], None] = None,
         **submit_fn_kwargs,
-    ):
-        executor = get_slurm_executor(
-            slurm_config,
-            slurm_parameters_kwargs=slurm_params_kwargs,
-            slurm_submission_kwargs=slurm_submit_kwargs,
-        )
-        job = executor.submit(submit_fn, *submit_fn_args, **submit_fn_kwargs)
+    ) -> None:
+        """An annoated function to be run in slurm, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in slurm field)
 
-        # get result to run program in debug mode
-        if slurm_config.mode != "slurm":
-            job.result()
+        ### Distributed Enviroment
+        1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
+        2. After the set up, the distributed job will be launched and the following variables are exported.
+            @dataclass
+            class DistributedArgs:
+                num_processes: int
+                num_machines: int
+                machine_rank: int
+                main_process_ip: str
+                main_process_port: int
+
+        :param slurm_config: the slurm configuration dataclass
+        :param submit_fn_args: the argument passed to the `submit_fn`
+        :param system_argv: the system arguments for the second launch (by default it will use the current system arguments `sys.argv[1:]`)
+        :return: decorator function
+        """
+        if not slurm_config.use_distributed_env:
+            executor = get_slurm_executor(
+                slurm_config,
+                slurm_parameters_kwargs=slurm_params_kwargs,
+                slurm_submission_kwargs=slurm_submit_kwargs,
+            )
+            job = executor.submit(submit_fn, *submit_fn_args, **submit_fn_kwargs)
+
+            # get result to run program in debug mode
+            if slurm_config.mode != "slurm":
+                job.result()
+        else:
+            # check whether slurm has been set up
+            slurm_has_been_set_up = False
+            if os.environ.get("NNTOOL_SLURM_HAS_BEEN_SET_UP") is not None:
+                slurm_has_been_set_up = True
+
+            if not slurm_has_been_set_up:
+                executor = get_slurm_executor(
+                    slurm_config,
+                    slurm_parameters_kwargs=slurm_params_kwargs,
+                    slurm_submission_kwargs=slurm_submit_kwargs,
+                )
+
+                # prepare distributed env for the second launch
+                task = PyTorchDistributedTask(
+                    f"export NNTOOL_SLURM_HAS_BEEN_SET_UP=1; {slurm_config.distributed_launch_command}",
+                    system_argv if system_argv is not None else list(sys.argv[1:]),
+                    slurm_config,
+                    verbose=True,
+                )
+
+                job = executor.submit(task)
+
+                # get result to run program in debug mode
+                if slurm_config.mode != "slurm":
+                    job.result()
+            else:
+                submit_fn(*submit_fn_args, **submit_fn_kwargs)
 
     return wrapper
