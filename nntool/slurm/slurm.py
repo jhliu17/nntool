@@ -1,5 +1,6 @@
 import os
 import sys
+import shlex
 from functools import wraps
 from typing import Any, Callable, Type, Union
 
@@ -35,15 +36,21 @@ def get_slurm_executor(
         name=slurm_config.slurm_job_name,
         slurm_partition=slurm_config.slurm_partition,
         nodes=slurm_config.num_of_node,
-        tasks_per_node=slurm_config.tasks_per_node,
-        cpus_per_task=slurm_config.cpus_per_task,
-        gpus_per_task=slurm_config.gpus_per_task,
+        slurm_tasks_per_node=slurm_config.tasks_per_node,
+        slurm_cpus_per_task=slurm_config.cpus_per_task,
+        slurm_gpus_per_node=slurm_config.gpus_per_task * slurm_config.tasks_per_node,
         timeout_min=slurm_config.timeout_min,
         slurm_additional_parameters=slurm_additional_parameters,
         **slurm_submission_kwargs,
     )
 
     return executor
+
+
+def reconstruct_command_line(argv):
+    # Quote each argument that needs special handling (like spaces or shell characters)
+    # and join them with spaces to form the command line
+    return " ".join(shlex.quote(arg) for arg in argv)
 
 
 def slurm_launcher(
@@ -114,8 +121,7 @@ def slurm_distributed_launcher(
                      mush have a slurm field)
     :return: decorator function with main entry
     """
-    sys_argv = list(sys.argv[1:])
-    sys_arg_str = " ".join(sys_argv)
+    argv = list(sys.argv[1:])
     args = parse_from_cli(ArgsType, parser, *extra_args, **extra_kwargs)
 
     # check if args have slurm field
@@ -140,9 +146,10 @@ def slurm_distributed_launcher(
                 )
 
                 # prepare distributed env for the second launch
+                cmd = reconstruct_command_line(argv)
                 task = PyTorchDistributedTask(
-                    f"export NNTOOL_SLURM_HAS_BEEN_SET_UP=1; {slurm_config.distributed_launch_command} {sys_arg_str}",
-                    sys_argv,
+                    f"export NNTOOL_SLURM_HAS_BEEN_SET_UP=1; {slurm_config.distributed_launch_command} {cmd}",
+                    cmd,
                     slurm_config,
                     verbose=True,
                 )
