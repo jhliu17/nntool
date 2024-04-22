@@ -41,8 +41,12 @@ class SlurmArgs:
     # time out min
     timeout_min: int = sys.maxsize
 
-    # use distributed backend
-    distributed_env: bool = False
-
-    # distributed launch command
+    # distributed launch command (this will be called after the distributed enviroment is set up)
+    # the following environment variables are available:
+    #   num_processes: int
+    #   num_machines: int
+    #   machine_rank: int
+    #   main_process_ip: str
+    #   main_process_port: int
+    # use brackets to access the environment variables, e.g. [num_processes]
     distributed_launch_command: str = ""
