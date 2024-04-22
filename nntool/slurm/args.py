@@ -44,6 +44,9 @@ class SlurmArgs:
     # time out min
     timeout_min: int = sys.maxsize
 
+    # whether to use distributed environment
+    use_distributed_env: bool = False
+
     # distributed launch command (this will be called after the distributed enviroment is set up)
     # the following environment variables are available:
     #   num_processes: int

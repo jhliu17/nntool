@@ -1,7 +1,7 @@
 import torch
 import time
 import accelerate
-from nntool.slurm import SlurmArgs, slurm_distributed_launcher
+from nntool.slurm import SlurmArgs, slurm_launcher
 from dataclasses import dataclass
 
 
@@ -12,7 +12,7 @@ class ExperimentArgs:
     experiment_name: str = "slurm_experiment_name"
 
 
-@slurm_distributed_launcher(ExperimentArgs)
+@slurm_launcher(ExperimentArgs)
 def main(args: ExperimentArgs):
     accelerator = accelerate.Accelerator()
     device = accelerator.device
