@@ -1,5 +1,6 @@
 import os
 import random
+import shlex
 
 import submitit
 from dataclasses import dataclass
@@ -34,6 +35,12 @@ class DistributedArgs:
     machine_rank: int
     main_process_ip: str
     main_process_port: int
+
+
+def reconstruct_command_line(argv):
+    # Quote each argument that needs special handling (like spaces or shell characters)
+    # and join them with spaces to form the command line
+    return " ".join(shlex.quote(arg) for arg in argv)
 
 
 class PyTorchDistributedTask(Task):
@@ -102,7 +109,9 @@ class PyTorchDistributedTask(Task):
         return self.dist_args, self.dist_env
 
     def command(self) -> str:
-        return self.launch_cmd.format(**self.dist_args.__dict__)
+        cmd = self.launch_cmd.format(**self.dist_args.__dict__)
+        cmd += " " + reconstruct_command_line(self.argv)
+        return cmd
 
     def __call__(self):
         # set up distributed environment

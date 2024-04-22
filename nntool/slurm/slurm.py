@@ -1,6 +1,5 @@
 import os
 import sys
-import shlex
 from functools import wraps
 from typing import Any, Callable, Type, Union
 
@@ -45,12 +44,6 @@ def get_slurm_executor(
     )
 
     return executor
-
-
-def reconstruct_command_line(argv):
-    # Quote each argument that needs special handling (like spaces or shell characters)
-    # and join them with spaces to form the command line
-    return " ".join(shlex.quote(arg) for arg in argv)
 
 
 def slurm_launcher(
@@ -146,10 +139,9 @@ def slurm_distributed_launcher(
                 )
 
                 # prepare distributed env for the second launch
-                cmd = reconstruct_command_line(argv)
                 task = PyTorchDistributedTask(
-                    f"export NNTOOL_SLURM_HAS_BEEN_SET_UP=1; {slurm_config.distributed_launch_command} {cmd}",
-                    cmd,
+                    f"export NNTOOL_SLURM_HAS_BEEN_SET_UP=1; {slurm_config.distributed_launch_command}",
+                    argv,
                     slurm_config,
                     verbose=True,
                 )
