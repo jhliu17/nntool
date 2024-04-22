@@ -48,5 +48,5 @@ class SlurmArgs:
     #   machine_rank: int
     #   main_process_ip: str
     #   main_process_port: int
-    # use brackets to access the environment variables, e.g. [num_processes]
+    # use braces to access the environment variables, e.g. {num_processes}
     distributed_launch_command: str = ""

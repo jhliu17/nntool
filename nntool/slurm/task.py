@@ -102,7 +102,7 @@ class PyTorchDistributedTask(Task):
         return self.dist_args, self.dist_env
 
     def command(self) -> str:
-        return self.launch_cmd
+        return self.launch_cmd.format(**self.dist_args.__dict__)
 
     def __call__(self):
         # set up distributed environment
