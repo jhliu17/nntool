@@ -99,6 +99,8 @@ class PyTorchDistributedTask(Task):
         )
         self.dist_env = dist_env
 
+        return self.dist_args, self.dist_env
+
     def command(self) -> str:
         return self.launch_cmd
 

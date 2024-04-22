@@ -46,6 +46,3 @@ class SlurmArgs:
 
     # distributed launch command
     distributed_launch_command: str = ""
-
-    # guard for slurm environment set up
-    slurm_has_been_set_up: bool = False
