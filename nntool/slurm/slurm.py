@@ -37,7 +37,11 @@ def get_slurm_executor(
         nodes=slurm_config.num_of_node,
         slurm_tasks_per_node=slurm_config.tasks_per_node,
         slurm_cpus_per_task=slurm_config.cpus_per_task,
-        slurm_gpus_per_node=slurm_config.gpus_per_task * slurm_config.tasks_per_node,
+        slurm_gpus_per_node=(
+            slurm_config.gpus_per_task * slurm_config.tasks_per_node
+            if slurm_config.gpus_per_node is None
+            else slurm_config.gpus_per_node
+        ),
         timeout_min=slurm_config.timeout_min,
         slurm_additional_parameters=slurm_additional_parameters,
         **slurm_submission_kwargs,
