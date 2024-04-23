@@ -50,6 +50,18 @@ def get_slurm_executor(
     return executor
 
 
+def slurm_has_been_set_up() -> bool:
+    """NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
+
+    :return: bool
+    """
+    # check whether slurm has been set up
+    has_been_set_up = False
+    if os.environ.get("NNTOOL_SLURM_HAS_BEEN_SET_UP") is not None:
+        has_been_set_up = True
+    return has_been_set_up
+
+
 def slurm_launcher(
     ArgsType: Type[Any],
     parser: Union[str, Callable] = "tyro",
@@ -86,11 +98,6 @@ def slurm_launcher(
         )
     slurm_config: SlurmArgs = getattr(args, slurm_key)
 
-    # check whether slurm has been set up
-    slurm_has_been_set_up = False
-    if os.environ.get("NNTOOL_SLURM_HAS_BEEN_SET_UP") is not None:
-        slurm_has_been_set_up = True
-
     # decorator
     def decorator(main_fn):
         @wraps(main_fn)
@@ -111,7 +118,7 @@ def slurm_launcher(
     def dist_decorator(main_fn):
         @wraps(main_fn)
         def wrapper():
-            if not slurm_has_been_set_up:
+            if not slurm_has_been_set_up():
                 executor = get_slurm_executor(
                     slurm_config,
                     slurm_parameters_kwargs=slurm_params_kwargs,
@@ -178,15 +185,10 @@ def slurm_distributed_launcher(
         )
     slurm_config: SlurmArgs = getattr(args, slurm_key)
 
-    # check whether slurm has been set up
-    slurm_has_been_set_up = False
-    if os.environ.get("NNTOOL_SLURM_HAS_BEEN_SET_UP") is not None:
-        slurm_has_been_set_up = True
-
     def decorator(main_fn):
         @wraps(main_fn)
         def wrapper():
-            if not slurm_has_been_set_up:
+            if not slurm_has_been_set_up():
                 executor = get_slurm_executor(
                     slurm_config,
                     slurm_parameters_kwargs=slurm_params_kwargs,
@@ -258,11 +260,7 @@ def slurm_function(
                 job.result()
         else:
             # check whether slurm has been set up
-            slurm_has_been_set_up = False
-            if os.environ.get("NNTOOL_SLURM_HAS_BEEN_SET_UP") is not None:
-                slurm_has_been_set_up = True
-
-            if not slurm_has_been_set_up:
+            if not slurm_has_been_set_up():
                 executor = get_slurm_executor(
                     slurm_config,
                     slurm_parameters_kwargs=slurm_params_kwargs,
