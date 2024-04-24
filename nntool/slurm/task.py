@@ -57,11 +57,11 @@ class PyTorchDistributedTask(Task):
         argv: list[str],
         slurm_args: SlurmArgs,
         verbose: bool = False,
+        **set_up_kwargs,
     ):
+        super().__init__(argv, slurm_args, verbose)
         self.launch_cmd = launch_cmd
-        self.argv = argv
-        self.slurm_args = slurm_args
-        self.verbose = verbose
+        self.set_up_kwargs = set_up_kwargs
 
         # to be set up in the dist_set_up method
         self.dist_args = DistributedArgs(None, None, None, None, None)
@@ -76,13 +76,15 @@ class PyTorchDistributedTask(Task):
         rng = random.Random(dist_env._job_env.job_id)
         dist_env.master_port = rng.randint(10000, 20000)
         dist_env = dist_env.export()
-        os.environ.update(
-            **{
-                "CUDA_LAUNCH_BLOCKING": "1",
-                "NCCL_DEBUG": "info",
-                "CUDA_VISIBLE_DEVICES": os.environ["SLURM_JOB_GPUS"],
-            }
-        )
+
+        # other setup
+        env_setup = {
+            # "CUDA_LAUNCH_BLOCKING": "1",
+            # "NCCL_DEBUG": "info",
+            "CUDA_VISIBLE_DEVICES": os.environ["SLURM_JOB_GPUS"],
+        }
+        env_setup.update(self.set_up_kwargs)
+        os.environ.update(**env_setup)
 
         self.log(nvidia_smi_gpu_memory_stats())
         self.log(f"master: {dist_env.master_addr}:{dist_env.master_port}")
