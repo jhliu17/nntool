@@ -110,6 +110,7 @@ def _slurm_dist_decorator(
     slurm_config: SlurmArgs,
     slurm_params_kwargs: dict = {},
     slurm_submit_kwargs: dict = {},
+    slurm_task_kwargs: dict = {},
     system_argv: Union[list[str], None] = None,
     *default_submit_fn_args,
     **default_submit_fn_kwargs,
@@ -140,6 +141,7 @@ def _slurm_dist_decorator(
                     system_argv if system_argv is not None else list(sys.argv[1:]),
                     slurm_config,
                     verbose=True,
+                    **slurm_task_kwargs,
                 )
 
                 job = executor.submit(task)
@@ -161,6 +163,7 @@ def slurm_launcher(
     slurm_key: str = "slurm",
     slurm_params_kwargs: dict = {},
     slurm_submit_kwargs: dict = {},
+    slurm_task_kwargs: dict = {},
     *extra_args,
     **extra_kwargs,
 ):
@@ -196,7 +199,12 @@ def slurm_launcher(
         _slurm_decorator(slurm_config, slurm_params_kwargs, slurm_submit_kwargs, args)
         if not slurm_config.use_distributed_env
         else _slurm_dist_decorator(
-            slurm_config, slurm_params_kwargs, slurm_submit_kwargs, argv, args
+            slurm_config,
+            slurm_params_kwargs,
+            slurm_submit_kwargs,
+            slurm_task_kwargs,
+            argv,
+            args,
         )
     )
 
@@ -209,6 +217,7 @@ def slurm_distributed_launcher(
     slurm_key: str = "slurm",
     slurm_params_kwargs: dict = {},
     slurm_submit_kwargs: dict = {},
+    slurm_task_kwargs: dict = {},
     *extra_args,
     **extra_kwargs,
 ):
@@ -240,7 +249,12 @@ def slurm_distributed_launcher(
     slurm_config: SlurmArgs = getattr(args, slurm_key)
 
     decorator = _slurm_dist_decorator(
-        slurm_config, slurm_params_kwargs, slurm_submit_kwargs, argv, args
+        slurm_config,
+        slurm_params_kwargs,
+        slurm_submit_kwargs,
+        slurm_task_kwargs,
+        argv,
+        args,
     )
 
     return decorator
@@ -255,6 +269,7 @@ def slurm_function(
         slurm_config: SlurmArgs,
         slurm_params_kwargs: dict = {},
         slurm_submit_kwargs: dict = {},
+        slurm_task_kwargs: dict = {},
         system_argv: Union[list[str], None] = None,
     ):
         """An annoated function to be run in slurm, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in slurm field)
@@ -293,6 +308,7 @@ def slurm_function(
                     slurm_config,
                     slurm_params_kwargs,
                     slurm_submit_kwargs,
+                    slurm_task_kwargs,
                     system_argv,
                 )(submit_fn)(
                     *submit_fn_args,
