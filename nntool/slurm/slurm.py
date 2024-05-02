@@ -41,7 +41,7 @@ def get_slurm_executor(
             slurm_config.gpus_per_task * slurm_config.tasks_per_node
             if slurm_config.gpus_per_node is None
             else slurm_config.gpus_per_node
-        ),
+        ),  # gpu cannot be assigned in the task level
         timeout_min=slurm_config.timeout_min,
         slurm_additional_parameters=slurm_additional_parameters,
         **slurm_submission_kwargs,
