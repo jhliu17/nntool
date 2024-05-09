@@ -82,7 +82,7 @@ def _slurm_decorator(
         def wrapper(
             *submit_fn_args,
             **submit_fn_kwargs,
-        ) -> None:
+        ):
             submit_fn_args = (
                 default_submit_fn_args if not submit_fn_args else submit_fn_args
             )
@@ -100,6 +100,8 @@ def _slurm_decorator(
             # get result to run program in debug mode
             if slurm_config.mode != "slurm":
                 job.result()
+
+            return job
 
         return wrapper
 
@@ -149,6 +151,8 @@ def _slurm_dist_decorator(
                 # get result to run program in debug mode
                 if slurm_config.mode != "slurm":
                     job.result()
+
+                return job
             else:
                 submit_fn(*submit_fn_args, **submit_fn_kwargs)
 
@@ -295,16 +299,16 @@ def slurm_function(
         def wrapped_submit_fn(
             *submit_fn_args,
             **submit_fn_kwargs,
-        ) -> None:
+        ):
             if not slurm_config.use_distributed_env:
-                _slurm_decorator(
+                return _slurm_decorator(
                     slurm_config, slurm_params_kwargs, slurm_submit_kwargs
                 )(submit_fn)(
                     *submit_fn_args,
                     **submit_fn_kwargs,
                 )
             else:
-                _slurm_dist_decorator(
+                return _slurm_dist_decorator(
                     slurm_config,
                     slurm_params_kwargs,
                     slurm_submit_kwargs,
