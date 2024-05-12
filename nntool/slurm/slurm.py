@@ -154,7 +154,7 @@ def _slurm_dist_decorator(
 
                 return job
             else:
-                submit_fn(*submit_fn_args, **submit_fn_kwargs)
+                return submit_fn(*submit_fn_args, **submit_fn_kwargs)
 
         return wrapper
 
