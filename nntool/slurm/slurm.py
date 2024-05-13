@@ -267,7 +267,26 @@ def slurm_distributed_launcher(
 def slurm_function(
     submit_fn: Callable,
 ):
-    """A decorator to annoate a function to be run in slurm, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in slurm field)"""
+    """A decorator to annoate a function to be run in slurm, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in slurm field)
+
+    An annoated function to be run in slurm, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in slurm field)
+
+    ### Distributed Enviroment
+    1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
+    2. After the set up, the distributed job will be launched and the following variables are exported.
+        @dataclass
+        class DistributedArgs:
+            num_processes: int
+            num_machines: int
+            machine_rank: int
+            main_process_ip: str
+            main_process_port: int
+
+    :param slurm_config: the slurm configuration dataclass
+    :param submit_fn_args: the argument passed to the `submit_fn`
+    :param system_argv: the system arguments for the second launch (by default it will use the current system arguments `sys.argv[1:]`)
+    :return: decorator function
+    """
 
     def wrapper(
         slurm_config: SlurmArgs,
@@ -276,23 +295,14 @@ def slurm_function(
         slurm_task_kwargs: dict = {},
         system_argv: Union[list[str], None] = None,
     ):
-        """An annoated function to be run in slurm, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in slurm field)
+        """_summary_
 
-        ### Distributed Enviroment
-        1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
-        2. After the set up, the distributed job will be launched and the following variables are exported.
-            @dataclass
-            class DistributedArgs:
-                num_processes: int
-                num_machines: int
-                machine_rank: int
-                main_process_ip: str
-                main_process_port: int
-
-        :param slurm_config: the slurm configuration dataclass
-        :param submit_fn_args: the argument passed to the `submit_fn`
-        :param system_argv: the system arguments for the second launch (by default it will use the current system arguments `sys.argv[1:]`)
-        :return: decorator function
+        :param slurm_config: _description_
+        :param slurm_params_kwargs: _description_, defaults to {}
+        :param slurm_submit_kwargs: _description_, defaults to {}
+        :param slurm_task_kwargs: _description_, defaults to {}
+        :param system_argv: _description_, defaults to None
+        :return: _description_
         """
 
         @wraps(submit_fn)
