@@ -9,6 +9,7 @@ test:
 	python -m pytest
 
 push:
+	cd $(LOCAL_CACHE) && rm index.html
 	bash index.sh $(LOCAL_CACHE)
 	cd dist && cp *.whl $(LOCAL_CACHE)
 	cd dist && cp index.html $(LOCAL_CACHE)
