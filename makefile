@@ -10,8 +10,8 @@ test:
 
 push:
 	cd $(LOCAL_CACHE) && rm index.html
-	bash index.sh $(LOCAL_CACHE)
 	cd dist && cp *.whl $(LOCAL_CACHE)
+	bash index.sh $(LOCAL_CACHE)
 	cd dist && cp index.html $(LOCAL_CACHE)
 	cd $(LOCAL_CACHE) && git add ./* && git commit -m "Update wheel" && git push
 
