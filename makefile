@@ -9,8 +9,10 @@ test:
 	python -m pytest
 
 push:
+	bash index.sh $(LOCAL_CACHE)
 	cd dist && cp *.whl $(LOCAL_CACHE)
-	cd $(LOCAL_CACHE) && git add *.whl && git commit -m "Update wheel" && git push
+	cd dist && cp index.html $(LOCAL_CACHE)
+	cd $(LOCAL_CACHE) && git add ./* && git commit -m "Update wheel" && git push
 
 # Clean the build
 clean:
