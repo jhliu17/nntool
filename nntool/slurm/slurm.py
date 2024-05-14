@@ -1,6 +1,7 @@
 import os
 import sys
 from functools import wraps
+from warnings import warn
 from typing import Any, Callable, Type, Union
 
 import submitit
@@ -69,14 +70,6 @@ def _slurm_decorator(
     *default_submit_fn_args,
     **default_submit_fn_kwargs,
 ):
-    """Decorator to annoate a function to be run in slurm
-
-    :param submit_fn: function to be submitted
-    :param slurm_config: slurm configuration dataclass
-    :param slurm_params_kwargs: other slurm args, defaults to {}
-    :param slurm_submit_kwargs: other slurm key args, defaults to {}
-    """
-
     def decorator(submit_fn):
         @wraps(submit_fn)
         def wrapper(
@@ -171,21 +164,22 @@ def slurm_launcher(
     *extra_args,
     **extra_kwargs,
 ):
-    """A slurm launcher decorator for distributed or non-distributed job (controlled by `use_distributed_env` in slurm field)
+    """A slurm launcher decorator for distributed or non-distributed job (controlled by `use_distributed_env` in slurm field). This decorator should be used as the program entry. The decorated function is non-blocking in the mode of `slurm`, while other modes cause blocking.
 
-    ### Distributed Enviroment
+    **Exported Distributed Enviroment Variables**
     1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
-    2. After the set up, the distributed job will be launched and the following variables are exported.
-        @dataclass
-        class DistributedArgs:
-            num_processes: int
-            num_machines: int
-            machine_rank: int
-            main_process_ip: str
-            main_process_port: int
+    2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
 
     :param ArgsType: the experiment arguments type, which should be a dataclass (it
-                     mush have a slurm field)
+                     mush have a slurm field defined by `slurm_key`)
+    :param slurm_key: the key of the slurm field in the ArgsType, defaults to "slurm"
+    :param parser: the parser for the arguments, defaults to "tyro"
+    :param slurm_config: SlurmArgs, the slurm configuration dataclass
+    :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
+    :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
+    :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
+    :param extra_args: extra arguments for the parser
+    :param extra_kwargs: extra keyword arguments for the parser
     :return: decorator function with main entry
     """
     argv = list(sys.argv[1:])
@@ -225,23 +219,29 @@ def slurm_distributed_launcher(
     *extra_args,
     **extra_kwargs,
 ):
-    """A slurm launcher decorator for the distributed job
+    """A slurm launcher decorator for the distributed job. This decorator should be used for the distributed job only and as the program entry. The decorated function is non-blocking in the mode of `slurm`, while other modes cause blocking.
 
-    NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
-
-    After the set up, the distributed job will be launched and the following variables are exported.
-    @dataclass
-    class DistributedArgs:
-        num_processes: int
-        num_machines: int
-        machine_rank: int
-        main_process_ip: str
-        main_process_port: int
+    **Exported Distributed Enviroment Variables**
+    1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
+    2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
 
     :param ArgsType: the experiment arguments type, which should be a dataclass (it
-                     mush have a slurm field)
+                     mush have a slurm field defined by `slurm_key`)
+    :param slurm_key: the key of the slurm field in the ArgsType, defaults to "slurm"
+    :param parser: the parser for the arguments, defaults to "tyro"
+    :param slurm_config: SlurmArgs, the slurm configuration dataclass
+    :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
+    :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
+    :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
+    :param extra_args: extra arguments for the parser
+    :param extra_kwargs: extra keyword arguments for the parser
     :return: decorator function with main entry
     """
+    warn(
+        "`slurm_distributed_launcher` has been deprecated. Please use `slurm_launcher` instead, which supports both distributed or non-distributed job (controlled by `use_distributed_env` in slurm field).",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     argv = list(sys.argv[1:])
     args = parse_from_cli(ArgsType, parser, *extra_args, **extra_kwargs)
 
@@ -267,25 +267,15 @@ def slurm_distributed_launcher(
 def slurm_function(
     submit_fn: Callable,
 ):
-    """A decorator to annoate a function to be run in slurm, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in slurm field)
+    """A decorator to annoate a function to be run in slurm. The function decorated by this decorator should be launched in the way below.
+    ```
+    @slurm_function
+    def run_in_slurm(*args, **kwargs):
+        pass
 
-    An annoated function to be run in slurm, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in slurm field)
-
-    ### Distributed Enviroment
-    1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
-    2. After the set up, the distributed job will be launched and the following variables are exported.
-        @dataclass
-        class DistributedArgs:
-            num_processes: int
-            num_machines: int
-            machine_rank: int
-            main_process_ip: str
-            main_process_port: int
-
-    :param slurm_config: the slurm configuration dataclass
-    :param submit_fn_args: the argument passed to the `submit_fn`
-    :param system_argv: the system arguments for the second launch (by default it will use the current system arguments `sys.argv[1:]`)
-    :return: decorator function
+    job = run_in_slurm(slurm_config)(*args, **kwargs)
+    ```
+    The decorated function `submit_fn` is non-blocking now. To block and get the return value, you can call `job.result()`.
     """
 
     def wrapper(
@@ -295,14 +285,18 @@ def slurm_function(
         slurm_task_kwargs: dict = {},
         system_argv: Union[list[str], None] = None,
     ):
-        """_summary_
+        """A decorated function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
-        :param slurm_config: _description_
-        :param slurm_params_kwargs: _description_, defaults to {}
-        :param slurm_submit_kwargs: _description_, defaults to {}
-        :param slurm_task_kwargs: _description_, defaults to {}
-        :param system_argv: _description_, defaults to None
-        :return: _description_
+        **Exported Distributed Enviroment Variables**
+        1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
+        2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
+
+        :param slurm_config: SlurmArgs, the slurm configuration dataclass
+        :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
+        :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
+        :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
+        :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
+        :return: the wrapped submit function with configured slurm paramters
         """
 
         @wraps(submit_fn)
