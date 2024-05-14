@@ -15,9 +15,9 @@ class ExperimentArgs:
 
 @slurm_function
 def distributed_fn(args: ExperimentArgs):
-    """_summary_
+    """a demo function to test slurm
 
-    :param args: _description_
+    :param args: argument settings
     """
     accelerator = accelerate.Accelerator()
     device = accelerator.device
@@ -36,6 +36,10 @@ def distributed_fn(args: ExperimentArgs):
 
 @slurm_launcher(ExperimentArgs)
 def slurm_main(args: ExperimentArgs):
+    """launch slurm to execute main function
+
+    :param args: argument settings
+    """
     accelerator = accelerate.Accelerator()
     device = accelerator.device
     if accelerator.is_main_process:
@@ -53,11 +57,9 @@ def slurm_main(args: ExperimentArgs):
 
 def main():
     args = tyro.cli(ExperimentArgs)
-    fn = distributed_fn(args.slurm)
-    print(fn.__doc__)
-    fn(args)
+    fn = distributed_fn(args.slurm)(args)
 
 
 if __name__ == "__main__":
-    # main()
-    slurm_main()
+    main()
+    # slurm_main()
