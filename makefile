@@ -10,10 +10,7 @@ test:
 
 push:
 	cd dist && cp *.whl $(LOCAL_CACHE)
-	cd $(LOCAL_CACHE)
-	git add *.whl
-	git commit -m "Update wheel"
-	git push
+	cd $(LOCAL_CACHE) && git add *.whl && git commit -m "Update wheel" && git push
 
 # Clean the build
 clean:
