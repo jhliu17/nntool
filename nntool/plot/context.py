@@ -5,7 +5,7 @@ import seaborn as sns
 from importlib import reload
 from typing import Union
 from dataclasses import dataclass
-from .plot import SIZE_SMALL, latexify, savefig
+from .plot_module import SIZE_SMALL, latexify, savefig
 
 
 @dataclass

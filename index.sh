@@ -4,7 +4,7 @@
 resource_dir=$1
 
 # Output HTML file
-output_file="dist/index.html"
+output_file="$2/index.html"
 
 # Start of the HTML file
 echo "<html><head><title>Resource Index</title></head><body><h1>Links for nntool</h1><ul>" > "$output_file"
