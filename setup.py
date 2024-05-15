@@ -1,4 +1,24 @@
-from setuptools import setup, find_packages
+import os
+from setuptools import setup, find_packages, Command
+
+
+class CleanCython(Command):
+    description = "custom clean command to remove Cython build artifacts"
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        for dirpath, _, filenames in os.walk("."):
+            for filename in filenames:
+                if filename.endswith((".c", ".so")):
+                    file_path = os.path.join(dirpath, filename)
+                    print(f"Removing file: {file_path}")
+                    os.remove(file_path)
 
 
 setup(
@@ -28,6 +48,9 @@ setup(
     },
     extras_require={"dev": ["pytest>=8.0.2", "jax[cpu]>=0.4.0", "torch>=2.2.0"]},
     setup_requires=["cython", "cythonpackage[build]"],
+    cmdclass={
+        "clean_cython": CleanCython,
+    },
     # Additional metadata
     author="Junhao Liu",
     author_email="junhaoliu17@gmail.com",

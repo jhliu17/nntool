@@ -29,4 +29,5 @@ push_cython:
 
 # Clean the build
 clean:
-	rm -f dist/*
+	rm -rf build
+	python setup.py clean_cython
