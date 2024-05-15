@@ -17,7 +17,8 @@ push:
 	cd $(LOCAL_CACHE) && git add ./* && git commit -m "Update wheel" && git push
 
 wheel_cython:
-	CIBW_BEFORE_BUILD="pip install cython" CIBW_BUILD="cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64" cibuildwheel --platform linux
+	CIBW_BEFORE_BUILD="pip install cython cythonpackage" CIBW_BUILD="cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64" cibuildwheel --platform linux
+	# CIBW_BEFORE_BUILD="pip install cython cythonpackage" CIBW_BUILD="cp310-manylinux_x86_64" cibuildwheel --platform linux
 
 push_cython:
 	cd $(LOCAL_CYTHON_CACHE) && rm index.html

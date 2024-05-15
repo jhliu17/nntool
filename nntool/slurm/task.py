@@ -5,7 +5,7 @@ import shlex
 import submitit
 from dataclasses import dataclass
 from .args import SlurmArgs
-from ..accelerator.utils import nvidia_smi_gpu_memory_stats
+from ..accelerator.utils import nvidia_smi_gpu_memory_stats_str
 
 
 class Task:
@@ -86,7 +86,7 @@ class PyTorchDistributedTask(Task):
         env_setup.update(self.set_up_kwargs)
         os.environ.update(**env_setup)
 
-        self.log(nvidia_smi_gpu_memory_stats())
+        self.log(nvidia_smi_gpu_memory_stats_str())
         self.log(f"master: {dist_env.master_addr}:{dist_env.master_port}")
         self.log(f"rank: {dist_env.rank}")
         self.log(f"world size: {dist_env.world_size}")

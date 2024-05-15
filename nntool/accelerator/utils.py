@@ -29,3 +29,11 @@ def nvidia_smi_gpu_memory_stats():
         raise Exception(f"nvidia-smi returned non zero error code: {e.returncode}")
 
     return out_dict
+
+
+def nvidia_smi_gpu_memory_stats_str():
+    """
+    Parse the nvidia-smi output and extract the memory used stats.
+    """
+    stats = nvidia_smi_gpu_memory_stats()
+    return ", ".join([f"{k}: {v:.4f}" for k, v in stats.items()])
