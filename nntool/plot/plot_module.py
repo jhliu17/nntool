@@ -55,6 +55,12 @@ def latexify(
     plt.rc("text", usetex=True)
     plt.rc("font", family="serif")
     plt.rc("figure", figsize=(fig_width, fig_height))
+    plt.rcParams[
+        "text.latex.preamble"
+    ] = r"""
+    \usepackage{amsmath}
+    \usepackage{bm}
+    """
 
 
 def is_latexify_enabled():

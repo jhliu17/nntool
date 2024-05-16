@@ -2,7 +2,6 @@ import os
 import matplotlib
 import seaborn as sns
 
-from importlib import reload
 from typing import Union
 from dataclasses import dataclass
 from .plot_module import SIZE_SMALL, latexify, savefig
@@ -35,7 +34,7 @@ class enable_latexify:
     def __exit__(self, *args):
         if self.enable:
             os.environ.pop("LATEXIFY")
-            reload(matplotlib)
+            matplotlib.rcParams.update(matplotlib.rcParamsDefault)
 
     def savefig(
         self, filename, despine: bool = True, fig_dir: str = "tests/plot", **kwargs
