@@ -12,6 +12,9 @@ wheel_cython:
 test:
 	python -m pytest
 
+pyi:
+	stubgen nntool
+
 push:
 	cd $(LOCAL_CACHE) && rm -f index.html
 	cd dist && cp *.whl $(LOCAL_CACHE)

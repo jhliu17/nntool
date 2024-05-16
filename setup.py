@@ -40,7 +40,9 @@ package_info = dict(
     cmdclass={
         "clean_cython": CleanCython,
     },
-    extras_require={"dev": ["pytest>=8.0.2", "jax[cpu]>=0.4.0", "torch>=2.2.0"]},
+    extras_require={
+        "dev": ["pytest>=8.0.2", "jax[cpu]>=0.4.0", "torch>=2.2.0", "mypy"]
+    },
     # Additional metadata
     author="Junhao Liu",
     author_email="junhaoliu17@gmail.com",
