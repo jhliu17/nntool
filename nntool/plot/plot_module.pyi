@@ -1,0 +1,9 @@
+from _typeshed import Incomplete
+
+DEFAULT_WIDTH: float
+DEFAULT_HEIGHT: float
+SIZE_SMALL: int
+
+def latexify(width_scale_factor: int = 1, height_scale_factor: int = 1, fig_width: Incomplete | None = None, fig_height: Incomplete | None = None, font_size=...) -> None: ...
+def is_latexify_enabled(): ...
+def savefig(f_name, tight_layout: bool = True, tight_bbox: bool = False, pad_inches: float = 0.0, fig_dir: Incomplete | None = None, *args, **kwargs) -> None: ...

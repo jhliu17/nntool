@@ -1,0 +1,3 @@
+from typing import Any, Callable
+
+def parse_from_cli(ArgsType: type[Any], parser: str | Callable = 'tyro', *args, **kwargs) -> Any: ...

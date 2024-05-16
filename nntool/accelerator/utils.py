@@ -1,7 +1,7 @@
 import subprocess
 
 
-def nvidia_smi_gpu_memory_stats():
+def nvidia_smi_gpu_memory_stats() -> dict:
     """
     Parse the nvidia-smi output and extract the memory used stats.
     """
@@ -31,7 +31,7 @@ def nvidia_smi_gpu_memory_stats():
     return out_dict
 
 
-def nvidia_smi_gpu_memory_stats_str():
+def nvidia_smi_gpu_memory_stats_str() -> str:
     """
     Parse the nvidia-smi output and extract the memory used stats.
     """
