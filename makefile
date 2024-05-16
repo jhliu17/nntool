@@ -6,6 +6,9 @@ all: wheel
 wheel:
 	NNTOOL_PYTHON_BUILD=1 python setup.py sdist bdist_wheel
 
+wheel_cython:
+	python setup.py sdist bdist_wheel
+
 test:
 	python -m pytest
 
