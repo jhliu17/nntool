@@ -13,7 +13,7 @@ test:
 	python -m pytest
 
 pyi:
-	stubgen nntool
+	stubgen --include-docstrings nntool
 
 push:
 	cd $(LOCAL_CACHE) && rm -f index.html
