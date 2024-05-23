@@ -5,7 +5,7 @@ import submitit
 from submitit import Job
 from warnings import warn
 from dataclasses import dataclass, field
-from typing import Any, Callable, Type, Union, Dict, List
+from typing import Any, Callable, Tuple, Type, Union, Dict, List
 
 from ..parser import parse_from_cli
 from .args import SlurmArgs
@@ -26,7 +26,7 @@ class SlurmFunction:
     :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
     :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
     :param submit_fn: function to be submitted to Slurm, defaults to None
-    :param default_submit_fn_args: default args for submit_fn, defaults to []
+    :param default_submit_fn_args: default args for submit_fn, defaults to ()
     :param default_submit_fn_kwargs: default known word args for submit_fn, defaults to {}
     :return: the wrapped submit function with configured slurm paramters
     """
@@ -37,7 +37,7 @@ class SlurmFunction:
     slurm_task_kwargs: Dict[str, Any] = field(default_factory=dict)
     system_argv: Union[List[str], None] = None
     submit_fn: Union[Callable[..., Any], None] = None
-    default_submit_fn_args: List[Any] = field(default_factory=list)
+    default_submit_fn_args: Tuple[Any] = field(default_factory=tuple)
     default_submit_fn_kwargs: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
@@ -267,7 +267,7 @@ def slurm_launcher(
             slurm_task_kwargs,
             system_argv=argv,
             submit_fn=submit_fn,
-            default_submit_fn_args=args,
+            default_submit_fn_args=(args,),
         )
 
     return decorator
@@ -326,7 +326,7 @@ def slurm_distributed_launcher(
             slurm_task_kwargs,
             system_argv=argv,
             submit_fn=submit_fn,
-            default_submit_fn_args=args,
+            default_submit_fn_args=(args,),
         )
 
     return decorator
