@@ -4,7 +4,7 @@ import submitit
 
 from submitit import Job
 from warnings import warn
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable, Type, Union, Dict, List
 
 from ..parser import parse_from_cli
@@ -31,10 +31,10 @@ class SlurmFunction:
     :return: the wrapped submit function with configured slurm paramters
     """
 
-    slurm_config: SlurmArgs = None
-    slurm_params_kwargs: Dict[str, Any] = {}
-    slurm_submit_kwargs: Dict[str, Any] = {}
-    slurm_task_kwargs: Dict[str, Any] = {}
+    slurm_config: Union[SlurmArgs, None] = None
+    slurm_params_kwargs: Dict[str, Any] = field(default_factory=dict)
+    slurm_submit_kwargs: Dict[str, Any] = field(default_factory=dict)
+    slurm_task_kwargs: Dict[str, Any] = field(default_factory=dict)
     system_argv: Union[List[str], None] = None
     submit_fn: Union[Callable[..., Any], None] = None
     default_submit_fn_args: Union[List[Any], None] = None
@@ -42,6 +42,20 @@ class SlurmFunction:
 
     def __post_init__(self):
         self.__doc__ = self.submit_fn.__doc__
+
+    def is_integrated(self):
+        """Whether the slurm function has been set up.
+
+        :return: True if the slurm function has been set up, False otherwise
+        """
+        return self.submit_fn is not None and self.slurm_config is not None
+
+    def is_distributed(self):
+        """Whether the slurm function is distributed.
+
+        :return: True if the slurm function is distributed, False otherwise
+        """
+        return self.slurm_config.use_distributed_env
 
     @staticmethod
     def get_slurm_executor(
@@ -129,10 +143,10 @@ class SlurmFunction:
         :raises ValueError: if the submit_fn is not set up
         :return: Slurm Job or the return value of the submit_fn
         """
-        if self.slurm_config is None:
+        if not self.is_integrated():
             raise ValueError("Slurm function should be set up before calling.")
 
-        if self.slurm_config.use_distributed_env:
+        if self.is_distributed():
             return self._distributed_submit(*submit_fn_args, **submit_fn_kwargs)
         else:
             return self._submit(*submit_fn_args, **submit_fn_kwargs)
