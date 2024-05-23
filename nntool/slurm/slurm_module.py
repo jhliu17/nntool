@@ -26,8 +26,8 @@ class SlurmFunction:
     :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
     :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
     :param submit_fn: function to be submitted to Slurm, defaults to None
-    :param default_submit_fn_args: default args for submit_fn, defaults to None
-    :param default_submit_fn_kwargs: default known word args for submit_fn, defaults to None
+    :param default_submit_fn_args: default args for submit_fn, defaults to []
+    :param default_submit_fn_kwargs: default known word args for submit_fn, defaults to {}
     :return: the wrapped submit function with configured slurm paramters
     """
 
