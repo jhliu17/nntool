@@ -282,7 +282,7 @@ def slurm_distributed_launcher(
     slurm_task_kwargs: dict = {},
     *extra_args,
     **extra_kwargs,
-) -> SlurmFunction:
+) -> Callable[[Callable[..., Any]], SlurmFunction]:
     """A slurm launcher decorator for the distributed job. This decorator should be used for the distributed job only and as the program entry. The decorated function is non-blocking in the mode of `slurm`, while other modes cause blocking.
 
     **Exported Distributed Enviroment Variables**
@@ -334,7 +334,7 @@ def slurm_distributed_launcher(
 
 def slurm_function(
     submit_fn: Callable,
-):
+) -> Callable[..., SlurmFunction]:
     """A decorator to annoate a function to be run in slurm. The function decorated by this decorator should be launched in the way below.
     ```
     @slurm_function
