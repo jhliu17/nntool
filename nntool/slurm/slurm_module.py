@@ -37,8 +37,8 @@ class SlurmFunction:
     slurm_task_kwargs: Dict[str, Any] = field(default_factory=dict)
     system_argv: Union[List[str], None] = None
     submit_fn: Union[Callable[..., Any], None] = None
-    default_submit_fn_args: Union[List[Any], None] = None
-    default_submit_fn_kwargs: Union[Dict[str, Any], None] = None
+    default_submit_fn_args: List[Any] = field(default_factory=list)
+    default_submit_fn_kwargs: Dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self):
         self.__doc__ = self.submit_fn.__doc__
