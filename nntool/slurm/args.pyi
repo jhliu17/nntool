@@ -54,3 +54,22 @@ class SlurmArgs:
     #   main_process_port: int
     # use braces to access the environment variables, e.g. {num_processes}
     distributed_launch_command: str
+
+    def __init__(
+        self,
+        mode,
+        slurm_job_name,
+        slurm_partition,
+        slurm_output_folder,
+        node_list,
+        node_list_exclude,
+        num_of_node,
+        tasks_per_node,
+        gpus_per_task,
+        cpus_per_task,
+        gpus_per_node,
+        mem,
+        timeout_min,
+        use_distributed_env,
+        distributed_launch_command,
+    ) -> None: ...

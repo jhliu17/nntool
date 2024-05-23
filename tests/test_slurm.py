@@ -2,7 +2,11 @@ import torch
 import time
 import accelerate
 import tyro
-from nntool.slurm import SlurmArgs, slurm_launcher, slurm_function
+from nntool.slurm import (
+    SlurmArgs,
+    slurm_launcher,
+    slurm_function,
+)
 from dataclasses import dataclass
 
 
@@ -10,7 +14,7 @@ from dataclasses import dataclass
 class ExperimentArgs:
     slurm: SlurmArgs
 
-    experiment_name: str = "slurm_experiment_name"
+    experiment_name: str = "test_slurm"
 
 
 @slurm_function
@@ -57,7 +61,8 @@ def slurm_main(args: ExperimentArgs):
 
 def main():
     args = tyro.cli(ExperimentArgs)
-    fn = distributed_fn(args.slurm)(args)
+    fn = distributed_fn(args.slurm)
+    fn(args)
 
 
 if __name__ == "__main__":

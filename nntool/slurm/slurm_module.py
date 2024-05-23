@@ -1,10 +1,11 @@
 import os
 import sys
+import submitit
+
+from submitit import Job
 from warnings import warn
 from dataclasses import dataclass
 from typing import Any, Callable, Type, Union, Dict, List
-
-import submitit
 
 from ..parser import parse_from_cli
 from .args import SlurmArgs
@@ -38,6 +39,9 @@ class SlurmFunction:
     submit_fn: Union[Callable[..., Any], None] = None
     default_submit_fn_args: Union[List[Any], None] = None
     default_submit_fn_kwargs: Union[Dict[str, Any], None] = None
+
+    def __post_init__(self):
+        self.__doc__ = self.submit_fn.__doc__
 
     @staticmethod
     def get_slurm_executor(
@@ -99,7 +103,7 @@ class SlurmFunction:
         slurm_task_kwargs: Dict[str, Any] = {},
         system_argv: Union[List[str], None] = None,
     ) -> "SlurmFunction":
-        """A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
+        """Update the slurm configuration for the slurm function.
 
         **Exported Distributed Enviroment Variables**
         1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
@@ -119,20 +123,25 @@ class SlurmFunction:
         self.system_argv = system_argv
         return self
 
-    def __call__(self, *submit_fn_args, **submit_fn_kwargs) -> Any:
-        if self.slurm_config is None:
-            raise ValueError("Slurm function should be initialized before calling.")
+    def __call__(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
+        """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
 
-        if not self.slurm_config.use_distributed_env:
-            return self._submit(*submit_fn_args, **submit_fn_kwargs)
-        else:
+        :raises ValueError: if the submit_fn is not set up
+        :return: Slurm Job or the return value of the submit_fn
+        """
+        if self.slurm_config is None:
+            raise ValueError("Slurm function should be set up before calling.")
+
+        if self.slurm_config.use_distributed_env:
             return self._distributed_submit(*submit_fn_args, **submit_fn_kwargs)
+        else:
+            return self._submit(*submit_fn_args, **submit_fn_kwargs)
 
     def _submit(
         self,
         *submit_fn_args,
         **submit_fn_kwargs,
-    ) -> Any:
+    ) -> Job:
         submit_fn_args = (
             self.default_submit_fn_args if not submit_fn_args else submit_fn_args
         )
@@ -157,7 +166,7 @@ class SlurmFunction:
         self,
         *submit_fn_args,
         **submit_fn_kwargs,
-    ) -> Any:
+    ) -> Union[Job, Any]:
         submit_fn_args = (
             self.default_submit_fn_args if not submit_fn_args else submit_fn_args
         )
