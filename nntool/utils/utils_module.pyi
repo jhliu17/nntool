@@ -3,6 +3,6 @@ def get_output_path(output_path: str = ..., append_date: bool = ...) -> tuple[st
     """Get output path based on environment variable OUTPUT_PATH
 
     :param append_date: append a children folder with the date time, defaults to True
-    :return: output path
+    :return: (output path, current time)
     """
     ...
