@@ -16,7 +16,9 @@ def get_current_time():
 
 
 @cache
-def get_output_path(output_path: str = "./", append_date: bool = True) -> str:
+def get_output_path(
+    output_path: str = "./", append_date: bool = True
+) -> tuple[str, str]:
     """Get output path based on environment variable OUTPUT_PATH
 
     :param append_date: append a children folder with the date time, defaults to True
@@ -28,7 +30,8 @@ def get_output_path(output_path: str = "./", append_date: bool = True) -> str:
             f"OUTPUT_PATH is found in environment variables. Using path: {output_path}"
         )
 
+    current_time = get_current_time()
     if append_date:
-        output_path = os.path.join(output_path, get_current_time())
+        output_path = os.path.join(output_path, current_time)
 
-    return output_path
+    return output_path, current_time
