@@ -26,4 +26,10 @@ class WandbConfig:
     # wandb api key (toml file with [wandb] key field)
     api_key_config_file: str
 
-def init_wandb(args: WandbConfig, run_config: dict) -> None: ...
+def init_wandb(args: WandbConfig, run_config: dict) -> None:
+    """initialize wandb and log the configuration
+
+    :param args: WandbConfig object
+    :param run_config: configuration dictionary to be logged
+    """
+    ...

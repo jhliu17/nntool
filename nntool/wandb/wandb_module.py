@@ -2,6 +2,7 @@ import os
 import git
 import wandb
 import toml
+import warnings
 
 from dataclasses import dataclass, field
 
@@ -37,13 +38,22 @@ class WandbConfig:
 
 
 def init_wandb(args: WandbConfig, run_config: dict):
-    if "WANDB_API_KEY" in os.environ["WANDB_API_KEY"]:
+    """initialize wandb and log the configuration
+
+    :param args: WandbConfig object
+    :param run_config: configuration dictionary to be logged
+    """
+    if "WANDB_API_KEY" in os.environ:
+        warnings.warn("WANDB_API_KEY is found in environment variables. Using it.")
         wandb.login(key=os.environ["WANDB_API_KEY"])
     elif args.api_key_config_file:
         with open(args.api_key_config_file, "r") as config_file:
             config_data = toml.load(config_file)
         wandb.login(key=config_data["wandb"]["key"])
     else:
+        warnings.warn(
+            "WANDB_API_KEY is not found in environment variables or the local key file."
+        )
         pass
 
     if args.log_git_hash:
