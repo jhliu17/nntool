@@ -4,7 +4,7 @@ from typing import Literal, Union
 
 
 @dataclass
-class SlurmArgs:
+class SlurmConfig:
     # running mode
     mode: Literal["debug", "local", "slurm"] = "debug"
 
@@ -56,3 +56,6 @@ class SlurmArgs:
     #   main_process_port: int
     # use braces to access the environment variables, e.g. {num_processes}
     distributed_launch_command: str = ""
+
+
+SlurmArgs = SlurmConfig

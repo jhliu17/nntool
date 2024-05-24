@@ -2,7 +2,7 @@ from typing import Literal
 from dataclasses import dataclass
 
 @dataclass
-class SlurmArgs:
+class SlurmConfig:
     # running mode
     mode: Literal["debug", "local", "slurm"]
 
@@ -73,3 +73,5 @@ class SlurmArgs:
         use_distributed_env,
         distributed_launch_command,
     ) -> None: ...
+
+SlurmArgs = SlurmConfig

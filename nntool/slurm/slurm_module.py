@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Tuple, Type, Union, Dict, List
 
 from ..parser import parse_from_cli
-from .args import SlurmArgs
+from .args import SlurmConfig
 from .task import PyTorchDistributedTask
 
 
@@ -20,7 +20,7 @@ class SlurmFunction:
     1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
     2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
 
-    :param slurm_config: SlurmArgs, the slurm configuration dataclass, defaults to None
+    :param slurm_config: SlurmConfig, the slurm configuration dataclass, defaults to None
     :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
     :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
     :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
@@ -31,7 +31,7 @@ class SlurmFunction:
     :return: the wrapped submit function with configured slurm paramters
     """
 
-    slurm_config: Union[SlurmArgs, None] = None
+    slurm_config: Union[SlurmConfig, None] = None
     slurm_params_kwargs: Dict[str, Any] = field(default_factory=dict)
     slurm_submit_kwargs: Dict[str, Any] = field(default_factory=dict)
     slurm_task_kwargs: Dict[str, Any] = field(default_factory=dict)
@@ -59,7 +59,7 @@ class SlurmFunction:
 
     @staticmethod
     def get_slurm_executor(
-        slurm_config: SlurmArgs,
+        slurm_config: SlurmConfig,
         slurm_parameters_kwargs: dict = {},
         slurm_submission_kwargs: dict = {},
     ):
@@ -111,7 +111,7 @@ class SlurmFunction:
 
     def update(
         self,
-        slurm_config: SlurmArgs,
+        slurm_config: SlurmConfig,
         slurm_params_kwargs: Dict[str, Any] = {},
         slurm_submit_kwargs: Dict[str, Any] = {},
         slurm_task_kwargs: Dict[str, Any] = {},
@@ -123,7 +123,7 @@ class SlurmFunction:
         1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
         2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
 
-        :param slurm_config: SlurmArgs, the slurm configuration dataclass
+        :param slurm_config: SlurmConfig, the slurm configuration dataclass
         :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
         :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
         :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
@@ -239,7 +239,7 @@ def slurm_launcher(
                      mush have a slurm field defined by `slurm_key`)
     :param slurm_key: the key of the slurm field in the ArgsType, defaults to "slurm"
     :param parser: the parser for the arguments, defaults to "tyro"
-    :param slurm_config: SlurmArgs, the slurm configuration dataclass
+    :param slurm_config: SlurmConfig, the slurm configuration dataclass
     :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
     :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
     :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
@@ -255,7 +255,7 @@ def slurm_launcher(
         raise ValueError(
             f"ArgsType should have a field named `{slurm_key}` to use `slurm_launcher` decorator."
         )
-    slurm_config: SlurmArgs = getattr(args, slurm_key)
+    slurm_config: SlurmConfig = getattr(args, slurm_key)
 
     def decorator(
         submit_fn: Callable[..., Any],
@@ -293,7 +293,7 @@ def slurm_distributed_launcher(
                      mush have a slurm field defined by `slurm_key`)
     :param slurm_key: the key of the slurm field in the ArgsType, defaults to "slurm"
     :param parser: the parser for the arguments, defaults to "tyro"
-    :param slurm_config: SlurmArgs, the slurm configuration dataclass
+    :param slurm_config: SlurmConfig, the slurm configuration dataclass
     :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
     :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
     :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
@@ -314,7 +314,7 @@ def slurm_distributed_launcher(
         raise ValueError(
             f"ArgsType should have a field named `{slurm_key}` to use `slurm_launcher` decorator."
         )
-    slurm_config: SlurmArgs = getattr(args, slurm_key)
+    slurm_config: SlurmConfig = getattr(args, slurm_key)
 
     def decorator(
         submit_fn: Callable[..., Any],
