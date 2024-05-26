@@ -32,9 +32,9 @@ class SlurmFunction:
     """
 
     slurm_config: Union[SlurmConfig, None] = None
-    slurm_params_kwargs: Dict[str, Any] = field(default_factory=dict)
-    slurm_submit_kwargs: Dict[str, Any] = field(default_factory=dict)
-    slurm_task_kwargs: Dict[str, Any] = field(default_factory=dict)
+    slurm_params_kwargs: Dict[str, str] = field(default_factory=dict)
+    slurm_submit_kwargs: Dict[str, str] = field(default_factory=dict)
+    slurm_task_kwargs: Dict[str, str] = field(default_factory=dict)
     system_argv: Union[List[str], None] = None
     submit_fn: Union[Callable[..., Any], None] = None
     default_submit_fn_args: Tuple[Any] = field(default_factory=tuple)
@@ -42,6 +42,12 @@ class SlurmFunction:
 
     def __post_init__(self):
         self.__doc__ = self.submit_fn.__doc__
+        self._update_slurm_kwargs(
+            self.slurm_config,
+            self.slurm_params_kwargs,  # make sure the same parameters are controlled by the kwargs
+            self.slurm_submit_kwargs,
+            self.slurm_task_kwargs,
+        )
 
     def is_integrated(self):
         """Whether the slurm function has been set up.
@@ -109,12 +115,35 @@ class SlurmFunction:
             has_been_set_up = True
         return has_been_set_up
 
+    def _update_slurm_kwargs(
+        self,
+        slurm_config: Union[SlurmConfig, None],
+        slurm_params_kwargs: Dict[str, str] = {},
+        slurm_submit_kwargs: Dict[str, str] = {},
+        slurm_task_kwargs: Dict[str, str] = {},
+    ):
+        """update the slurm configuration for the slurm function. By default, the slurm parameters, slurm submission parameters, and slurm task parameters are updated. The slurm parameters are updated by the slurm configuration, while the slurm submission parameters and slurm task parameters would override them by the given arguments.
+
+        :param slurm_config: passed configurations
+        :param slurm_params_kwargs: extra settings, defaults to {}
+        :param slurm_submit_kwargs: extra settings, defaults to {}
+        :param slurm_task_kwargs: extra settings, defaults to {}
+        """
+        if slurm_config is not None:
+            self.slurm_params_kwargs.update(slurm_config.slurm_params_kwargs)
+            self.slurm_submit_kwargs.update(slurm_config.slurm_submit_kwargs)
+            self.slurm_task_kwargs.update(slurm_config.slurm_task_kwargs)
+
+        self.slurm_params_kwargs.update(slurm_params_kwargs)
+        self.slurm_submit_kwargs.update(slurm_submit_kwargs)
+        self.slurm_task_kwargs.update(slurm_task_kwargs)
+
     def update(
         self,
         slurm_config: SlurmConfig,
-        slurm_params_kwargs: Dict[str, Any] = {},
-        slurm_submit_kwargs: Dict[str, Any] = {},
-        slurm_task_kwargs: Dict[str, Any] = {},
+        slurm_params_kwargs: Dict[str, str] = {},
+        slurm_submit_kwargs: Dict[str, str] = {},
+        slurm_task_kwargs: Dict[str, str] = {},
         system_argv: Union[List[str], None] = None,
     ) -> "SlurmFunction":
         """Update the slurm configuration for the slurm function.
@@ -131,10 +160,13 @@ class SlurmFunction:
         :return: the wrapped submit function with configured slurm paramters
         """
         self.slurm_config = slurm_config
-        self.slurm_params_kwargs = slurm_params_kwargs
-        self.slurm_submit_kwargs = slurm_submit_kwargs
-        self.slurm_task_kwargs = slurm_task_kwargs
         self.system_argv = system_argv
+        self._update_slurm_kwargs(
+            slurm_config,
+            slurm_params_kwargs,
+            slurm_submit_kwargs,
+            slurm_task_kwargs,
+        )
         return self
 
     def __call__(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
@@ -334,7 +366,7 @@ def slurm_distributed_launcher(
 
 def slurm_function(
     submit_fn: Callable,
-) -> Callable[..., SlurmFunction]:
+):
     """A decorator to annoate a function to be run in slurm. The function decorated by this decorator should be launched in the way below.
     ```
     @slurm_function
@@ -345,4 +377,30 @@ def slurm_function(
     ```
     The decorated function `submit_fn` is non-blocking now. To block and get the return value, you can call `job.result()`.
     """
-    return SlurmFunction(submit_fn=submit_fn).update
+    slurm_fn = SlurmFunction(submit_fn=submit_fn)
+
+    def wrapper(
+        slurm_config: SlurmConfig,
+        slurm_params_kwargs: Dict[str, Any] = {},
+        slurm_submit_kwargs: Dict[str, Any] = {},
+        slurm_task_kwargs: Dict[str, Any] = {},
+        system_argv: Union[List[str], None] = None,
+    ):
+        """Update the slurm configuration for the slurm function.
+
+        :param slurm_config: SlurmConfig, the slurm configuration dataclass
+        :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
+        :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
+        :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
+        :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
+        :return: the wrapped submit function with configured slurm paramters
+        """
+        return slurm_fn.update(
+            slurm_config,
+            slurm_params_kwargs,
+            slurm_submit_kwargs,
+            slurm_task_kwargs,
+            system_argv,
+        )
+
+    return wrapper

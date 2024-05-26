@@ -37,6 +37,10 @@ class WandbConfig:
     api_key_config_file: str = ""
 
 
+def is_wandb_enabled():
+    return wandb.run is not None
+
+
 def init_wandb(args: WandbConfig, run_config: dict):
     """initialize wandb and log the configuration
 
@@ -70,6 +74,9 @@ def init_wandb(args: WandbConfig, run_config: dict):
         notes=args.notes,
         config=run_config,
     )
+    if not is_wandb_enabled():
+        warnings.warn("wandb is not enabled after intialization.")
+
     wandb.run.log_code(
         root=args.code_root,
         include_fn=lambda path, root: any(

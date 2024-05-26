@@ -1,6 +1,6 @@
 import sys
-from dataclasses import dataclass
-from typing import Literal, Union
+from dataclasses import dataclass, field
+from typing import Literal, Union, Dict
 
 
 @dataclass
@@ -56,6 +56,15 @@ class SlurmConfig:
     #   main_process_port: int
     # use braces to access the environment variables, e.g. {num_processes}
     distributed_launch_command: str = ""
+
+    # extra slurm job parameters
+    slurm_params_kwargs: Dict[str, str] = field(default_factory=dict)
+
+    # extra slurm submit parameters
+    slurm_submit_kwargs: Dict[str, str] = field(default_factory=dict)
+
+    # extra slurm task parameters
+    slurm_task_kwargs: Dict[str, str] = field(default_factory=dict)
 
 
 SlurmArgs = SlurmConfig

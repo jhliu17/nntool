@@ -14,12 +14,12 @@ class BaseTrainer(object):
         self.has_writer = has_wandb_writer
         self._wandb_defined_metrics: Set[str] = set()
         if self.has_writer:
-            self._init_wandb()
+            self._init_wandb_metric()
 
     def _get_wandb_step_name(self, wandb_section: str = "trainer_state") -> str:
         return f"{wandb_section}/{self.__class__.__name__}_step"
 
-    def _init_wandb(self):
+    def _init_wandb_metric(self):
         wandb.define_metric(self._get_wandb_step_name())
         self._wandb_defined_metrics.add(self._get_wandb_step_name())
 
