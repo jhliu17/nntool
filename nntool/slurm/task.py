@@ -131,3 +131,4 @@ class PyTorchDistributedTask(Task):
 
         if exit_code != 0:
             raise RuntimeError(f"command {cmd} failed with exit code {exit_code}")
+        return exit_code

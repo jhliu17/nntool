@@ -5,7 +5,7 @@ import submitit
 from submitit import Job
 from warnings import warn
 from dataclasses import dataclass, field
-from typing import Any, Callable, Tuple, Type, Union, Dict, List
+from typing import Any, Callable, Literal, Tuple, Type, Union, Dict, List
 
 from ..parser import parse_from_cli
 from .args import SlurmConfig
@@ -48,6 +48,7 @@ class SlurmFunction:
             self.slurm_submit_kwargs,
             self.slurm_task_kwargs,
         )
+        self.executor = None  # to be initialized by `get_slurm_executor`
 
     def is_integrated(self):
         """Whether the slurm function has been set up.
@@ -63,12 +64,16 @@ class SlurmFunction:
         """
         return self.slurm_config.use_distributed_env
 
-    @staticmethod
     def get_slurm_executor(
-        slurm_config: SlurmConfig,
-        slurm_parameters_kwargs: dict = {},
-        slurm_submission_kwargs: dict = {},
+        self,
     ):
+        if self.executor is not None:
+            return self.executor
+
+        slurm_config = self.slurm_config
+        slurm_parameters_kwargs = self.slurm_params_kwargs
+        slurm_submission_kwargs = self.slurm_submit_kwargs
+
         executor = submitit.AutoExecutor(
             folder=slurm_config.slurm_output_folder,
             cluster=None if slurm_config.mode == "slurm" else slurm_config.mode,
@@ -101,6 +106,8 @@ class SlurmFunction:
             **slurm_submission_kwargs,
         )
 
+        # set executor
+        self.executor = executor
         return executor
 
     @staticmethod
@@ -179,12 +186,29 @@ class SlurmFunction:
             raise ValueError("Slurm function should be set up before calling.")
 
         if self.is_distributed():
-            return self._distributed_submit(*submit_fn_args, **submit_fn_kwargs)
+            return self._distributed_submit(
+                "submit", *submit_fn_args, **submit_fn_kwargs
+            )
         else:
-            return self._submit(*submit_fn_args, **submit_fn_kwargs)
+            return self._submit("submit", *submit_fn_args, **submit_fn_kwargs)
+
+    def map_array(self, *submit_fn_args, **submit_fn_kwargs) -> List[Job]:
+        """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
+
+        :raises ValueError: if the submit_fn is not set up
+        :return: Slurm Job or the return value of the submit_fn
+        """
+        if not self.is_integrated():
+            raise ValueError("Slurm function should be set up before calling.")
+
+        if self.is_distributed():
+            raise ValueError("Distributed job does not support `map_array` mode.")
+        else:
+            return self._submit("map_array", *submit_fn_args, **submit_fn_kwargs)
 
     def _submit(
         self,
+        submit_mode: Literal["submit", "map_array"] = "submit",
         *submit_fn_args,
         **submit_fn_kwargs,
     ) -> Job:
@@ -195,21 +219,20 @@ class SlurmFunction:
             self.default_submit_fn_kwargs if not submit_fn_kwargs else submit_fn_kwargs
         )
 
-        executor = self.get_slurm_executor(
-            self.slurm_config,
-            slurm_parameters_kwargs=self.slurm_params_kwargs,
-            slurm_submission_kwargs=self.slurm_submit_kwargs,
+        executor = self.get_slurm_executor()
+        job = getattr(executor, submit_mode)(
+            self.submit_fn, *submit_fn_args, **submit_fn_kwargs
         )
-        job = executor.submit(self.submit_fn, *submit_fn_args, **submit_fn_kwargs)
 
         # get result to run program in debug or local mode
         if self.slurm_config.mode != "slurm":
-            job.result()
+            job.results()
 
         return job
 
     def _distributed_submit(
         self,
+        submit_mode: Literal["submit", "map_array"] = "submit",
         *submit_fn_args,
         **submit_fn_kwargs,
     ) -> Union[Job, Any]:
@@ -221,11 +244,7 @@ class SlurmFunction:
         )
 
         if not self.slurm_has_been_set_up():
-            executor = self.get_slurm_executor(
-                self.slurm_config,
-                slurm_parameters_kwargs=self.slurm_params_kwargs,
-                slurm_submission_kwargs=self.slurm_submit_kwargs,
-            )
+            executor = self.get_slurm_executor()
 
             # prepare distributed env for the second launch
             os.environ["NNTOOL_SLURM_HAS_BEEN_SET_UP"] = "1"
@@ -241,11 +260,11 @@ class SlurmFunction:
                 **self.slurm_task_kwargs,
             )
 
-            job = executor.submit(task)
+            job = getattr(executor, submit_mode)(task)
 
             # get result to run program in debug or local mode
             if self.slurm_config.mode != "slurm":
-                job.result()
+                job.results()
 
             return job
         else:
