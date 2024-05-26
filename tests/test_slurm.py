@@ -104,3 +104,7 @@ def test_slurm_launcher():
     #     return args
 
     pass
+
+
+if __name__ == "__main__":
+    run_job()
