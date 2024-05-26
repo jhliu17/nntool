@@ -16,7 +16,7 @@ from .task import PyTorchDistributedTask
 class SlurmFunction:
     """A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
-    **Exported Distributed Enviroment Variables**
+    #### Exported Distributed Enviroment Variables
     1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
     2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
 
@@ -148,7 +148,7 @@ class SlurmFunction:
     ) -> "SlurmFunction":
         """Update the slurm configuration for the slurm function.
 
-        **Exported Distributed Enviroment Variables**
+        #### Exported Distributed Enviroment Variables
         1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
         2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
 
@@ -202,7 +202,7 @@ class SlurmFunction:
         )
         job = executor.submit(self.submit_fn, *submit_fn_args, **submit_fn_kwargs)
 
-        # get result to run program in debug mode
+        # get result to run program in debug or local mode
         if self.slurm_config.mode != "slurm":
             job.result()
 
@@ -228,8 +228,9 @@ class SlurmFunction:
             )
 
             # prepare distributed env for the second launch
+            os.environ["NNTOOL_SLURM_HAS_BEEN_SET_UP"] = "1"
             task = PyTorchDistributedTask(
-                f"export NNTOOL_SLURM_HAS_BEEN_SET_UP=1; {self.slurm_config.distributed_launch_command}",
+                self.slurm_config.distributed_launch_command,
                 (
                     self.system_argv
                     if self.system_argv is not None
@@ -242,7 +243,7 @@ class SlurmFunction:
 
             job = executor.submit(task)
 
-            # get result to run program in debug mode
+            # get result to run program in debug or local mode
             if self.slurm_config.mode != "slurm":
                 job.result()
 
@@ -263,7 +264,7 @@ def slurm_launcher(
 ) -> Callable[[Callable[..., Any]], SlurmFunction]:
     """A slurm launcher decorator for distributed or non-distributed job (controlled by `use_distributed_env` in slurm field). This decorator should be used as the program entry. The decorated function is non-blocking in the mode of `slurm`, while other modes cause blocking.
 
-    **Exported Distributed Enviroment Variables**
+    #### Exported Distributed Enviroment Variables
     1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
     2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
 
@@ -317,7 +318,7 @@ def slurm_distributed_launcher(
 ) -> Callable[[Callable[..., Any]], SlurmFunction]:
     """A slurm launcher decorator for the distributed job. This decorator should be used for the distributed job only and as the program entry. The decorated function is non-blocking in the mode of `slurm`, while other modes cause blocking.
 
-    **Exported Distributed Enviroment Variables**
+    #### Exported Distributed Enviroment Variables
     1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
     2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
 
@@ -387,6 +388,10 @@ def slurm_function(
         system_argv: Union[List[str], None] = None,
     ):
         """Update the slurm configuration for the slurm function.
+
+        #### Exported Distributed Enviroment Variables
+        1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
+        2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
 
         :param slurm_config: SlurmConfig, the slurm configuration dataclass
         :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}

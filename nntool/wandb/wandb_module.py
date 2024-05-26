@@ -75,7 +75,9 @@ def init_wandb(args: WandbConfig, run_config: dict):
         config=run_config,
     )
     if not is_wandb_enabled():
-        warnings.warn("wandb is not enabled after intialization.")
+        warnings.warn(
+            "wandb is not enabled after intialization. Please check `wandb enabled`."
+        )
 
     wandb.run.log_code(
         root=args.code_root,

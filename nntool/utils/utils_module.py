@@ -34,12 +34,18 @@ def get_output_path(
     if "OUTPUT_PATH" in os.environ:
         output_path = os.environ["OUTPUT_PATH"]
         current_time = "" if not append_date else os.path.split(output_path)[-1].strip()
+    elif "NNTOOL_OUTPUT_PATH" in os.environ:
+        # reuse the NNTOOL_OUTPUT_PATH if it is set
+        output_path = os.environ["NNTOOL_OUTPUT_PATH"]
+        current_time = "" if not append_date else os.path.split(output_path)[-1].strip()
     else:
-        warnings.warn(
-            f"OUTPUT_PATH is not found in environment variables. Using path: {output_path}"
-        )
         current_time = get_current_time()
         if append_date:
             output_path = os.path.join(output_path, current_time)
+
+        os.environ["NNTOOL_OUTPUT_PATH"] = output_path
+        warnings.warn(
+            f"OUTPUT_PATH is not found in environment variables. NNTOOL_OUTPUT_PATH is set using path: {output_path}"
+        )
 
     return output_path, current_time
