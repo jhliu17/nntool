@@ -270,7 +270,7 @@ class SlurmFunction:
                         shlex.quote(str(self.folder)),
                         "export NNTOOL_SLURM_HAS_BEEN_SET_UP=1",
                         f"source {shlex.quote(str(self.folder))}/distributed_env.sh",
-                        self.slurm_config.distributed_launch_command,
+                        task.command(),
                     ]
                 )
 

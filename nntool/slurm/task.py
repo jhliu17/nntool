@@ -37,6 +37,13 @@ class DistributedTaskConfig:
     main_process_ip: str
     main_process_port: int
 
+    def export_bash(self, output_folder: str):
+        lines = ["#!/bin/bash"]
+        for k, v in self.__dict__.items():
+            lines.append(f"export nntool_{k}={v}")
+        with open(os.path.join(output_folder, "distributed_env.sh"), "w") as f:
+            f.write("\n".join(lines))
+
 
 def reconstruct_command_line(argv):
     # Quote each argument that needs special handling (like spaces or shell characters)
@@ -64,7 +71,13 @@ class PyTorchDistributedTask(Task):
         self.env_setup_kwargs = env_setup_kwargs
 
         # to be set up in the dist_set_up method
-        self.dist_args = DistributedTaskConfig(None, None, None, None, None)
+        self.dist_args = DistributedTaskConfig(
+            "$nntool_num_processes",
+            "$nntool_num_machines",
+            "$nntool_machine_rank",
+            "$nntool_main_process_ip",
+            "$nntool_main_process_port",
+        )
         self.dist_env = None
 
     def dist_set_up(self):
@@ -116,25 +129,16 @@ class PyTorchDistributedTask(Task):
         cmd += " " + reconstruct_command_line(self.argv)
         return cmd
 
-    def env_command(self) -> str:
-        cmd = self.launch_cmd.format(**self.dist_args.__dict__)
-        cmd += " " + reconstruct_command_line(self.argv)
-        return cmd
-
     def __call__(self):
         # set up distributed environment
         self.dist_set_up()
+
+        # job environment
+        job = submitit.JobEnvironment()
 
         # run command
         cmd = self.command()
 
         if self.dist_env.local_rank == 0:
             print(f"running command: {cmd}")
-            exit_code = os.system(cmd)
-        else:
-            exit_code = 0
-            print("waiting for master to finish")
-
-        if exit_code != 0:
-            raise RuntimeError(f"command {cmd} failed with exit code {exit_code}")
-        return exit_code
+            self.dist_args.export_bash(job.folder)
