@@ -260,22 +260,29 @@ class SlurmFunction:
             )
 
             # monkey patch the submitit command to set up distributed env
-            executor = self.get_slurm_executor()
-
+            # in distributed training, if two jobs are launched in the same node, the second job will fail
+            # directly use sbatch to submit jobs fixed the issue
             def _submitit_command_str(self) -> str:
                 return " ".join(
                     [
                         self.python,
                         "-u -m submitit.core._submit",
                         shlex.quote(str(self.folder)),
-                        "export NNTOOL_SLURM_HAS_BEEN_SET_UP=1",
-                        f"source {shlex.quote(str(self.folder))}/distributed_env.sh",
-                        task.command(),
+                        "\n".join(
+                            [
+                                "\n",
+                                "# nntool command",
+                                "export NNTOOL_SLURM_HAS_BEEN_SET_UP=1",
+                                f"source {shlex.quote(str(self.folder))}/nntool_distributed_env.sh",
+                                f"{task.command()}",
+                            ]
+                        ),
                     ]
                 )
 
             SlurmExecutor._submitit_command_str = property(_submitit_command_str)
 
+            executor = self.get_slurm_executor()
             job = getattr(executor, submit_mode)(task)
 
             # get result to run program in debug or local mode

@@ -2,6 +2,7 @@ import os
 import shlex
 
 import submitit
+from typing import Union
 from dataclasses import dataclass
 from .args import SlurmConfig
 from ..accelerator.utils import nvidia_smi_gpu_memory_stats_str
@@ -31,17 +32,17 @@ class Task:
 
 @dataclass
 class DistributedTaskConfig:
-    num_processes: int
-    num_machines: int
-    machine_rank: int
-    main_process_ip: str
-    main_process_port: int
+    num_processes: Union[int, str] = "$nntool_num_processes"
+    num_machines: Union[int, str] = "$nntool_num_machines"
+    machine_rank: Union[int, str] = "$nntool_machine_rank"
+    main_process_ip: str = "$nntool_main_process_ip"
+    main_process_port: Union[int, str] = "$nntool_main_process_port"
 
     def export_bash(self, output_folder: str):
         lines = ["#!/bin/bash"]
         for k, v in self.__dict__.items():
             lines.append(f"export nntool_{k}={v}")
-        with open(os.path.join(output_folder, "distributed_env.sh"), "w") as f:
+        with open(os.path.join(output_folder, "nntool_distributed_env.sh"), "w") as f:
             f.write("\n".join(lines))
 
 
@@ -71,13 +72,7 @@ class PyTorchDistributedTask(Task):
         self.env_setup_kwargs = env_setup_kwargs
 
         # to be set up in the dist_set_up method
-        self.dist_args = DistributedTaskConfig(
-            "$nntool_num_processes",
-            "$nntool_num_machines",
-            "$nntool_machine_rank",
-            "$nntool_main_process_ip",
-            "$nntool_main_process_port",
-        )
+        self.dist_args = DistributedTaskConfig()
         self.dist_env = None
 
     def dist_set_up(self):
@@ -134,11 +129,18 @@ class PyTorchDistributedTask(Task):
         self.dist_set_up()
 
         # job environment
-        job = submitit.JobEnvironment()
+        job_env = submitit.helpers.JobEnvironment()
 
-        # run command
+        # concrete run command
         cmd = self.command()
 
+        # export distributed environment variables
         if self.dist_env.local_rank == 0:
             print(f"running command: {cmd}")
-            self.dist_args.export_bash(job.folder)
+            try:
+                self.dist_args.export_bash(job_env.paths.folder)
+            except Exception as e:
+                print(f"failed to export distributed environment variables: {e}")
+                return -1
+
+        return 0
