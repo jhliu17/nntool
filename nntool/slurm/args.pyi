@@ -27,9 +27,6 @@ class SlurmConfig:
     # tasks per node
     tasks_per_node: int
 
-    # processes per task (this value is not used by slurm, but in the distributed environment)
-    processes_per_task: int = 1
-
     # number of gpus per task to request
     gpus_per_task: int
 
@@ -47,6 +44,9 @@ class SlurmConfig:
 
     # whether to use distributed environment
     use_distributed_env: bool
+
+    # processes per task (this value is not used by slurm, but in the distributed environment)
+    processes_per_task: int
 
     # distributed launch command (this will be called after the distributed enviroment is set up)
     # the following environment variables are available:
