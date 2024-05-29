@@ -14,12 +14,13 @@ distributed_slurm_settings = SlurmConfig(
     node_list="laniakea",
     slurm_output_folder="tests/outputs/slurm",
     num_of_node=1,
-    tasks_per_node=2,
-    gpus_per_task=1,
+    tasks_per_node=1,
+    gpus_per_task=2,
     cpus_per_task=1,
-    mem="2GB",
+    # mem="1G",
     timeout_min=10,
     use_distributed_env=True,
+    processes_per_task=2,
     distributed_launch_command="accelerate launch --config_file tests/distributed.yaml --num_processes {num_processes} --num_machines {num_machines} --machine_rank {machine_rank} --main_process_ip {main_process_ip} --main_process_port {main_process_port} -m tests.test_slurm",
 )
 
@@ -75,7 +76,9 @@ def test_distributed_slurm_function():
     job = distributed_fn(distributed_slurm_settings)(1, k=1)
     result = job.results()
     print(result)
-    assert result == [0, 0]
+    assert result == [
+        0,
+    ]
 
 
 def test_job_array_slurm_function():
