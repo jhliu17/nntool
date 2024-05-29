@@ -27,6 +27,9 @@ class SlurmConfig:
     # tasks per node
     tasks_per_node: int
 
+    # processes per task (this value is not used by slurm, but in the distributed environment)
+    processes_per_task: int = 1
+
     # number of gpus per task to request
     gpus_per_task: int
 

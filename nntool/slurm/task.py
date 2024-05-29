@@ -1,17 +1,18 @@
 import os
-import random
 import shlex
 
 import submitit
 from dataclasses import dataclass
-from .args import SlurmArgs
+from .args import SlurmConfig
 from ..accelerator.utils import nvidia_smi_gpu_memory_stats_str
 
 
 class Task:
-    def __init__(self, argv: list[str], slurm_args: SlurmArgs, verbose: bool = False):
+    def __init__(
+        self, argv: list[str], slurm_config: SlurmConfig, verbose: bool = False
+    ):
         self.argv = argv
-        self.slurm_args = slurm_args
+        self.slurm_config = slurm_config
         self.verbose = verbose
 
     def log(self, msg: str):
@@ -29,7 +30,7 @@ class Task:
 
 
 @dataclass
-class DistributedArgs:
+class DistributedTaskConfig:
     num_processes: int
     num_machines: int
     machine_rank: int
@@ -48,23 +49,22 @@ class PyTorchDistributedTask(Task):
     https://github.com/huggingface/accelerate/issues/1239
     https://github.com/yuvalkirstain/PickScore/blob/main/trainer/slurm_scripts/slurm_train.py
     https://github.com/facebookincubator/submitit/pull/1703
-
     """
 
     def __init__(
         self,
         launch_cmd: str,
         argv: list[str],
-        slurm_args: SlurmArgs,
+        slurm_config: SlurmConfig,
         verbose: bool = False,
-        **set_up_kwargs,
+        **env_setup_kwargs,
     ):
-        super().__init__(argv, slurm_args, verbose)
+        super().__init__(argv, slurm_config, verbose)
         self.launch_cmd = launch_cmd
-        self.set_up_kwargs = set_up_kwargs
+        self.env_setup_kwargs = env_setup_kwargs
 
         # to be set up in the dist_set_up method
-        self.dist_args = DistributedArgs(None, None, None, None, None)
+        self.dist_args = DistributedTaskConfig(None, None, None, None, None)
         self.dist_env = None
 
     def dist_set_up(self):
@@ -72,10 +72,7 @@ class PyTorchDistributedTask(Task):
         self.log("exporting PyTorch distributed environment variables")
 
         # prepare enviroment variables
-        dist_env = submitit.helpers.TorchDistributedEnvironment()
-        rng = random.Random(dist_env._job_env.job_id)
-        dist_env.master_port = rng.randint(10000, 20000)
-        dist_env = dist_env.export()
+        dist_env = submitit.helpers.TorchDistributedEnvironment().export()
 
         # other setup
         env_setup = {
@@ -83,7 +80,7 @@ class PyTorchDistributedTask(Task):
             # "NCCL_DEBUG": "info",
             "CUDA_VISIBLE_DEVICES": os.environ["SLURM_JOB_GPUS"],
         }
-        env_setup.update(self.set_up_kwargs)
+        env_setup.update(self.env_setup_kwargs)
         os.environ.update(**env_setup)
 
         self.log(nvidia_smi_gpu_memory_stats_str())
@@ -97,11 +94,15 @@ class PyTorchDistributedTask(Task):
         )
 
         # set distributed arguments
-        num_processes = self.slurm_args.tasks_per_node * self.slurm_args.num_of_node
-        machine_rank = dist_env.rank // self.slurm_args.tasks_per_node
-        self.dist_args = DistributedArgs(
+        num_processes = (
+            self.slurm_config.tasks_per_node
+            * self.slurm_config.processes_per_task
+            * self.slurm_config.num_of_node
+        )
+        machine_rank = dist_env.rank // self.slurm_config.tasks_per_node
+        self.dist_args = DistributedTaskConfig(
             num_processes=num_processes,
-            num_machines=self.slurm_args.num_of_node,
+            num_machines=self.slurm_config.num_of_node,
             machine_rank=machine_rank,
             main_process_ip=dist_env.master_addr,
             main_process_port=dist_env.master_port,
