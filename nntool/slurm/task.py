@@ -116,6 +116,11 @@ class PyTorchDistributedTask(Task):
         cmd += " " + reconstruct_command_line(self.argv)
         return cmd
 
+    def env_command(self) -> str:
+        cmd = self.launch_cmd.format(**self.dist_args.__dict__)
+        cmd += " " + reconstruct_command_line(self.argv)
+        return cmd
+
     def __call__(self):
         # set up distributed environment
         self.dist_set_up()

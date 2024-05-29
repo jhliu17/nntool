@@ -1,8 +1,9 @@
 import os
 import sys
+import shlex
 import submitit
 
-from submitit import Job
+from submitit import Job, SlurmExecutor
 from warnings import warn
 from dataclasses import dataclass, field
 from typing import Any, Callable, Literal, Tuple, Type, Union, Dict, List
@@ -244,8 +245,6 @@ class SlurmFunction:
         )
 
         if not self.slurm_has_been_set_up():
-            executor = self.get_slurm_executor()
-
             # prepare distributed env for the second launch
             os.environ["NNTOOL_SLURM_HAS_BEEN_SET_UP"] = "1"
             task = PyTorchDistributedTask(
@@ -259,6 +258,23 @@ class SlurmFunction:
                 verbose=True,
                 **self.slurm_task_kwargs,
             )
+
+            # monkey patch the submitit command to set up distributed env
+            executor = self.get_slurm_executor()
+
+            def _submitit_command_str(self) -> str:
+                return " ".join(
+                    [
+                        self.python,
+                        "-u -m submitit.core._submit",
+                        shlex.quote(str(self.folder)),
+                        "export NNTOOL_SLURM_HAS_BEEN_SET_UP=1",
+                        f"source {shlex.quote(str(self.folder))}/distributed_env.sh",
+                        self.slurm_config.distributed_launch_command,
+                    ]
+                )
+
+            SlurmExecutor._submitit_command_str = property(_submitit_command_str)
 
             job = getattr(executor, submit_mode)(task)
 
