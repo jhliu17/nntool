@@ -137,10 +137,13 @@ class PyTorchDistributedTask(Task):
         # export distributed environment variables
         if self.dist_env.local_rank == 0:
             print(f"running command: {cmd}")
-            try:
-                self.dist_args.export_bash(job_env.paths.folder)
-            except Exception as e:
-                print(f"failed to export distributed environment variables: {e}")
-                return -1
+            if self.slurm_config.mode == "slurm":
+                try:
+                    self.dist_args.export_bash(job_env.paths.folder)
+                except Exception as e:
+                    print(f"failed to export distributed environment variables: {e}")
+                    return -1
+            else:
+                return os.system(cmd)
 
         return 0
