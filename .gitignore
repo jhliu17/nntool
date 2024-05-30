@@ -163,3 +163,4 @@ tests/outputs/
 *.c
 out/
 .pypi_token
+outputs/

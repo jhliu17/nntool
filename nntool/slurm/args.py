@@ -44,6 +44,25 @@ class SlurmConfig:
     # time out min
     timeout_min: int = sys.maxsize
 
+    # whether to pack code
+    pack_code: bool = True
+
+    # use packed code to run
+    use_packed_code: bool = False
+
+    # code root
+    code_root: str = "."
+
+    # code file extensions
+    code_ext: list[str] = field(
+        default_factory=lambda: [".py", ".sh", ".yaml", ".toml"]
+    )
+
+    # exclude folders (relative to the code root)
+    exclude_code_folders: list[str] = field(
+        default_factory=lambda: ["wandb", "outputs", "datasets"]
+    )
+
     # whether to use distributed environment
     use_distributed_env: bool = False
 

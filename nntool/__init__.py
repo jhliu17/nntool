@@ -4,4 +4,4 @@ cythonpackage.init(__name__)
 
 
 def test_import():
-    print("mdtool is imported!")
+    print(f"nntool located at {__file__} is imported!")

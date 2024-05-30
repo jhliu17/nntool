@@ -3,6 +3,7 @@ import sys
 import shlex
 import submitit
 
+from functools import partial
 from submitit import Job, SlurmExecutor
 from warnings import warn
 from dataclasses import dataclass, field
@@ -10,7 +11,12 @@ from typing import Any, Callable, Literal, Tuple, Type, Union, Dict, List
 
 from ..parser import parse_from_cli
 from .args import SlurmConfig
-from .task import PyTorchDistributedTask
+from .task import (
+    PyTorchDistributedTask,
+    get_code_files,
+    include_code_files,
+    exclude_code_folders,
+)
 
 
 @dataclass
@@ -177,21 +183,61 @@ class SlurmFunction:
         )
         return self
 
+    def _before_submit(self):
+        if not self.is_integrated():
+            raise ValueError("Slurm function should be set up before calling.")
+
+        # pack the code and scripts to the slurm output folder
+        if self.slurm_config.pack_code:
+            target_code_root = get_code_files(
+                self.slurm_config.code_root,
+                self.slurm_config.slurm_output_folder,
+                include_fn=partial(
+                    include_code_files, code_ext=self.slurm_config.code_ext
+                ),
+                exclude_fn=partial(
+                    exclude_code_folders,
+                    code_folders=self.slurm_config.exclude_code_folders,
+                ),
+            )
+
+            if self.slurm_config.use_packed_code:
+                self.slurm_params_kwargs.update({"chdir": target_code_root})
+
     def __call__(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
         """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
 
         :raises ValueError: if the submit_fn is not set up
         :return: Slurm Job or the return value of the submit_fn
         """
-        if not self.is_integrated():
-            raise ValueError("Slurm function should be set up before calling.")
+        self._before_submit()
+        return self._dispatch_submit_strategy(
+            "submit", *submit_fn_args, **submit_fn_kwargs
+        )
 
-        if self.is_distributed():
-            return self._distributed_submit(
-                "submit", *submit_fn_args, **submit_fn_kwargs
-            )
+    def _dispatch_submit_strategy(
+        self,
+        submit_mode: Literal["submit", "map_array"] = "submit",
+        *submit_fn_args,
+        **submit_fn_kwargs,
+    ) -> Union[Job, Any]:
+        if submit_mode == "submit":
+            if self.is_distributed():
+                return self._distributed_submit(
+                    "submit", *submit_fn_args, **submit_fn_kwargs
+                )
+            else:
+                return self._submit("submit", *submit_fn_args, **submit_fn_kwargs)
+        elif submit_mode == "map_array":
+            if self.is_distributed():
+                raise ValueError("Distributed job does not support `map_array` mode.")
+            else:
+                return self._submit("map_array", *submit_fn_args, **submit_fn_kwargs)
         else:
-            return self._submit("submit", *submit_fn_args, **submit_fn_kwargs)
+            raise ValueError(f"Invalid submit mode: {submit_mode}")
+
+    def submit(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
+        return self(*submit_fn_args, **submit_fn_kwargs)
 
     def map_array(self, *submit_fn_args, **submit_fn_kwargs) -> List[Job]:
         """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
@@ -199,13 +245,10 @@ class SlurmFunction:
         :raises ValueError: if the submit_fn is not set up
         :return: Slurm Job or the return value of the submit_fn
         """
-        if not self.is_integrated():
-            raise ValueError("Slurm function should be set up before calling.")
-
-        if self.is_distributed():
-            raise ValueError("Distributed job does not support `map_array` mode.")
-        else:
-            return self._submit("map_array", *submit_fn_args, **submit_fn_kwargs)
+        self._before_submit()
+        return self._dispatch_submit_strategy(
+            "map_array", *submit_fn_args, **submit_fn_kwargs
+        )
 
     def _submit(
         self,
