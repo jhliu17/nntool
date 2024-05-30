@@ -1,24 +1,32 @@
+import os
 import torch
 import time
 import accelerate
+import nntool
 from nntool.slurm import (
     SlurmConfig,
     slurm_launcher,
     slurm_function,
 )
+from nntool.utils import get_current_time
+from nntool import test_import
+from tests.src.my_file import test_import as my_test_import
 
 distributed_slurm_settings = SlurmConfig(
     mode="slurm",
     slurm_job_name="test_slurm",
     slurm_partition="zhanglab.p",
     node_list="laniakea",
-    slurm_output_folder="tests/outputs/slurm",
+    slurm_output_folder=f"outputs/{get_current_time()}/slurm",
     num_of_node=1,
     tasks_per_node=1,
     gpus_per_task=2,
     cpus_per_task=1,
     mem="10G",
     timeout_min=10,
+    pack_code=True,
+    code_root="./",
+    use_packed_code=True,
     use_distributed_env=True,
     processes_per_task=2,
     distributed_launch_command="accelerate launch --config_file tests/distributed.yaml --num_processes {num_processes} --num_machines {num_machines} --machine_rank {machine_rank} --main_process_ip {main_process_ip} --main_process_port {main_process_port} -m tests.test_slurm",
@@ -29,18 +37,24 @@ slurm_settings = SlurmConfig(
     slurm_job_name="test_slurm",
     slurm_partition="zhanglab.p",
     node_list="laniakea",
-    slurm_output_folder="tests/outputs/slurm",
+    slurm_output_folder=f"outputs/{get_current_time()}/slurm",
     num_of_node=1,
     tasks_per_node=1,
     gpus_per_task=0,
     cpus_per_task=1,
     mem="2GB",
     timeout_min=10,
+    pack_code=True,
+    code_root="./",
+    use_packed_code=True,
     use_distributed_env=False,
 )
 
 
 def run_job(sleep_time: int = 30):
+    print(torch.__file__)
+    test_import()
+    my_test_import()
     accelerator = accelerate.Accelerator()
     device = accelerator.device
     if accelerator.is_main_process:
@@ -69,6 +83,10 @@ def distributed_fn(*args, **kwargs):
 @slurm_function
 def work_fn(a, b):
     """a demo function to test slurm"""
+    print(torch.__file__)
+    test_import()
+    my_test_import()
+    print("PYTHONPATH", os.environ.get("PYTHONPATH"))
     return a + b
 
 
