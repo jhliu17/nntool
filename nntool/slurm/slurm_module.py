@@ -467,7 +467,7 @@ def slurm_function(
         slurm_submit_kwargs: Dict[str, Any] = {},
         slurm_task_kwargs: Dict[str, Any] = {},
         system_argv: Union[List[str], None] = None,
-    ):
+    ) -> SlurmFunction:
         """Update the slurm configuration for the slurm function.
 
         #### Exported Distributed Enviroment Variables
