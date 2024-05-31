@@ -9,11 +9,14 @@ from dataclasses import dataclass, field
 
 @dataclass
 class WandbConfig:
+    # wandb api key (toml file with [wandb] key field)
+    api_key_config_file: str = ""
+
     # project name in wandb
-    project: str = "YOUR_PROJECT_NAME"
+    project: str = ""
 
     # wandb user name
-    entity: str = "YOUR_ENTITY_NAME"
+    entity: str = ""
 
     # wandb run name (leave blacnk to use default name)
     name: str = ""
@@ -33,9 +36,6 @@ class WandbConfig:
     # code file extensions
     code_ext: list[str] = field(default_factory=lambda: [".py", ".sh"])
 
-    # wandb api key (toml file with [wandb] key field)
-    api_key_config_file: str = ""
-
 
 def is_wandb_enabled():
     return wandb.run is not None
@@ -47,6 +47,7 @@ def init_wandb(args: WandbConfig, run_config: dict):
     :param args: WandbConfig object
     :param run_config: configuration dictionary to be logged
     """
+    project, entity = args.project, args.entity
     if "WANDB_API_KEY" in os.environ:
         warnings.warn("WANDB_API_KEY is found in environment variables. Using it.")
         wandb.login(key=os.environ["WANDB_API_KEY"])
@@ -54,6 +55,8 @@ def init_wandb(args: WandbConfig, run_config: dict):
         with open(args.api_key_config_file, "r") as config_file:
             config_data = toml.load(config_file)
         wandb.login(key=config_data["wandb"]["key"])
+        project = config_data["wandb"].get("project", args.project)
+        entity = config_data["wandb"].get("entity", args.entity)
     else:
         warnings.warn(
             "WANDB_API_KEY is not found in environment variables or the local key file."
@@ -68,8 +71,8 @@ def init_wandb(args: WandbConfig, run_config: dict):
         )
 
     wandb.init(
-        project=args.project,
-        entity=args.entity,
+        project=project,
+        entity=entity,
         name=args.name if args.name else None,
         notes=args.notes,
         config=run_config,
