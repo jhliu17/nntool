@@ -13,7 +13,7 @@ from ..parser import parse_from_cli
 from .args import SlurmConfig
 from .task import (
     PyTorchDistributedTask,
-    get_code_files,
+    pack_code_files,
     include_code_files,
     exclude_code_folders,
 )
@@ -38,7 +38,7 @@ class SlurmFunction:
     :return: the wrapped submit function with configured slurm paramters
     """
 
-    slurm_config: Union[SlurmConfig, None] = None
+    slurm_config: SlurmConfig
     slurm_params_kwargs: Dict[str, str] = field(default_factory=dict)
     slurm_submit_kwargs: Dict[str, str] = field(default_factory=dict)
     slurm_task_kwargs: Dict[str, str] = field(default_factory=dict)
@@ -50,12 +50,19 @@ class SlurmFunction:
     def __post_init__(self):
         self.__doc__ = self.submit_fn.__doc__
         self._update_slurm_kwargs(
-            self.slurm_config,
-            self.slurm_params_kwargs,  # make sure the same parameters are controlled by the kwargs
-            self.slurm_submit_kwargs,
-            self.slurm_task_kwargs,
+            self.slurm_config.slurm_params_kwargs,  # make sure the same parameters are controlled by the config
+            self.slurm_config.slurm_submit_kwargs,
+            self.slurm_config.slurm_task_kwargs,
         )
         self.executor = None  # to be initialized by `get_slurm_executor`
+        self.pack_code_include_fn = partial(
+            include_code_files,
+            code_ext=self.slurm_config.code_file_suffixes,
+        )
+        self.pack_code_exclude_fn = partial(
+            exclude_code_folders,
+            code_folders=self.slurm_config.exclude_code_folders,
+        )
 
     def is_integrated(self):
         """Whether the slurm function has been set up.
@@ -131,56 +138,48 @@ class SlurmFunction:
 
     def _update_slurm_kwargs(
         self,
-        slurm_config: Union[SlurmConfig, None],
         slurm_params_kwargs: Dict[str, str] = {},
         slurm_submit_kwargs: Dict[str, str] = {},
         slurm_task_kwargs: Dict[str, str] = {},
     ):
         """update the slurm configuration for the slurm function. By default, the slurm parameters, slurm submission parameters, and slurm task parameters are updated. The slurm parameters are updated by the slurm configuration, while the slurm submission parameters and slurm task parameters would override them by the given arguments.
 
-        :param slurm_config: passed configurations
         :param slurm_params_kwargs: extra settings, defaults to {}
         :param slurm_submit_kwargs: extra settings, defaults to {}
         :param slurm_task_kwargs: extra settings, defaults to {}
         """
-        if slurm_config is not None:
-            self.slurm_params_kwargs.update(slurm_config.slurm_params_kwargs)
-            self.slurm_submit_kwargs.update(slurm_config.slurm_submit_kwargs)
-            self.slurm_task_kwargs.update(slurm_config.slurm_task_kwargs)
-
         self.slurm_params_kwargs.update(slurm_params_kwargs)
         self.slurm_submit_kwargs.update(slurm_submit_kwargs)
         self.slurm_task_kwargs.update(slurm_task_kwargs)
 
     def update(
         self,
-        slurm_config: SlurmConfig,
         slurm_params_kwargs: Dict[str, str] = {},
         slurm_submit_kwargs: Dict[str, str] = {},
         slurm_task_kwargs: Dict[str, str] = {},
         system_argv: Union[List[str], None] = None,
+        pack_code_include_fn: Callable[[str, str], bool] = None,
+        pack_code_exclude_fn: Callable[[str, str], bool] = None,
     ) -> "SlurmFunction":
         """Update the slurm configuration for the slurm function.
 
-        #### Exported Distributed Enviroment Variables
-        1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
-        2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
-
-        :param slurm_config: SlurmConfig, the slurm configuration dataclass
         :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
         :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
         :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
         :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
         :return: the wrapped submit function with configured slurm paramters
         """
-        self.slurm_config = slurm_config
-        self.system_argv = system_argv
+        if system_argv is not None:
+            self.system_argv = system_argv
         self._update_slurm_kwargs(
-            slurm_config,
             slurm_params_kwargs,
             slurm_submit_kwargs,
             slurm_task_kwargs,
         )
+        if pack_code_include_fn is not None:
+            self.pack_code_include_fn = pack_code_include_fn
+        if pack_code_exclude_fn is not None:
+            self.pack_code_exclude_fn = pack_code_exclude_fn
         return self
 
     def _before_submit(self):
@@ -189,20 +188,16 @@ class SlurmFunction:
 
         # pack the code and scripts to the slurm output folder
         if self.slurm_config.pack_code:
-            target_code_root = get_code_files(
+            target_code_root = pack_code_files(
                 self.slurm_config.code_root,
                 self.slurm_config.slurm_output_folder,
-                include_fn=partial(
-                    include_code_files, code_ext=self.slurm_config.code_ext
-                ),
-                exclude_fn=partial(
-                    exclude_code_folders,
-                    code_folders=self.slurm_config.exclude_code_folders,
-                ),
+                include_fn=self.pack_code_include_fn,
+                exclude_fn=self.pack_code_exclude_fn,
             )
 
+            # set sbatch command to change directory
             if self.slurm_config.use_packed_code:
-                self.slurm_params_kwargs.update({"chdir": target_code_root})
+                self.update(slurm_params_kwargs={"chdir": target_code_root})
 
     def __call__(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
         """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
@@ -465,7 +460,6 @@ def slurm_function(
     ```
     The decorated function `submit_fn` is non-blocking now. To block and get the return value, you can call `job.result()`.
     """
-    slurm_fn = SlurmFunction(submit_fn=submit_fn)
 
     def wrapper(
         slurm_config: SlurmConfig,
@@ -487,12 +481,14 @@ def slurm_function(
         :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
         :return: the wrapped submit function with configured slurm paramters
         """
-        return slurm_fn.update(
+        slurm_fn = SlurmFunction(
             slurm_config,
             slurm_params_kwargs,
             slurm_submit_kwargs,
             slurm_task_kwargs,
             system_argv,
+            submit_fn=submit_fn,
         )
+        return slurm_fn
 
     return wrapper

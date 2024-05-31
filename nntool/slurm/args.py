@@ -54,7 +54,7 @@ class SlurmConfig:
     code_root: str = "."
 
     # code file extensions
-    code_ext: list[str] = field(
+    code_file_suffixes: list[str] = field(
         default_factory=lambda: [".py", ".sh", ".yaml", ".toml"]
     )
 

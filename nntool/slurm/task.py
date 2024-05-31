@@ -42,31 +42,15 @@ def filtered_dir(
     exclude_fn: Union[Callable[[str, str], bool], Callable[[str], bool]],
 ) -> Generator[str, None, None]:
     """Simple generator to walk a directory."""
-    import inspect
-
-    # compatibility with old API, which didn't pass root
-    def _include_fn(path: str, root: str) -> bool:
-        return (
-            include_fn(path, root)  # type: ignore
-            if len(inspect.signature(include_fn).parameters) == 3
-            else include_fn(path)  # type: ignore
-        )
-
-    def _exclude_fn(path: str, root: str) -> bool:
-        return (
-            exclude_fn(path, root)  # type: ignore
-            if len(inspect.signature(exclude_fn).parameters) == 3
-            else exclude_fn(path)  # type: ignore
-        )
 
     for dirpath, _, files in os.walk(root):
         for fname in files:
             file_path = os.path.join(dirpath, fname)
-            if _include_fn(file_path, root) and not _exclude_fn(file_path, root):
+            if include_fn(file_path, root) and not exclude_fn(file_path, root):
                 yield file_path
 
 
-def get_code_files(
+def pack_code_files(
     root: str,
     target_root: str,
     include_fn: Union[
