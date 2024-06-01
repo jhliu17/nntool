@@ -183,6 +183,9 @@ class SlurmFunction:
         return self
 
     def _before_submit(self):
+        if self.slurm_has_been_set_up():
+            return
+
         if not self.is_integrated():
             raise ValueError("Slurm function should be set up before calling.")
 
