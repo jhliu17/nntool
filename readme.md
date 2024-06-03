@@ -6,6 +6,9 @@
 
 ```bash
 pip install git+https://github.com/jhliu17/nntool.git
+
+# install latest built from sdist
+pip install -f https://jhliu17.github.io/wheel/nntool/sdist nntool
 ```
 
 ## Reinstallation
@@ -43,5 +46,5 @@ python setup.py sdist bdist_wheel
 
 ## Pre-built Download
 ```bash
-pip install https://jhliu17.github.io/nntool/wheel/nntool-0.2.0-py3-none-any.whl
+pip install -f https://jhliu17.github.io/wheel/nntool/sdist nntool
 ```
