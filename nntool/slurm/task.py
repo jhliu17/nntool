@@ -210,7 +210,7 @@ class PyTorchDistributedTask(Task):
             print(f"running command: {cmd}")
             if self.slurm_config.mode == "slurm":
                 try:
-                    self.dist_args.export_bash(job_env.paths.folder)
+                    self.dist_args.export_bash(shlex.quote(str(job_env.paths.folder)))
                 except Exception as e:
                     print(f"failed to export distributed environment variables: {e}")
                     return -1
