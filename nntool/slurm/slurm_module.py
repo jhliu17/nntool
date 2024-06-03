@@ -136,6 +136,9 @@ class SlurmFunction:
             has_been_set_up = True
         return has_been_set_up
 
+    def _mark_slurm_has_been_set_up(self):
+        os.environ["NNTOOL_SLURM_HAS_BEEN_SET_UP"] = "1"
+
     def _update_slurm_kwargs(
         self,
         slurm_params_kwargs: Dict[str, str] = {},
@@ -148,9 +151,12 @@ class SlurmFunction:
         :param slurm_submit_kwargs: extra settings, defaults to {}
         :param slurm_task_kwargs: extra settings, defaults to {}
         """
-        self.slurm_params_kwargs.update(slurm_params_kwargs)
-        self.slurm_submit_kwargs.update(slurm_submit_kwargs)
-        self.slurm_task_kwargs.update(slurm_task_kwargs)
+        if slurm_params_kwargs:
+            self.slurm_params_kwargs.update(slurm_params_kwargs)
+        if slurm_submit_kwargs:
+            self.slurm_submit_kwargs.update(slurm_submit_kwargs)
+        if slurm_task_kwargs:
+            self.slurm_task_kwargs.update(slurm_task_kwargs)
 
     def update(
         self,
@@ -183,6 +189,10 @@ class SlurmFunction:
         return self
 
     def _before_submit(self):
+        """The hook function before submitting the job. It will pack the code and scripts to the slurm output folder if the `pack_code` is set to True in the slurm configuration. Only work before the first submit.
+
+        :raises ValueError: if the slurm function is not integrated
+        """
         if self.slurm_has_been_set_up():
             return
 
@@ -262,6 +272,7 @@ class SlurmFunction:
         )
 
         executor = self.get_slurm_executor()
+        self._mark_slurm_has_been_set_up()
         job = getattr(executor, submit_mode)(
             self.submit_fn, *submit_fn_args, **submit_fn_kwargs
         )
@@ -287,7 +298,6 @@ class SlurmFunction:
 
         if not self.slurm_has_been_set_up():
             # prepare distributed env for the second launch
-            os.environ["NNTOOL_SLURM_HAS_BEEN_SET_UP"] = "1"
             task = PyTorchDistributedTask(
                 self.slurm_config.distributed_launch_command,
                 (
@@ -326,6 +336,7 @@ class SlurmFunction:
                 SlurmExecutor._submitit_command_str = property(_submitit_command_str)
 
             executor = self.get_slurm_executor()
+            self._mark_slurm_has_been_set_up()
             job = getattr(executor, submit_mode)(task)
 
             # get result to run program in debug or local mode
