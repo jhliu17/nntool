@@ -1,5 +1,5 @@
-LOCAL_CACHE = /Users/junhao/Writings/code/homepage/wheel/nntool/sdist
-LOCAL_CYTHON_CACHE = /Users/junhao/Writings/code/homepage/wheel/nntool/releases/
+LOCAL_CACHE = /Users/junhao/Workings/code/homepage/wheel/nntool/sdist
+LOCAL_CYTHON_CACHE = /Users/junhao/Workings/code/homepage/wheel/nntool/releases/
 
 all: wheel
 
