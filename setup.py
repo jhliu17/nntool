@@ -23,7 +23,7 @@ class CleanCython(Command):
 
 package_info = dict(
     name="nntool",
-    version="0.6.3",
+    version="0.7.0",
     python_requires=">=3.9",
     install_requires=[
         # List your package dependencies here
@@ -34,14 +34,20 @@ package_info = dict(
         "matplotlib>=3.8.0",
         "seaborn>=0.13.2",
         "wandb>=0.15.0",
-        "toml>=0.10",
+        "tomli>=2.0.1",
         "cythonpackage",
     ],
     cmdclass={
         "clean_cython": CleanCython,
     },
     extras_require={
-        "dev": ["pytest>=8.0.2", "jax[cpu]>=0.4.0", "torch>=2.2.0", "mypy"]
+        "dev": [
+            "pytest>=8.0.2",
+            "jax[cpu]>=0.4.0",
+            "torch>=2.2.0",
+            "mypy",
+            "accelerate",
+        ]
     },
     # Additional metadata
     author="Junhao Liu",

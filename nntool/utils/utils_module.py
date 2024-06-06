@@ -1,6 +1,7 @@
 import os
 import datetime
 import warnings
+import tomli
 
 from functools import cache
 
@@ -17,6 +18,18 @@ def get_current_time():
     formatted_time = current_time.strftime("%m%d%Y_%H%M%S")
 
     return formatted_time
+
+
+def read_toml_file(file_path: str) -> dict:
+    """Read a toml file and return the content as a dictionary
+
+    :param file_path: path to the toml file
+    :return: content of the toml file as a dictionary
+    """
+    with open(file_path, "r") as f:
+        content = tomli.load(f)
+
+    return content
 
 
 @cache
