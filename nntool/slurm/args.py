@@ -45,7 +45,7 @@ class SlurmConfig:
     timeout_min: int = sys.maxsize
 
     # whether to pack code
-    pack_code: bool = True
+    pack_code: bool = False
 
     # use packed code to run
     use_packed_code: bool = False
