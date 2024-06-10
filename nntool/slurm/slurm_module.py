@@ -3,10 +3,10 @@ import sys
 import shlex
 import submitit
 
+from copy import deepcopy
 from functools import partial
 from submitit import Job, SlurmExecutor
 from warnings import warn
-from dataclasses import dataclass, field
 from typing import Any, Callable, Literal, Tuple, Type, Union, Dict, List
 
 from ..parser import parse_from_cli
@@ -19,41 +19,60 @@ from .task import (
 )
 
 
-@dataclass
 class SlurmFunction:
-    """A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
+    def __init__(
+        self,
+        slurm_config: SlurmConfig,
+        slurm_params_kwargs: Union[Dict[str, str], None] = None,
+        slurm_submit_kwargs: Union[Dict[str, str], None] = None,
+        slurm_task_kwargs: Union[Dict[str, str], None] = None,
+        system_argv: Union[List[str], None] = None,
+        submit_fn: Union[Callable[..., Any], None] = None,
+        default_submit_fn_args: Union[Tuple[Any], None] = None,
+        default_submit_fn_kwargs: Union[Dict[str, Any], None] = None,
+    ):
+        """A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
-    #### Exported Distributed Enviroment Variables
-    1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
-    2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
+        #### Exported Distributed Enviroment Variables
+        1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
+        2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
 
-    :param slurm_config: SlurmConfig, the slurm configuration dataclass, defaults to None
-    :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
-    :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
-    :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
-    :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
-    :param submit_fn: function to be submitted to Slurm, defaults to None
-    :param default_submit_fn_args: default args for submit_fn, defaults to ()
-    :param default_submit_fn_kwargs: default known word args for submit_fn, defaults to {}
-    :return: the wrapped submit function with configured slurm paramters
-    """
+        :param slurm_config: SlurmConfig, the slurm configuration dataclass, defaults to None
+        :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
+        :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
+        :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
+        :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
+        :param submit_fn: function to be submitted to Slurm, defaults to None
+        :param default_submit_fn_args: default args for submit_fn, defaults to ()
+        :param default_submit_fn_kwargs: default known word args for submit_fn, defaults to {}
+        :return: the wrapped submit function with configured slurm paramters
+        """
+        self.slurm_config = slurm_config
+        self.slurm_params_kwargs: Dict[str, str] = (
+            {} if slurm_params_kwargs is None else deepcopy(slurm_params_kwargs)
+        )
+        self.slurm_submit_kwargs: Dict[str, str] = (
+            {} if slurm_submit_kwargs is None else deepcopy(slurm_submit_kwargs)
+        )
+        self.slurm_task_kwargs: Dict[str, str] = (
+            {} if slurm_task_kwargs is None else deepcopy(slurm_task_kwargs)
+        )
+        self.system_argv: Union[List[str], None] = system_argv
+        self.submit_fn: Union[Callable[..., Any], None] = submit_fn
+        self.default_submit_fn_args: Tuple[Any] = (
+            tuple() if default_submit_fn_args is None else default_submit_fn_args
+        )
+        self.default_submit_fn_kwargs: Dict[str, Any] = (
+            dict() if default_submit_fn_kwargs is None else default_submit_fn_kwargs
+        )
 
-    slurm_config: SlurmConfig
-    slurm_params_kwargs: Dict[str, str] = field(default_factory=dict)
-    slurm_submit_kwargs: Dict[str, str] = field(default_factory=dict)
-    slurm_task_kwargs: Dict[str, str] = field(default_factory=dict)
-    system_argv: Union[List[str], None] = None
-    submit_fn: Union[Callable[..., Any], None] = None
-    default_submit_fn_args: Tuple[Any] = field(default_factory=tuple)
-    default_submit_fn_kwargs: Dict[str, Any] = field(default_factory=dict)
-
-    def __post_init__(self):
         self.__doc__ = self.submit_fn.__doc__
         self._update_slurm_kwargs(
             self.slurm_config.slurm_params_kwargs,  # make sure the same parameters are controlled by the config
             self.slurm_config.slurm_submit_kwargs,
             self.slurm_config.slurm_task_kwargs,
         )
+
         self.executor = None  # to be initialized by `get_slurm_executor`
         self.pack_code_include_fn = partial(
             include_code_files,
@@ -257,6 +276,42 @@ class SlurmFunction:
         return self._dispatch_submit_strategy(
             "map_array", *submit_fn_args, **submit_fn_kwargs
         )
+
+    def on_condition(
+        self,
+        jobs: Union[Job, List[Job], Tuple[Job]],
+        condition: Literal["afterany", "afterok", "afternotok"] = "afterok",
+    ):
+        """Mark this job should be executed after the provided slurm jobs have been done. This function allows combining different conditions by multiple calling.
+
+        :param jobs: dependent jobs
+        :param condition: run condition, defaults to "afterok"
+        :return: self
+        """
+        if not isinstance(jobs, (list, tuple)):
+            jobs = [jobs]
+
+        previous_conditions = self.slurm_params_kwargs.get("dependency", "")
+        append_condition = f"{condition}:{':'.join([job.job_id for job in jobs])}"
+        self.slurm_params_kwargs.update(
+            {
+                "dependency": (
+                    f"{previous_conditions}:{append_condition}"
+                    if previous_conditions
+                    else append_condition
+                )
+            }
+        )
+        return self
+
+    def afterok(self, *jobs: Tuple[Job]):
+        return self.on_condition(jobs, "afterok")
+
+    def afterany(self, *jobs: Tuple[Job]):
+        return self.on_condition(jobs, "afterany")
+
+    def afternotok(self, *jobs: Tuple[Job]):
+        return self.on_condition(jobs, "afternotok")
 
     def _submit(
         self,
