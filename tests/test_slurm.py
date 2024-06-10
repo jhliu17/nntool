@@ -2,10 +2,9 @@ import os
 import torch
 import time
 import accelerate
-import nntool
+
 from nntool.slurm import (
     SlurmConfig,
-    slurm_launcher,
     slurm_function,
 )
 from nntool.utils import get_current_time
@@ -16,7 +15,7 @@ distributed_slurm_settings = SlurmConfig(
     mode="slurm",
     slurm_job_name="test_slurm",
     slurm_partition="zhanglab.p",
-    node_list="laniakea",
+    node_list="galaxy",
     slurm_output_folder=f"outputs/{get_current_time()}/slurm",
     num_of_node=1,
     tasks_per_node=1,
@@ -36,7 +35,7 @@ slurm_settings = SlurmConfig(
     mode="slurm",
     slurm_job_name="test_slurm",
     slurm_partition="zhanglab.p",
-    node_list="laniakea",
+    node_list="galaxy",
     slurm_output_folder=f"outputs/{get_current_time()}/slurm",
     num_of_node=1,
     tasks_per_node=1,
@@ -87,6 +86,7 @@ def work_fn(a, b):
     test_import()
     my_test_import()
     print("PYTHONPATH", os.environ.get("PYTHONPATH"))
+    time.sleep(a + b)
     return a + b
 
 
@@ -113,18 +113,26 @@ def test_job_array_slurm_function():
     assert results == [4, 6, 16, 18]
 
 
-def test_slurm_launcher():
-    # @slurm_launcher(SlurmConfig)
-    # def slurm_main(args: SlurmConfig):
-    #     """launch slurm to execute main function
+def test_sequential_jobs():
+    jobs = []
+    job1 = work_fn(slurm_settings)(10, 2)
+    jobs.append(job1)
 
-    #     :param args: argument settings
-    #     """
-    #     print(args)
-    #     run_job(30)
-    #     return args
+    fn1 = work_fn(slurm_settings)
+    fn1.on_condition(job1)
+    job2 = fn1(7, 12)
+    jobs.append(job2)
 
-    pass
+    fn2 = work_fn(slurm_settings)
+    print(fn2.slurm_params_kwargs)
+    assert fn1 is not fn2
+
+    fn2.afterany(job1, job2)
+    job3 = fn2(20, 30)
+    jobs.append(job3)
+
+    results = [job.result() for job in jobs]
+    assert results == [12, 19, 50]
 
 
 if __name__ == "__main__":
