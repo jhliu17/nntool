@@ -3,10 +3,8 @@ import torch
 import time
 import accelerate
 
-from nntool.slurm import (
-    SlurmConfig,
-    slurm_function,
-)
+from dataclasses import dataclass
+from nntool.slurm import SlurmConfig, slurm_function, slurm
 from nntool.utils import get_current_time
 from nntool import test_import
 from tests.src.my_file import test_import as my_test_import
@@ -50,6 +48,17 @@ slurm_settings = SlurmConfig(
 )
 
 
+@dataclass
+class TestWorker:
+    name: str
+
+    @slurm
+    def run(self, a: int, b: int):
+        print("My name is:", self.name)
+        time.sleep(a + b)
+        return a + b
+
+
 def run_job(sleep_time: int = 30):
     print(torch.__file__)
     test_import()
@@ -68,7 +77,7 @@ def run_job(sleep_time: int = 30):
         time.sleep(sleep_time)
 
 
-@slurm_function
+@slurm
 def distributed_fn(*args, **kwargs):
     """a demo function to test slurm
 
@@ -91,7 +100,7 @@ def work_fn(a, b):
 
 
 def test_distributed_slurm_function():
-    job = distributed_fn(distributed_slurm_settings)(1, k=1)
+    job = distributed_fn[distributed_slurm_settings](1, k=1)
     result = job.results()
     print(result)
     assert result == [
@@ -100,7 +109,7 @@ def test_distributed_slurm_function():
 
 
 def test_job_array_slurm_function():
-    fn = work_fn(slurm_settings)
+    fn = work_fn[slurm_settings]
 
     job = fn(1, 2)
     result = job.result()
@@ -115,24 +124,33 @@ def test_job_array_slurm_function():
 
 def test_sequential_jobs():
     jobs = []
-    job1 = work_fn(slurm_settings)(10, 2)
+    job1 = work_fn[slurm_settings](10, 2)
     jobs.append(job1)
 
-    fn1 = work_fn(slurm_settings)
+    fn1 = work_fn[slurm_settings]
     fn1.on_condition(job1)
     job2 = fn1(7, 12)
     jobs.append(job2)
 
-    fn2 = work_fn(slurm_settings)
+    fn2 = work_fn[slurm_settings]
     print(fn2.slurm_params_kwargs)
     assert fn1 is not fn2
 
     fn2.afterany(job1, job2)
-    job3 = fn2(20, 30)
+    job3 = fn2(2, 30)
     jobs.append(job3)
 
     results = [job.result() for job in jobs]
-    assert results == [12, 19, 50]
+    assert results == [12, 19, 32]
+
+
+def test_class_slurm_function():
+    worker = TestWorker("test_worker")
+
+    job = worker.run[slurm_settings](worker, 20, 10)
+    result = job.result()
+    print(result)
+    assert result == 30
 
 
 if __name__ == "__main__":
