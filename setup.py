@@ -23,7 +23,7 @@ class CleanCython(Command):
 
 package_info = dict(
     name="nntool",
-    version="0.8.0",
+    version="1.0.0",
     python_requires=">=3.9",
     install_requires=[
         # List your package dependencies here
