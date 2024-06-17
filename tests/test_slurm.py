@@ -88,7 +88,7 @@ def distributed_fn(*args, **kwargs):
     return args, kwargs
 
 
-@slurm_function
+@slurm
 def work_fn(a, b):
     """a demo function to test slurm"""
     print(torch.__file__)
