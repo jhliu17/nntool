@@ -5,7 +5,7 @@ cythonpackage.init(__name__)
 from .args import SlurmConfig, SlurmArgs
 from .slurm_module import (
     slurm_function,
-    slurm,
+    slurm_fn,
     slurm_launcher,
     slurm_distributed_launcher,
 )
