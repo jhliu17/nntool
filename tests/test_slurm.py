@@ -4,7 +4,7 @@ import time
 import accelerate
 
 from dataclasses import dataclass
-from nntool.slurm import SlurmConfig, slurm_function, slurm
+from nntool.slurm import SlurmConfig, slurm_function, slurm_fn
 from nntool.utils import get_current_time
 from nntool import test_import
 from tests.src.my_file import test_import as my_test_import
@@ -52,7 +52,7 @@ slurm_settings = SlurmConfig(
 class TestWorker:
     name: str
 
-    @slurm
+    @slurm_fn
     def run(self, a: int, b: int):
         print("My name is:", self.name)
         time.sleep(a + b)
@@ -77,7 +77,7 @@ def run_job(sleep_time: int = 30):
         time.sleep(sleep_time)
 
 
-@slurm
+@slurm_fn
 def distributed_fn(*args, **kwargs):
     """a demo function to test slurm
 
@@ -88,7 +88,7 @@ def distributed_fn(*args, **kwargs):
     return args, kwargs
 
 
-@slurm
+@slurm_fn
 def work_fn(a, b):
     """a demo function to test slurm"""
     print(torch.__file__)

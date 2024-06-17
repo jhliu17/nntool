@@ -597,7 +597,7 @@ def slurm_function(
     return wrapper
 
 
-def slurm(
+def slurm_fn(
     submit_fn: Callable,
 ):
     """A decorator to annoate a function to be run in slurm. The function decorated by this decorator should be launched in the way below.
