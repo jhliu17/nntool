@@ -214,7 +214,9 @@ class SlurmFunction:
         slurm_fn._updated = True
         return slurm_fn
 
-    def __getitem__(self, slurm_configs: Union[Tuple[Any], Any]):
+    def __getitem__(
+        self, slurm_configs: Union[Dict[str, Any], Tuple[Any], Any]
+    ) -> "SlurmFunction":
         """Update the slurm configuration for the slurm function. A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
         #### Exported Distributed Enviroment Variables
@@ -228,10 +230,13 @@ class SlurmFunction:
         :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
         :return: the wrapped submit function with configured slurm paramters
         """
-        if not isinstance(slurm_configs, (list, tuple)):
-            slurm_configs = (slurm_configs,)
-
-        return self.update(*slurm_configs)
+        if isinstance(slurm_configs, dict):
+            return self.update(**slurm_configs)
+        elif isinstance(slurm_configs, (list, tuple)):
+            return self.update(*slurm_configs)
+        else:
+            # will try to pass the slurm_configs as the first argument
+            return self.update(slurm_configs)
 
     def _before_submit(self):
         """The hook function before submitting the job. It will pack the code and scripts to the slurm output folder if the `pack_code` is set to True in the slurm configuration. Only work before the first submit.
