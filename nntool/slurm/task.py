@@ -155,11 +155,22 @@ class PyTorchDistributedTask(Task):
 
         # other setup
         env_setup = {
+            "NCCL_DEBUG": "info",
             # "CUDA_LAUNCH_BLOCKING": "1",
-            # "NCCL_DEBUG": "info",
-            "CUDA_VISIBLE_DEVICES": os.environ["SLURM_JOB_GPUS"],
         }
+
+        # set CUDA visible devices if slurm has scheduled GPUs otherwise use all GPUs (without setting
+        # CUDA_VISIBLE_DEVICES)
+        env_setup.update(
+            {"CUDA_VISIBLE_DEVICES": os.environ["SLURM_JOB_GPUS"]}
+            if "SLURM_JOB_GPUS" in os.environ
+            else {}
+        )
+
+        # other environment variables set by the user
         env_setup.update(self.env_setup_kwargs)
+
+        # update environment variables
         os.environ.update(**env_setup)
 
         self.log(nvidia_smi_gpu_memory_stats_str())
@@ -169,7 +180,7 @@ class PyTorchDistributedTask(Task):
         self.log(f"local rank: {dist_env.local_rank}")
         self.log(f"local world size: {dist_env.local_world_size}")
         self.log(
-            f"local rank {dist_env.local_rank}: {os.environ['CUDA_VISIBLE_DEVICES']=}"
+            f"local rank {dist_env.local_rank}: CUDA_VISIBLE_DEVICES {os.environ.get('CUDA_VISIBLE_DEVICES', 'all')}"
         )
 
         # set distributed arguments
