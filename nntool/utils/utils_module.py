@@ -26,7 +26,7 @@ def read_toml_file(file_path: str) -> dict:
     :param file_path: path to the toml file
     :return: content of the toml file as a dictionary
     """
-    with open(file_path, "r") as f:
+    with open(file_path, "rb") as f:
         content = tomli.load(f)
 
     return content
