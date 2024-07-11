@@ -155,7 +155,7 @@ class PyTorchDistributedTask(Task):
 
         # other setup
         env_setup = {
-            "NCCL_DEBUG": "info",
+            # "NCCL_DEBUG": "info",
             # "CUDA_LAUNCH_BLOCKING": "1",
         }
 
