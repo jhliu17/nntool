@@ -1,3 +1,4 @@
+import os
 import sys
 from dataclasses import dataclass, field
 from typing import Literal, Union, Dict
@@ -87,6 +88,20 @@ class SlurmConfig:
 
     # extra slurm task parameters
     slurm_task_kwargs: Dict[str, str] = field(default_factory=dict)
+
+    def __post_init__(self):
+        # normalize the output folder
+        output_folder_suffix = ""
+        if self.mode != "slurm":
+            output_folder_suffix = f"_{self.mode}"
+        if self.slurm_output_folder.endswith("slurm"):
+            self.slurm_output_folder = (
+                f"{self.slurm_output_folder}{output_folder_suffix}"
+            )
+        else:
+            self.slurm_output_folder = os.path.join(
+                self.slurm_output_folder, f"slurm{output_folder_suffix}"
+            )
 
 
 SlurmArgs = SlurmConfig
