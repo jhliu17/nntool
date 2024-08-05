@@ -7,7 +7,7 @@ from typing import Literal, Union, Dict
 @dataclass
 class SlurmConfig:
     # running mode
-    mode: Literal["debug", "local", "slurm"] = "debug"
+    mode: Literal["debug", "exec", "local", "slurm"] = "debug"
 
     # slurm job name
     slurm_job_name: str = "YOUR_JOB_NAME"

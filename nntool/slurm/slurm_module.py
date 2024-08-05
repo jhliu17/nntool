@@ -79,9 +79,13 @@ class SlurmFunction:
         slurm_parameters_kwargs = self.slurm_params_kwargs
         slurm_submission_kwargs = self.slurm_submit_kwargs
 
+        # select the cluster type, which is based on the submitit library
+        # here we add a special mode called `exec` for running the job in the local machine
+        # which is equivalent to the `debug` mode in the submitit library
+        cluster_dispatch = {"slurm": None, "exec": "debug", "debug": "debug", "local": "local"}
         executor = submitit.AutoExecutor(
             folder=slurm_config.slurm_output_folder,
-            cluster=None if slurm_config.mode == "slurm" else slurm_config.mode,
+            cluster=cluster_dispatch.get(slurm_config.mode, slurm_config.mode),
         )
 
         # set additional parameters
