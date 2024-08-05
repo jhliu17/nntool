@@ -42,7 +42,11 @@ class SlurmFunction:
         )
         self.__doc__ = self.submit_fn.__doc__
 
-        # annotations here, will be updated by `update`
+        # slurm funcion is instantiated after calling `instantiate`
+        self._instantiated = False
+        self.executor = None  # to be set up by `get_executor`
+
+        # annotations here, will be set up after instantiation
         self.slurm_config: SlurmConfig
         self.slurm_params_kwargs: Dict[str, str]
         self.slurm_submit_kwargs: Dict[str, str]
@@ -51,15 +55,12 @@ class SlurmFunction:
         self.pack_code_include_fn: Callable[[str, str], bool]
         self.pack_code_exclude_fn: Callable[[str, str], bool]
 
-        self._updated = False
-        self.executor = None  # to be initialized by `get_slurm_executor`
-
-    def is_integrated(self):
+    def is_instantiated(self):
         """Whether the slurm function has been set up.
 
         :return: True if the slurm function has been set up, False otherwise
         """
-        return self.submit_fn is not None and self._updated
+        return self.submit_fn is not None and self._instantiated
 
     def is_distributed(self):
         """Whether the slurm function is distributed.
@@ -68,7 +69,7 @@ class SlurmFunction:
         """
         return self.slurm_config.use_distributed_env
 
-    def get_slurm_executor(
+    def get_executor(
         self,
     ):
         if self.executor is not None:
@@ -148,7 +149,7 @@ class SlurmFunction:
         if slurm_task_kwargs:
             self.slurm_task_kwargs.update(slurm_task_kwargs)
 
-    def update(
+    def instantiate(
         self,
         slurm_config: SlurmConfig,
         slurm_params_kwargs: Union[Dict[str, str], None] = None,
@@ -210,14 +211,14 @@ class SlurmFunction:
         if pack_code_exclude_fn is not None:
             slurm_fn.pack_code_exclude_fn = pack_code_exclude_fn
 
-        # mark updated
-        slurm_fn._updated = True
+        # mark instantiated
+        slurm_fn._instantiated = True
         return slurm_fn
 
     def __getitem__(
         self, slurm_configs: Union[Dict[str, Any], Tuple[Any], Any]
     ) -> "SlurmFunction":
-        """Update the slurm configuration for the slurm function. A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
+        """Instantiate the slurm configuration for the slurm function. A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
         #### Exported Distributed Enviroment Variables
         1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
@@ -231,23 +232,23 @@ class SlurmFunction:
         :return: the wrapped submit function with configured slurm paramters
         """
         if isinstance(slurm_configs, dict):
-            return self.update(**slurm_configs)
+            return self.instantiate(**slurm_configs)
         elif isinstance(slurm_configs, (list, tuple)):
-            return self.update(*slurm_configs)
+            return self.instantiate(*slurm_configs)
         else:
             # will try to pass the slurm_configs as the first argument
-            return self.update(slurm_configs)
+            return self.instantiate(slurm_configs)
 
-    def _before_submit(self):
+    def _before_submit(self, *args, **kwargs):
         """The hook function before submitting the job. It will pack the code and scripts to the slurm output folder if the `pack_code` is set to True in the slurm configuration. Only work before the first submit.
 
-        :raises ValueError: if the slurm function is not integrated
+        :raises Exception: if the slurm function is not integrated
         """
         if self.slurm_has_been_set_up():
             return
 
-        if not self.is_integrated():
-            raise ValueError("Slurm function should be set up before calling.")
+        if not self.is_instantiated():
+            raise Exception("Slurm function should be instantiated before calling.")
 
         # pack the code and scripts to the slurm output folder
         if self.slurm_config.pack_code:
@@ -262,51 +263,67 @@ class SlurmFunction:
             if self.slurm_config.use_packed_code:
                 self.slurm_params_kwargs.update({"chdir": target_code_root})
 
+    def _after_submit(
+        self,
+        submit_results: Union[Job, Any] = None,
+        *args,
+        **kwargs,
+    ):
+        # get result to run program other than slurm mode
+        if isinstance(submit_results, Job):
+            if self.slurm_config.mode != "slurm":
+                submit_results.results()
+
     def __call__(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
         """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
 
-        :raises ValueError: if the submit_fn is not set up
+        :raises Exception: if the submit_fn is not set up
         :return: Slurm Job or the return value of the submit_fn
         """
         self._before_submit()
-        return self._dispatch_submit_strategy(
-            "submit", *submit_fn_args, **submit_fn_kwargs
-        )
+        submit_strategy = self._dispatch_submit_strategy("submit")
+        submit_results = submit_strategy(*submit_fn_args, **submit_fn_kwargs)
+        self._after_submit(submit_results)
+        return submit_results
 
     def _dispatch_submit_strategy(
         self,
         submit_mode: Literal["submit", "map_array"] = "submit",
         *submit_fn_args,
         **submit_fn_kwargs,
-    ) -> Union[Job, Any]:
+    ) -> Callable[..., Union[Job, Any]]:
         if submit_mode == "submit":
             if self.is_distributed():
-                return self._distributed_submit(
-                    "submit", *submit_fn_args, **submit_fn_kwargs
-                )
+                return partial(self._distributed_submit, submit_mode="submit")
             else:
-                return self._submit("submit", *submit_fn_args, **submit_fn_kwargs)
+                return partial(self._submit, submit_mode="submit")
         elif submit_mode == "map_array":
             if self.is_distributed():
-                raise ValueError("Distributed job does not support `map_array` mode.")
+                raise Exception("Distributed job does not support `map_array` mode.")
             else:
-                return self._submit("map_array", *submit_fn_args, **submit_fn_kwargs)
+                return partial(self._submit, submit_mode="map_array")
         else:
-            raise ValueError(f"Invalid submit mode: {submit_mode}")
+            raise Exception(f"Invalid submit mode: {submit_mode}")
 
     def submit(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
+        """An alias function to __call__.
+
+        :raises Exception: if the submit_fn is not set up
+        :return: Slurm Job or the return value of the submit_fn
+        """
         return self(*submit_fn_args, **submit_fn_kwargs)
 
     def map_array(self, *submit_fn_args, **submit_fn_kwargs) -> List[Job]:
         """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
 
-        :raises ValueError: if the submit_fn is not set up
+        :raises Exception: if the submit_fn is not set up
         :return: Slurm Job or the return value of the submit_fn
         """
         self._before_submit()
-        return self._dispatch_submit_strategy(
-            "map_array", *submit_fn_args, **submit_fn_kwargs
-        )
+        submit_strategy = self._dispatch_submit_strategy("map_array")
+        submit_results = submit_strategy(*submit_fn_args, **submit_fn_kwargs)
+        self._after_submit(submit_results)
+        return submit_results
 
     def on_condition(
         self,
@@ -357,16 +374,11 @@ class SlurmFunction:
             self.default_submit_fn_kwargs if not submit_fn_kwargs else submit_fn_kwargs
         )
 
-        executor = self.get_slurm_executor()
+        executor = self.get_executor()
         self._mark_slurm_has_been_set_up()
         job = getattr(executor, submit_mode)(
             self.submit_fn, *submit_fn_args, **submit_fn_kwargs
         )
-
-        # get result to run program in debug or local mode
-        if self.slurm_config.mode != "slurm":
-            job.results()
-
         return job
 
     def _distributed_submit(
@@ -421,14 +433,9 @@ class SlurmFunction:
 
                 SlurmExecutor._submitit_command_str = property(_submitit_command_str)
 
-            executor = self.get_slurm_executor()
+            executor = self.get_executor()
             self._mark_slurm_has_been_set_up()
             job = getattr(executor, submit_mode)(task)
-
-            # get result to run program in debug or local mode
-            if self.slurm_config.mode != "slurm":
-                job.results()
-
             return job
         else:
             return self.submit_fn(*submit_fn_args, **submit_fn_kwargs)
@@ -478,7 +485,7 @@ def slurm_launcher(
         return SlurmFunction(
             submit_fn=submit_fn,
             default_submit_fn_args=(args,),
-        ).update(
+        ).instantiate(
             slurm_config,
             slurm_params_kwargs,
             slurm_submit_kwargs,
@@ -538,7 +545,7 @@ def slurm_distributed_launcher(
         return SlurmFunction(
             submit_fn=submit_fn,
             default_submit_fn_args=(args,),
-        ).update(
+        ).instantiate(
             slurm_config,
             slurm_params_kwargs,
             slurm_submit_kwargs,
@@ -585,7 +592,7 @@ def slurm_function(
         """
         slurm_fn = SlurmFunction(
             submit_fn=submit_fn,
-        ).update(
+        ).instantiate(
             slurm_config,
             slurm_params_kwargs,
             slurm_submit_kwargs,
