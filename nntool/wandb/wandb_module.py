@@ -70,7 +70,7 @@ def init_wandb(args: WandbConfig, run_config: dict):
             f"{args.notes + ', ' if args.notes else ''}" + f"git hash: {git_hash}"
         )
 
-    wandb.init(
+    wandb_run = wandb.init(
         project=project,
         entity=entity,
         name=args.name if args.name else None,
@@ -82,9 +82,10 @@ def init_wandb(args: WandbConfig, run_config: dict):
             "wandb is not enabled after intialization. Please check `wandb enabled`."
         )
 
-    wandb.run.log_code(
+    wandb_run.log_code(
         root=args.code_root,
         include_fn=lambda path, root: any(
             [path.endswith(ext) for ext in args.code_ext]
         ),
     )
+    return wandb_run
