@@ -82,7 +82,12 @@ class SlurmFunction:
         # select the cluster type, which is based on the submitit library
         # here we add a special mode called `exec` for running the job in the local machine
         # which is equivalent to the `debug` mode in the submitit library
-        cluster_dispatch = {"slurm": None, "exec": "debug", "debug": "debug", "local": "local"}
+        cluster_dispatch = {
+            "slurm": None,
+            "exec": "debug",
+            "debug": "debug",
+            "local": "local",
+        }
         executor = submitit.AutoExecutor(
             folder=slurm_config.slurm_output_folder,
             cluster=cluster_dispatch.get(slurm_config.mode, slurm_config.mode),
@@ -269,7 +274,7 @@ class SlurmFunction:
 
     def _after_submit(
         self,
-        submit_results: Union[Job, Any] = None,
+        submit_results: Union[Job, List[Job], Any] = None,
         *args,
         **kwargs,
     ):
@@ -277,6 +282,16 @@ class SlurmFunction:
         if isinstance(submit_results, Job):
             if self.slurm_config.mode != "slurm":
                 submit_results.results()
+        elif (
+            isinstance(submit_results, list)
+            and submit_results
+            and isinstance(submit_results[0], Job)
+        ):
+            if self.slurm_config.mode != "slurm":
+                for job in submit_results:
+                    job.results()
+        else:
+            pass
 
     def __call__(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
         """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
@@ -295,17 +310,17 @@ class SlurmFunction:
         submit_mode: Literal["submit", "map_array"] = "submit",
         *submit_fn_args,
         **submit_fn_kwargs,
-    ) -> Callable[..., Union[Job, Any]]:
+    ) -> Callable[..., Union[Job, List[Job], Any]]:
         if submit_mode == "submit":
             if self.is_distributed():
-                return partial(self._distributed_submit, submit_mode="submit")
+                return self._distributed_submit
             else:
-                return partial(self._submit, submit_mode="submit")
+                return self._submit
         elif submit_mode == "map_array":
             if self.is_distributed():
                 raise Exception("Distributed job does not support `map_array` mode.")
             else:
-                return partial(self._submit, submit_mode="map_array")
+                return self._submit_map_array
         else:
             raise Exception(f"Invalid submit mode: {submit_mode}")
 
@@ -365,37 +380,52 @@ class SlurmFunction:
     def afternotok(self, *jobs: Tuple[Job]):
         return self.on_condition(jobs, "afternotok")
 
-    def _submit(
+    def _get_submit_args(
         self,
-        submit_mode: Literal["submit", "map_array"] = "submit",
         *submit_fn_args,
         **submit_fn_kwargs,
-    ) -> Job:
+    ):
         submit_fn_args = (
             self.default_submit_fn_args if not submit_fn_args else submit_fn_args
         )
         submit_fn_kwargs = (
             self.default_submit_fn_kwargs if not submit_fn_kwargs else submit_fn_kwargs
         )
+        return submit_fn_args, submit_fn_kwargs
 
+    def _submit(
+        self,
+        *submit_fn_args,
+        **submit_fn_kwargs,
+    ) -> Job:
+        submit_fn_args, submit_fn_kwargs = self._get_submit_args(
+            *submit_fn_args, **submit_fn_kwargs
+        )
         executor = self.get_executor()
         self._mark_slurm_has_been_set_up()
-        job = getattr(executor, submit_mode)(
-            self.submit_fn, *submit_fn_args, **submit_fn_kwargs
+        job = executor.submit(self.submit_fn, *submit_fn_args, **submit_fn_kwargs)
+        return job
+
+    def _submit_map_array(
+        self,
+        *submit_fn_args,
+        **submit_fn_kwargs,
+    ) -> List[Job]:
+        submit_fn_args, submit_fn_kwargs = self._get_submit_args(
+            *submit_fn_args, **submit_fn_kwargs
         )
+        executor = self.get_executor()
+        self._mark_slurm_has_been_set_up()
+        job = executor.map_array(self.submit_fn, *submit_fn_args, **submit_fn_kwargs)
         return job
 
     def _distributed_submit(
         self,
-        submit_mode: Literal["submit", "map_array"] = "submit",
         *submit_fn_args,
         **submit_fn_kwargs,
     ) -> Union[Job, Any]:
-        submit_fn_args = (
-            self.default_submit_fn_args if not submit_fn_args else submit_fn_args
-        )
-        submit_fn_kwargs = (
-            self.default_submit_fn_kwargs if not submit_fn_kwargs else submit_fn_kwargs
+        submit_fn_args, submit_fn_kwargs = self._get_submit_args(
+            *submit_fn_args, **submit_fn_kwargs
         )
 
         if not self.slurm_has_been_set_up():
@@ -414,7 +444,7 @@ class SlurmFunction:
 
             # monkey patch the submitit command to set up distributed env
             # in distributed training, if two jobs are launched in the same node, the second job will fail
-            # directly use sbatch to submit jobs fixed the issue
+            # but directly use `sbatch`` to submit the second job without any issues
             if self.slurm_config.mode == "slurm":
 
                 def _submitit_command_str(self) -> str:
@@ -439,7 +469,7 @@ class SlurmFunction:
 
             executor = self.get_executor()
             self._mark_slurm_has_been_set_up()
-            job = getattr(executor, submit_mode)(task)
+            job = executor.submit(task)
             return job
         else:
             return self.submit_fn(*submit_fn_args, **submit_fn_kwargs)
@@ -529,7 +559,7 @@ def slurm_distributed_launcher(
     :return: decorator function with main entry
     """
     warn(
-        "`slurm_distributed_launcher` has been deprecated. Please use `slurm_launcher` instead, which supports both distributed or non-distributed job (controlled by `use_distributed_env` in slurm field).",
+        "`slurm_distributed_launcher` has been deprecated. Please use `slurm_launcher` instead, which supports both distributed and non-distributed job (controlled by `use_distributed_env` in slurm field).",
         DeprecationWarning,
         stacklevel=2,
     )
