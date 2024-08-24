@@ -7,15 +7,15 @@ from functools import cache
 
 
 def get_current_time():
-    """get current time in this format: MMDDYYYY_HHMMSS
+    """get current time in this format: MMDDYYYY/HHMMSS
 
-    :return: time in the format MMDDYYYY_HHMMSS
+    :return: time in the format MMDDYYYY/HHMMSS
     """
     # Get the current time
     current_time = datetime.datetime.now()
 
-    # Format the time (MDY_HMS)
-    formatted_time = current_time.strftime("%m%d%Y_%H%M%S")
+    # Format the time (MDY/HMS)
+    formatted_time = current_time.strftime("%m%d%Y/%H%M%S")
 
     return formatted_time
 
@@ -37,7 +37,7 @@ def get_output_path(
     output_path: str = "./", append_date: bool = True
 ) -> tuple[str, str]:
     """Get output path based on environment variable OUTPUT_PATH.
-    The output path is appended with the current time if append_date is True (e.g. /outputs/xxx/MMDDYYYY_HHMMSS).
+    The output path is appended with the current time if append_date is True (e.g. /outputs/xxx/MMDDYYYY/HHMMSS).
 
     The result for the same input is cached.
 
