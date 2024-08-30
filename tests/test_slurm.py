@@ -1,51 +1,56 @@
+import sys
 import os
 import torch
 import time
 import accelerate
+import pytest
 
 from dataclasses import dataclass
 from nntool.slurm import SlurmConfig, slurm_function, slurm_fn
 from nntool.utils import get_current_time
-from nntool import test_import
-from tests.src.my_file import test_import as my_test_import
 
-distributed_slurm_settings = SlurmConfig(
-    mode="slurm",
-    slurm_job_name="test_slurm",
-    slurm_partition="zhanglab.p",
-    node_list="galaxy",
-    slurm_output_folder=f"outputs/{get_current_time()}/slurm",
-    num_of_node=1,
-    tasks_per_node=1,
-    gpus_per_task=2,
-    cpus_per_task=1,
-    mem="10G",
-    timeout_min=10,
-    pack_code=True,
-    code_root="./",
-    use_packed_code=True,
-    use_distributed_env=True,
-    processes_per_task=2,
-    distributed_launch_command="accelerate launch --config_file tests/distributed.yaml --num_processes {num_processes} --num_machines {num_machines} --machine_rank {machine_rank} --main_process_ip {main_process_ip} --main_process_port {main_process_port} -m tests.test_slurm",
-)
 
-slurm_settings = SlurmConfig(
-    mode="slurm",
-    slurm_job_name="test_slurm",
-    slurm_partition="zhanglab.p",
-    node_list="galaxy",
-    slurm_output_folder=f"outputs/{get_current_time()}/slurm",
-    num_of_node=1,
-    tasks_per_node=1,
-    gpus_per_task=0,
-    cpus_per_task=1,
-    mem="2GB",
-    timeout_min=10,
-    pack_code=True,
-    code_root="./",
-    use_packed_code=True,
-    use_distributed_env=False,
-)
+def get_slurm_config(output_path, is_distributed: bool = False):
+    slurm_config = None
+    if is_distributed:
+        slurm_config = SlurmConfig(
+            mode="slurm",
+            slurm_job_name="test_slurm",
+            slurm_partition="zhanglab.p",
+            node_list="galaxy",
+            slurm_output_folder=f"{output_path}/{get_current_time()}/slurm",
+            num_of_node=1,
+            tasks_per_node=1,
+            gpus_per_task=2,
+            cpus_per_task=1,
+            mem="10G",
+            timeout_min=10,
+            pack_code=True,
+            code_root="./",
+            use_packed_code=True,
+            use_distributed_env=True,
+            processes_per_task=2,
+            distributed_launch_command="accelerate launch --config_file tests/distributed.yaml --num_processes {num_processes} --num_machines {num_machines} --machine_rank {machine_rank} --main_process_ip {main_process_ip} --main_process_port {main_process_port} -m tests.test_slurm",
+        )
+    else:
+        slurm_config = SlurmConfig(
+            mode="slurm",
+            slurm_job_name="test_slurm",
+            slurm_partition="zhanglab.p",
+            node_list="galaxy",
+            slurm_output_folder=f"{output_path}/{get_current_time()}/slurm",
+            num_of_node=1,
+            tasks_per_node=1,
+            gpus_per_task=0,
+            cpus_per_task=1,
+            mem="2GB",
+            timeout_min=10,
+            pack_code=True,
+            code_root="./",
+            use_packed_code=True,
+            use_distributed_env=False,
+        )
+    return slurm_config
 
 
 @dataclass
@@ -61,8 +66,6 @@ class TestWorker:
 
 def run_job(sleep_time: int = 30):
     print(torch.__file__)
-    test_import()
-    my_test_import()
     accelerator = accelerate.Accelerator()
     device = accelerator.device
     if accelerator.is_main_process:
@@ -92,15 +95,15 @@ def distributed_fn(*args, **kwargs):
 def work_fn(a, b):
     """a demo function to test slurm"""
     print(torch.__file__)
-    test_import()
-    my_test_import()
     print("PYTHONPATH", os.environ.get("PYTHONPATH"))
     time.sleep(a + b)
     return a + b
 
 
-def test_distributed_slurm_function():
-    job = distributed_fn[distributed_slurm_settings](1, k=1)
+@pytest.mark.skipif(sys.platform != "linux", reason="Test only runs on Linux")
+def test_distributed_slurm_function(tmp_path):
+    slurm_settings = get_slurm_config(tmp_path, is_distributed=True)
+    job = distributed_fn[slurm_settings](1, k=1)
     result = job.results()
     print(result)
     assert result == [
@@ -108,7 +111,9 @@ def test_distributed_slurm_function():
     ]
 
 
-def test_job_array_slurm_function():
+@pytest.mark.skipif(sys.platform != "linux", reason="Test only runs on Linux")
+def test_job_array_slurm_function(tmp_path):
+    slurm_settings = get_slurm_config(tmp_path, is_distributed=False)
     fn = work_fn[slurm_settings]
 
     job = fn(1, 2)
@@ -122,7 +127,10 @@ def test_job_array_slurm_function():
     assert results == [4, 6, 16, 18]
 
 
-def test_sequential_jobs():
+@pytest.mark.skipif(sys.platform != "linux", reason="Test only runs on Linux")
+def test_sequential_jobs(tmp_path):
+    slurm_settings = get_slurm_config(tmp_path, is_distributed=False)
+
     jobs = []
     job1 = work_fn[slurm_settings](10, 2)
     jobs.append(job1)
@@ -144,9 +152,10 @@ def test_sequential_jobs():
     assert results == [12, 19, 32]
 
 
-def test_class_slurm_function():
+@pytest.mark.skipif(sys.platform != "linux", reason="Test only runs on Linux")
+def test_class_slurm_function(tmp_path):
     worker = TestWorker("test_worker")
-
+    slurm_settings = get_slurm_config(tmp_path, is_distributed=False)
     job = worker.run[slurm_settings](worker, 20, 10)
     result = job.result()
     print(result)

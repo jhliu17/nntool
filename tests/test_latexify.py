@@ -7,7 +7,7 @@ from jax.scipy.stats import t, norm, laplace
 from nntool.plot import latexify, savefig, is_latexify_enabled, enable_latexify
 
 
-def test_latexify():
+def test_latexify(tmp_path):
     os.environ["LATEXIFY"] = "1"
     latexify(fig_width=0.45 * 6, fig_height=1.5)
 
@@ -38,7 +38,7 @@ def test_latexify():
     plt.ylabel("pdf")
     plt.xlabel("$x$")
     sns.despine()
-    savefig("studentLaplacePdf2.pdf", fig_dir="tests/plot")
+    savefig("studentLaplacePdf2.pdf", fig_dir=tmp_path)
 
     plt.figure()
     plt.plot(
@@ -63,7 +63,7 @@ def test_latexify():
         prop={"size": LEGEND_SIZE},
     )
     sns.despine()
-    savefig("studentLaplaceLogpdf2.pdf", fig_dir="tests/plot")
+    savefig("studentLaplaceLogpdf2.pdf", fig_dir=tmp_path)
 
     fig, ax = plt.subplots(1, 1)
     ax.plot(
@@ -91,7 +91,7 @@ def test_latexify():
     savefig("studentLaplaceLogpdf3.pdf", fig_dir="tests/plot/")
 
 
-def test_context():
+def test_context(tmp_path):
     with enable_latexify(fig_width=0.45 * 6, fig_height=1.5) as ctx:
         x = jnp.linspace(-4, 4, 100)
         normal = norm.pdf(x, loc=0, scale=1)
@@ -122,7 +122,7 @@ def test_context():
         plt.ylabel("pdf")
         plt.xlabel("$x$")
 
-        ctx.savefig("in_context_studentLaplacePdf2.pdf", fig_dir="tests/plot")
+        ctx.savefig("in_context_studentLaplacePdf2.pdf", fig_dir=tmp_path)
 
     x = jnp.linspace(-4, 4, 100)
     normal = norm.pdf(x, loc=0, scale=1)
@@ -153,4 +153,4 @@ def test_context():
     plt.ylabel("pdf")
     plt.xlabel("$x$")
 
-    ctx.savefig("out_context_studentLaplacePdf2.pdf", fig_dir="tests/plot")
+    ctx.savefig("out_context_studentLaplacePdf2.pdf", fig_dir=tmp_path)
