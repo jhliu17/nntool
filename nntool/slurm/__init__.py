@@ -3,7 +3,7 @@ import cythonpackage
 cythonpackage.init(__name__)
 
 from .args import SlurmConfig, SlurmArgs
-from .slurm_module import (
+from .wrap import (
     slurm_function,
     slurm_fn,
     slurm_launcher,
