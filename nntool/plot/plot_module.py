@@ -77,7 +77,7 @@ def _get_fig_name(fname_full):
     extention = "_latexified.pdf" if LATEXIFY else ".pdf"
     if fname_full[-4:] in [".png", ".pdf", ".jpg"]:
         fname = fname_full[:-4]
-        warnings.warn(
+        print(
             f"renaming {fname_full} to {fname}{extention} because LATEXIFY is {LATEXIFY}",
         )
     else:

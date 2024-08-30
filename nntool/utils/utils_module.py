@@ -1,6 +1,5 @@
 import os
 import datetime
-import warnings
 import tomli
 
 from functools import cache
@@ -57,7 +56,7 @@ def get_output_path(
             output_path = os.path.join(output_path, current_time)
 
         os.environ["NNTOOL_OUTPUT_PATH"] = output_path
-        warnings.warn(
+        print(
             f"OUTPUT_PATH is not found in environment variables. NNTOOL_OUTPUT_PATH is set using path: {output_path}"
         )
 
