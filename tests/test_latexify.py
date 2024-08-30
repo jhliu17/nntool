@@ -88,7 +88,7 @@ def test_latexify(tmp_path):
         prop={"size": LEGEND_SIZE},
     )
     sns.despine()
-    savefig("studentLaplaceLogpdf3.pdf", fig_dir="tests/plot/")
+    savefig("studentLaplaceLogpdf3.pdf", fig_dir=tmp_path)
 
 
 def test_context(tmp_path):

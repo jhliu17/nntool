@@ -54,7 +54,7 @@ def get_slurm_config(output_path, is_distributed: bool = False):
 
 
 @dataclass
-class TestWorker:
+class WorkerTest:
     name: str
 
     @slurm_fn
@@ -154,7 +154,7 @@ def test_sequential_jobs(tmp_path):
 
 @pytest.mark.skipif(sys.platform != "linux", reason="Test only runs on Linux")
 def test_class_slurm_function(tmp_path):
-    worker = TestWorker("test_worker")
+    worker = WorkerTest("test_worker")
     slurm_settings = get_slurm_config(tmp_path, is_distributed=False)
     job = worker.run[slurm_settings](worker, 20, 10)
     result = job.result()
