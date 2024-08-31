@@ -102,7 +102,7 @@ def work_fn(a, b):
 
 @pytest.mark.skipif(sys.platform != "linux", reason="Test only runs on Linux")
 def test_distributed_slurm_function(tmp_path):
-    slurm_settings = get_slurm_config(tmp_path, is_distributed=True)
+    slurm_settings = get_slurm_config("outputs/", is_distributed=True)
     job = distributed_fn[slurm_settings](1, k=1)
     result = job.results()
     print(result)
@@ -113,7 +113,7 @@ def test_distributed_slurm_function(tmp_path):
 
 @pytest.mark.skipif(sys.platform != "linux", reason="Test only runs on Linux")
 def test_job_array_slurm_function(tmp_path):
-    slurm_settings = get_slurm_config(tmp_path, is_distributed=False)
+    slurm_settings = get_slurm_config("outputs/", is_distributed=False)
     fn = work_fn[slurm_settings]
 
     job = fn(1, 2)
@@ -129,7 +129,7 @@ def test_job_array_slurm_function(tmp_path):
 
 @pytest.mark.skipif(sys.platform != "linux", reason="Test only runs on Linux")
 def test_sequential_jobs(tmp_path):
-    slurm_settings = get_slurm_config(tmp_path, is_distributed=False)
+    slurm_settings = get_slurm_config("outputs/", is_distributed=False)
 
     jobs = []
     job1 = work_fn[slurm_settings](10, 2)
@@ -155,7 +155,7 @@ def test_sequential_jobs(tmp_path):
 @pytest.mark.skipif(sys.platform != "linux", reason="Test only runs on Linux")
 def test_class_slurm_function(tmp_path):
     worker = WorkerTest("test_worker")
-    slurm_settings = get_slurm_config(tmp_path, is_distributed=False)
+    slurm_settings = get_slurm_config("outputs/", is_distributed=False)
     job = worker.run[slurm_settings](worker, 20, 10)
     result = job.result()
     print(result)
