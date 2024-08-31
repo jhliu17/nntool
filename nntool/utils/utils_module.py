@@ -2,8 +2,6 @@ import os
 import datetime
 import tomli
 
-from functools import cache
-
 
 def get_current_time():
     """get current time in this format: MMDDYYYY/HHMMSS
@@ -31,9 +29,9 @@ def read_toml_file(file_path: str) -> dict:
     return content
 
 
-@cache
 def get_output_path(
-    output_path: str = "./", append_date: bool = True
+    output_path: str = "./",
+    append_date: bool = True,
 ) -> tuple[str, str]:
     """Get output path based on environment variable OUTPUT_PATH.
     The output path is appended with the current time if append_date is True (e.g. /outputs/xxx/MMDDYYYY/HHMMSS).
@@ -45,17 +43,18 @@ def get_output_path(
     """
     if "OUTPUT_PATH" in os.environ:
         output_path = os.environ["OUTPUT_PATH"]
-        current_time = "" if not append_date else os.path.split(output_path)[-1].strip()
+        current_time = "" if not append_date else os.environ["OUTPUT_PATH_DATE"]
     elif "NNTOOL_OUTPUT_PATH" in os.environ:
         # reuse the NNTOOL_OUTPUT_PATH if it is set
         output_path = os.environ["NNTOOL_OUTPUT_PATH"]
-        current_time = "" if not append_date else os.path.split(output_path)[-1].strip()
+        current_time = "" if not append_date else os.environ["NNTOOL_OUTPUT_PATH_DATE"]
     else:
         current_time = get_current_time()
         if append_date:
             output_path = os.path.join(output_path, current_time)
 
         os.environ["NNTOOL_OUTPUT_PATH"] = output_path
+        os.environ["NNTOOL_OUTPUT_PATH_DATE"] = current_time
         print(
             f"OUTPUT_PATH is not found in environment variables. NNTOOL_OUTPUT_PATH is set using path: {output_path}"
         )
