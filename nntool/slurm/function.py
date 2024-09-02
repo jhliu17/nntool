@@ -6,7 +6,7 @@ import submitit
 from copy import deepcopy
 from functools import partial
 from submitit import Job, SlurmExecutor
-from typing import Any, Callable, Literal, Tuple, Union, Dict, List
+from typing import Any, Callable, Literal, Tuple, Union, Dict, List, Optional
 
 from .args import SlurmConfig
 from .task import (
@@ -20,9 +20,9 @@ from .task import (
 class SlurmFunction:
     def __init__(
         self,
-        submit_fn: Callable[..., Any] = None,
-        default_submit_fn_args: Union[Tuple[Any], None] = None,
-        default_submit_fn_kwargs: Union[Dict[str, Any], None] = None,
+        submit_fn: Callable[..., Any],
+        default_submit_fn_args: Optional[Tuple[Any]] = None,
+        default_submit_fn_kwargs: Optional[Dict[str, Any]] = None,
     ):
         """A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
@@ -41,15 +41,15 @@ class SlurmFunction:
         self.__doc__ = self.submit_fn.__doc__
 
         # slurm funcion is instantiated after calling `instantiate`
-        self._instantiated = False
-        self.executor = None  # to be set up by `get_executor`
+        self.__instantiated: bool = False
+        self.__executor = None  # to be set up by `get_executor`
 
         # annotations here, will be set up after instantiation
         self.slurm_config: SlurmConfig
         self.slurm_params_kwargs: Dict[str, str]
         self.slurm_submit_kwargs: Dict[str, str]
         self.slurm_task_kwargs: Dict[str, str]
-        self.system_argv: Union[List[str], None]
+        self.system_argv: Optional[List[str]]
         self.pack_code_include_fn: Callable[[str, str], bool]
         self.pack_code_exclude_fn: Callable[[str, str], bool]
 
@@ -58,7 +58,7 @@ class SlurmFunction:
 
         :return: True if the slurm function has been set up, False otherwise
         """
-        return self.submit_fn is not None and self._instantiated
+        return self.submit_fn is not None and self.__instantiated
 
     def is_distributed(self):
         """Whether the slurm function is distributed.
@@ -117,11 +117,11 @@ class SlurmFunction:
     def get_executor(
         self,
     ):
-        if self.executor is not None:
-            return self.executor
+        if self.__executor is not None:
+            return self.__executor
         else:
             executor = self.prepare_executor()
-            self.executor = executor
+            self.__executor = executor
         return executor
 
     @staticmethod
@@ -161,12 +161,12 @@ class SlurmFunction:
     def instantiate(
         self,
         slurm_config: SlurmConfig,
-        slurm_params_kwargs: Union[Dict[str, str], None] = None,
-        slurm_submit_kwargs: Union[Dict[str, str], None] = None,
-        slurm_task_kwargs: Union[Dict[str, str], None] = None,
-        system_argv: Union[List[str], None] = None,
-        pack_code_include_fn: Callable[[str, str], bool] = None,
-        pack_code_exclude_fn: Callable[[str, str], bool] = None,
+        slurm_params_kwargs: Optional[Dict[str, str]] = None,
+        slurm_submit_kwargs: Optional[Dict[str, str]] = None,
+        slurm_task_kwargs: Optional[Dict[str, str]] = None,
+        system_argv: Optional[List[str]] = None,
+        pack_code_include_fn: Optional[Callable[[str, str], bool]] = None,
+        pack_code_exclude_fn: Optional[Callable[[str, str], bool]] = None,
     ) -> "SlurmFunction":
         """Update the slurm configuration for the slurm function. A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
@@ -221,7 +221,7 @@ class SlurmFunction:
             slurm_fn.pack_code_exclude_fn = pack_code_exclude_fn
 
         # mark instantiated
-        slurm_fn._instantiated = True
+        slurm_fn.__instantiated = True
         return slurm_fn
 
     def __getitem__(
