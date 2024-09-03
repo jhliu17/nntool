@@ -1,6 +1,7 @@
 import os
 import toml
 
+from typing import Any, Dict
 from pathlib import Path
 from dataclasses import dataclass
 from .utils_module import get_output_path
@@ -8,10 +9,13 @@ from .utils_module import get_output_path
 
 @dataclass
 class BaseExperimentConfig:
-    # the output folder for the outputs
-    output_folder: str = "outputs"
+    # config name
+    config_name: str
 
-    # key for experiment name from the environment variable
+    # the output folder for the outputs
+    output_folder: str
+
+    # key for experiment name in the environment variable
     experiment_name_key: str = "EXP_NAME"
 
     # the path to the env.toml file
@@ -20,16 +24,13 @@ class BaseExperimentConfig:
     # append date time to the output path
     append_date_to_path: bool = True
 
-    # random seed
-    seed: int = 3407
-
     def __post_init__(self):
         # annotations
         self.experiment_name: str
         self.project_path: str
         self.output_path: str
         self.current_time: str
-        self.env_config = self.prepare_env_toml_dict()
+        self.env_toml: Dict[str, Any] = self.prepare_env_toml_dict()
 
         self.experiment_name = self.prepare_experiment_name()
         self.project_path, self.output_path, self.current_time = (
@@ -52,11 +53,14 @@ class BaseExperimentConfig:
         return os.environ.get(self.experiment_name_key, "default")
 
     def prepare_experiment_paths(self):
-        project_path = self.env_config["project"]["path"]
+        project_path = self.env_toml["project"]["path"]
 
         output_path, current_time = get_output_path(
-            output_path=f"{self.output_folder}/{self.experiment_name}",
+            output_path=os.path.join(
+                self.output_folder, self.config_name, self.experiment_name
+            ),
             append_date=self.append_date_to_path,
+            cache_into_env=False,
         )
         output_path = f"{project_path}/{output_path}"
         return project_path, output_path, current_time

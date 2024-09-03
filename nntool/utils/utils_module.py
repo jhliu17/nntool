@@ -32,18 +32,18 @@ def read_toml_file(file_path: str) -> dict:
 def get_output_path(
     output_path: str = "./",
     append_date: bool = True,
+    cache_into_env: bool = True,
 ) -> tuple[str, str]:
-    """Get output path based on environment variable OUTPUT_PATH.
-    The output path is appended with the current time if append_date is True (e.g. /outputs/xxx/MMDDYYYY/HHMMSS).
-
-    The result for the same input is cached.
+    """Get output path based on environment variable OUTPUT_PATH and NNTOOL_OUTPUT_PATH.
+    The output path is appended with the current time if append_date is True (e.g. /OUTPUT_PATH/xxx/MMDDYYYY/HHMMSS).
 
     :param append_date: append a children folder with the date time, defaults to True
+    :param cache_into_env: whether cache the newly created path into env, defaults to True
     :return: (output path, current time)
     """
     if "OUTPUT_PATH" in os.environ:
         output_path = os.environ["OUTPUT_PATH"]
-        current_time = "" if not append_date else os.environ["OUTPUT_PATH_DATE"]
+        current_time = "" if not append_date else get_current_time()
     elif "NNTOOL_OUTPUT_PATH" in os.environ:
         # reuse the NNTOOL_OUTPUT_PATH if it is set
         output_path = os.environ["NNTOOL_OUTPUT_PATH"]
@@ -53,10 +53,11 @@ def get_output_path(
         if append_date:
             output_path = os.path.join(output_path, current_time)
 
-        os.environ["NNTOOL_OUTPUT_PATH"] = output_path
-        os.environ["NNTOOL_OUTPUT_PATH_DATE"] = current_time
-        print(
-            f"OUTPUT_PATH is not found in environment variables. NNTOOL_OUTPUT_PATH is set using path: {output_path}"
-        )
+        if cache_into_env:
+            os.environ["NNTOOL_OUTPUT_PATH"] = output_path
+            os.environ["NNTOOL_OUTPUT_PATH_DATE"] = current_time
+            print(
+                f"OUTPUT_PATH is not found in environment variables. NNTOOL_OUTPUT_PATH is set using path: {output_path}"
+            )
 
     return output_path, current_time

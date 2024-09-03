@@ -18,7 +18,6 @@ def get_slurm_config(output_path, is_distributed: bool = False):
             slurm_job_name="test_slurm",
             slurm_partition="zhanglab.p",
             node_list="galaxy",
-            slurm_output_folder=f"{output_path}/{get_current_time()}/slurm",
             num_of_node=1,
             tasks_per_node=1,
             gpus_per_task=2,
@@ -38,7 +37,6 @@ def get_slurm_config(output_path, is_distributed: bool = False):
             slurm_job_name="test_slurm",
             slurm_partition="zhanglab.p",
             node_list="galaxy",
-            slurm_output_folder=f"{output_path}/{get_current_time()}/slurm",
             num_of_node=1,
             tasks_per_node=1,
             gpus_per_task=0,
@@ -50,6 +48,8 @@ def get_slurm_config(output_path, is_distributed: bool = False):
             use_packed_code=True,
             use_distributed_env=False,
         )
+
+    slurm_config = slurm_config.set_output_path(output_path, get_current_time())
     return slurm_config
 
 

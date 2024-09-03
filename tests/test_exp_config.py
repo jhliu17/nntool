@@ -1,6 +1,3 @@
-from sympy import N
-import tyro
-
 from dataclasses import dataclass, field
 from nntool.slurm import SlurmConfig
 from nntool.utils.exp_config import BaseExperimentConfig
@@ -11,7 +8,6 @@ def test_output_path(tmp_path):
         mode="slurm",
         slurm_partition="zhanglab.p",
         slurm_job_name="dna_llm",
-        slurm_output_folder="{output_path}/slurm",
         tasks_per_node=1,
         cpus_per_task=8,
         gpus_per_node=4,
@@ -36,22 +32,33 @@ def test_output_path(tmp_path):
         slurm: SlurmConfig = field(default_factory=lambda: SlurmConfig)
 
         def post_config_fields(self):
-            self.slurm.slurm_output_folder = self.slurm.slurm_output_folder.format(
-                output_path=self.output_path
-            )
+            self.slurm = self.slurm.set_output_path(self.output_path, self.current_time)
 
     experiments = dict(
         base=ExperimentConfig(
+            config_name="base",
+            output_folder=str(tmp_path),
+            slurm=base_slurm,
+            append_date_to_path=True,
+            env_toml_path="tests/env.toml",
+        ),
+        lite=ExperimentConfig(
+            config_name="lite",
             output_folder=str(tmp_path),
             slurm=base_slurm,
             append_date_to_path=True,
             env_toml_path="tests/env.toml",
         ),
     )
-    configs = tyro.extras.subcommand_type_from_defaults(experiments)
 
-    args = tyro.cli(configs, args=[])
+    args = experiments["base"]
     assert (
         args.slurm.slurm_output_folder
-        == f"{args.project_path}/{tmp_path}/{args.experiment_name}/{args.current_time}/slurm"
+        == f"{args.project_path}/{tmp_path}/base/{args.experiment_name}/{args.current_time}/slurm"
+    )
+
+    args = experiments["lite"]
+    assert (
+        args.slurm.slurm_output_folder
+        == f"{args.project_path}/{tmp_path}/lite/{args.experiment_name}/{args.current_time}/slurm"
     )

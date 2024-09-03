@@ -1,7 +1,7 @@
 import os
 import sys
-from dataclasses import dataclass, field
-from typing import Literal, Union, Dict, Optional
+from dataclasses import dataclass, field, replace
+from typing import Literal, Dict, Optional
 
 
 @dataclass
@@ -15,8 +15,8 @@ class SlurmConfig:
     # slurm partition name
     slurm_partition: str = "YOUR_PARTITION_NAME"
 
-    # slurm output folder
-    slurm_output_folder: str = "outputs/slurm"
+    # slurm output folder name
+    slurm_output_folder: str = "slurm"
 
     # node list string (leave blank to use all nodes)
     node_list: str = ""
@@ -102,6 +102,16 @@ class SlurmConfig:
             self.slurm_output_folder = os.path.join(
                 self.slurm_output_folder, f"slurm{output_folder_suffix}"
             )
+
+    def set_output_path(self, output_path: str, current_time: str) -> "SlurmConfig":
+        """Set output path and date for the slurm job. These two values will be cached into the environment variables as `NNTOOL_OUTPUT_PATH` and `NNTOOL_OUTPUT_PATH_DATE`. This function also updates the `slurm_output_folder` to the new path."""
+        new_config = replace(
+            self,
+            slurm_output_folder=os.path.join(output_path, self.slurm_output_folder),
+        )
+        new_config.output_path = output_path
+        new_config.output_path_date = current_time
+        return new_config
 
 
 SlurmArgs = SlurmConfig
