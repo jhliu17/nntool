@@ -40,8 +40,8 @@ class SlurmFunction:
         )
         self.__doc__ = self.submit_fn.__doc__
 
-        # slurm funcion is instantiated after calling `instantiate`
-        self.__instantiated: bool = False
+        # slurm funcion is configured after calling `configure`
+        self.__configured: bool = False
         self.__executor = None  # to be set up by `get_executor`
 
         # annotations here, will be set up after instantiation
@@ -53,12 +53,12 @@ class SlurmFunction:
         self.pack_code_include_fn: Callable[[str, str], bool]
         self.pack_code_exclude_fn: Callable[[str, str], bool]
 
-    def is_instantiated(self):
-        """Whether the slurm function has been set up.
+    def is_configured(self):
+        """Whether the slurm function has been configured.
 
-        :return: True if the slurm function has been set up, False otherwise
+        :return: True if the slurm function has been configured, False otherwise
         """
-        return self.submit_fn is not None and self.__instantiated
+        return self.submit_fn is not None and self.__configured
 
     def is_distributed(self):
         """Whether the slurm function is distributed.
@@ -158,7 +158,7 @@ class SlurmFunction:
         if slurm_task_kwargs:
             self.slurm_task_kwargs.update(slurm_task_kwargs)
 
-    def instantiate(
+    def configure(
         self,
         slurm_config: SlurmConfig,
         slurm_params_kwargs: Optional[Dict[str, str]] = None,
@@ -221,7 +221,7 @@ class SlurmFunction:
             slurm_fn.pack_code_exclude_fn = pack_code_exclude_fn
 
         # mark instantiated
-        slurm_fn.__instantiated = True
+        slurm_fn.__configured = True
         return slurm_fn
 
     def __getitem__(
@@ -241,12 +241,12 @@ class SlurmFunction:
         :return: the wrapped submit function with configured slurm paramters
         """
         if isinstance(slurm_configs, dict):
-            return self.instantiate(**slurm_configs)
+            return self.configure(**slurm_configs)
         elif isinstance(slurm_configs, (list, tuple)):
-            return self.instantiate(*slurm_configs)
+            return self.configure(*slurm_configs)
         else:
             # will try to pass the slurm_configs as the first argument
-            return self.instantiate(slurm_configs)
+            return self.configure(slurm_configs)
 
     def __before_submit(self, *args, **kwargs):
         """The hook function before submitting the job. It will pack the code and scripts to the slurm output folder if the `pack_code` is set to True in the slurm configuration. Only work before the first submit.
@@ -256,8 +256,8 @@ class SlurmFunction:
         if self.slurm_has_been_set_up():
             return
 
-        if not self.is_instantiated():
-            raise Exception("Slurm function should be instantiated before calling.")
+        if not self.is_configured():
+            raise Exception("A `SlurmFunction` should be configured before calling it.")
 
         # cache output path and current time into the environment variables for the second launch
         # this `hasattr` check is for backward compatiablity that the previous `SlurmConfig` does not have the

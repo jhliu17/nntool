@@ -52,7 +52,7 @@ def slurm_launcher(
         return SlurmFunction(
             submit_fn=submit_fn,
             default_submit_fn_args=(args,),
-        ).instantiate(
+        ).configure(
             slurm_config,
             slurm_params_kwargs,
             slurm_submit_kwargs,
@@ -112,7 +112,7 @@ def slurm_distributed_launcher(
         return SlurmFunction(
             submit_fn=submit_fn,
             default_submit_fn_args=(args,),
-        ).instantiate(
+        ).configure(
             slurm_config,
             slurm_params_kwargs,
             slurm_submit_kwargs,
@@ -159,7 +159,7 @@ def slurm_function(
         """
         slurm_fn = SlurmFunction(
             submit_fn=submit_fn,
-        ).instantiate(
+        ).configure(
             slurm_config,
             slurm_params_kwargs,
             slurm_submit_kwargs,
