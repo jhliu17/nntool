@@ -4,7 +4,7 @@ nav:
   - API:
     - nntool.slurm: nntool.slurm.md
     - nntool.wandb: nntool.wandb.md
-theme: "material"
+theme: readthedocs
 plugins:
   - mkdocstrings:
       handlers:
@@ -15,3 +15,6 @@ plugins:
             show_root_heading: false
             parameter_headings: true
             show_source: false
+            heading_level: 3
+            show_signature_annotations: true
+            separate_signature: true

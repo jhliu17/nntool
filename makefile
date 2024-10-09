@@ -24,7 +24,7 @@ push:
 	cd $(LOCAL_CACHE) && git add ./* && git commit -m "Update wheel" && git push
 
 push_site:
-	cd $(LOCAL_DOCS) && rm -f ./*
+	cd $(LOCAL_DOCS) && rm -rf ./*
 	cd site && cp -rf ./* $(LOCAL_DOCS)/
 	cd $(LOCAL_DOCS) && git add ./* && git commit -m "Update docs" && git push
 
