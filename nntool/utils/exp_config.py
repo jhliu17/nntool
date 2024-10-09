@@ -38,7 +38,7 @@ class BaseExperimentConfig:
         )
 
         # custom post update for the derived class
-        self.post_config_fields()
+        self.set_up_stateful_fields()
 
     def prepare_env_toml_dict(self):
         env_toml_path = Path(self.env_toml_path)
@@ -65,6 +65,6 @@ class BaseExperimentConfig:
         output_path = f"{project_path}/{output_path}"
         return project_path, output_path, current_time
 
-    def post_config_fields(self):
+    def set_up_stateful_fields(self):
         """post configuration steps for the derived class"""
         pass

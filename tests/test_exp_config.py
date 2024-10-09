@@ -31,7 +31,7 @@ def test_output_path(tmp_path):
     class ExperimentConfig(BaseExperimentConfig):
         slurm: SlurmConfig = field(default_factory=lambda: SlurmConfig)
 
-        def post_config_fields(self):
+        def set_up_stateful_fields(self):
             self.slurm = self.slurm.set_output_path(self.output_path, self.current_time)
 
     experiments = dict(
