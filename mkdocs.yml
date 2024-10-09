@@ -1,0 +1,17 @@
+site_name: 🚂 NNTool Documentation
+nav:
+  - Home: index.md
+  - API:
+    - nntool.slurm: nntool.slurm.md
+    - nntool.wandb: nntool.wandb.md
+theme: "material"
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: sphinx
+            docstring_section_style: table
+            show_root_heading: false
+            parameter_headings: true
+            show_source: false

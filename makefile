@@ -1,4 +1,5 @@
 LOCAL_CACHE = /Users/junhao/Working/code/homepage/wheel/nntool/sdist
+LOCAL_DOCS = /Users/junhao/Working/code/homepage/site/nntool
 LOCAL_CYTHON_CACHE = /Users/junhao/Working/code/homepage/wheel/nntool/releases/
 
 all: wheel
@@ -21,6 +22,11 @@ push:
 	bash index.sh $(LOCAL_CACHE) dist
 	cd dist && cp index.html $(LOCAL_CACHE)
 	cd $(LOCAL_CACHE) && git add ./* && git commit -m "Update wheel" && git push
+
+push_site:
+	cd $(LOCAL_DOCS) && rm -f ./*
+	cd site && cp -rf ./* $(LOCAL_DOCS)/
+	cd $(LOCAL_DOCS) && git add ./* && git commit -m "Update docs" && git push
 
 releases:
 	CIBW_BEFORE_BUILD="pip install cython cythonpackage" CIBW_BUILD="cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64" cibuildwheel --platform linux
