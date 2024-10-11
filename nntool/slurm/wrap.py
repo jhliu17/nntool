@@ -173,16 +173,19 @@ def slurm_function(
 
 def slurm_fn(
     submit_fn: Callable,
-):
-    """A decorator to annoate a function to be run in slurm. The function decorated by this decorator should be launched in the way below.
+) -> SlurmFunction:
+    """A decorator to annoate a function to be run on slurm. The function decorated by this decorator should be launched on the way below.
     ```
     @slurm_fn
-    def run_in_slurm(*args, **kwargs):
+    def run_on_slurm(*args, **kwargs):
         pass
 
-    job = run_in_slurm[slurm_config](*args, **kwargs)
+    job = run_on_slurm[slurm_config](*args, **kwargs)
     ```
+
     The decorated function `submit_fn` is non-blocking now. To block and get the return value, you can call `job.result()`.
+
+    :return: the function to be run on slurm
     """
     slurm_fn = SlurmFunction(submit_fn=submit_fn)
 

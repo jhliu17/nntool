@@ -126,7 +126,7 @@ class SlurmFunction:
 
     @staticmethod
     def slurm_has_been_set_up() -> bool:
-        """NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
+        """`NNTOOL_SLURM_HAS_BEEN_SET_UP` is a special environment variable to indicate that the slurm has been set up.
 
         :return: bool
         """
@@ -170,9 +170,15 @@ class SlurmFunction:
     ) -> "SlurmFunction":
         """Update the slurm configuration for the slurm function. A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
-        Exported Distributed Enviroment Variables
-        1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
-        2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
+        **Exported Distributed Enviroment Variables**
+
+        - `NNTOOL_SLURM_HAS_BEEN_SET_UP` is a special environment variable to indicate that the slurm has been set up.
+        - After the set up, the distributed job will be launched and the following variables are exported:
+            - num_processes: int
+            - num_machines: int
+            - machine_rank: int
+            - main_process_ip: str
+            - main_process_port: int
 
         :param slurm_config: SlurmConfig, the slurm configuration dataclass, defaults to None
         :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
@@ -225,7 +231,7 @@ class SlurmFunction:
         return slurm_fn
 
     def __getitem__(
-        self, slurm_configs: Union[Dict[str, Any], Tuple[Any], Any]
+        self, slurm_config: Union[Dict[str, Any], Tuple[Any], Any]
     ) -> "SlurmFunction":
         """Instantiate the slurm configuration for the slurm function. A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
@@ -233,20 +239,16 @@ class SlurmFunction:
         1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
         2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
 
-        :param slurm_config: SlurmConfig, the slurm configuration dataclass, defaults to None
-        :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
-        :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
-        :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
-        :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
+        :param slurm_config: SlurmConfig, the slurm configuration dataclass
         :return: the wrapped submit function with configured slurm paramters
         """
-        if isinstance(slurm_configs, dict):
-            return self.configure(**slurm_configs)
-        elif isinstance(slurm_configs, (list, tuple)):
-            return self.configure(*slurm_configs)
+        if isinstance(slurm_config, dict):
+            return self.configure(**slurm_config)
+        elif isinstance(slurm_config, (list, tuple)):
+            return self.configure(*slurm_config)
         else:
             # will try to pass the slurm_configs as the first argument
-            return self.configure(slurm_configs)
+            return self.configure(slurm_config)
 
     def __before_submit(self, *args, **kwargs):
         """The hook function before submitting the job. It will pack the code and scripts to the slurm output folder if the `pack_code` is set to True in the slurm configuration. Only work before the first submit.
