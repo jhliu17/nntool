@@ -3,7 +3,7 @@ import datetime
 import tomli
 
 
-def get_current_time():
+def get_current_time() -> str:
     """get current time in this format: MMDDYYYY/HHMMSS
 
     :return: time in the format MMDDYYYY/HHMMSS

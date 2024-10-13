@@ -9,6 +9,16 @@ from .utils_module import get_output_path
 
 @dataclass
 class BaseExperimentConfig:
+    """
+    Configuration class for setting up an experiment.
+
+    :param config_name: The name of the configuration.
+    :param output_folder: The folder path where the outputs will be saved.
+    :param experiment_name_key: Key for experiment name in the environment variable, default is 'EXP_NAME'.
+    :param env_toml_path: Path to the `env.toml` file, default is 'env.toml'.
+    :param append_date_to_path: If True, the current date and time will be appended to the output path, default is True.
+    """
+
     # config name
     config_name: str
 
