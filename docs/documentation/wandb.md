@@ -2,7 +2,6 @@
     options:
       members:
         - WandbConfig
-      show_source: true
 
 ::: nntool.wandb.wandb_module
     options:

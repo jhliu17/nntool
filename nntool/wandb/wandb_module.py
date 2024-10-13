@@ -6,9 +6,35 @@ import warnings
 
 from dataclasses import dataclass, field
 
+from wandb.sdk.lib.disabled import RunDisabled
+from wandb.sdk.wandb_run import Run
+
 
 @dataclass
 class WandbConfig:
+    """
+    Configuration class for Weights and Biases (wandb) integration.
+
+    :param api_key_config_file: The file path to the configuration file containing the wandb API key.
+                                The file should be a toml file with a `[wandb]` section. Default is an empty string.
+
+    :param project: The name of the project in wandb. Default is an empty string.
+
+    :param entity: The wandb user or team name. Default is an empty string.
+
+    :param name: The name of the wandb run. Leave blank to use the default run name. Default is an empty string.
+
+    :param notes: Notes or comments for the wandb run. Default is an empty string.
+
+    :param log_git_hash: Whether to log the current Git hash. Default is True.
+
+    :param log_code: Whether to log the current codebase. Default is True.
+
+    :param code_root: The root directory of the codebase to be logged. Default is the current directory (`.`).
+
+    :param code_ext: A list of file extensions for the code files to be logged. Default includes `.py` and `.sh`.
+    """
+
     # wandb api key (toml file with [wandb] key field)
     api_key_config_file: str = ""
 
@@ -41,11 +67,12 @@ def is_wandb_enabled():
     return wandb.run is not None
 
 
-def init_wandb(args: WandbConfig, run_config: dict):
+def init_wandb(args: WandbConfig, run_config: dict) -> Run | RunDisabled | None:
     """initialize wandb and log the configuration
 
     :param args: WandbConfig object
     :param run_config: configuration dictionary to be logged
+    :return: wandb run object
     """
     project, entity = args.project, args.entity
     if "WANDB_API_KEY" in os.environ:

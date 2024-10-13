@@ -1,4 +1,4 @@
-# Make a Python Function to be executed on Slurm
+# Create a Python function to be executed on Slurm
 
 ::: nntool.slurm.wrap
     options:
@@ -9,4 +9,3 @@
     options:
         members:
             - SlurmConfig
-        show_source: true

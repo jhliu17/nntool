@@ -6,6 +6,59 @@ from typing import Literal, Dict, Optional
 
 @dataclass
 class SlurmConfig:
+    """
+    Configuration class for SLURM job submission and execution.
+
+    :param mode: Running mode for the job. Options include:
+                 "debug" (default), "exec", "local", or "slurm".
+
+    :param slurm_job_name: The name of the SLURM job. Default is 'YOUR_JOB_NAME'.
+
+    :param slurm_partition: The name of the SLURM partition to use. Default is 'YOUR_PARTITION_NAME'.
+
+    :param slurm_output_folder: The folder name where SLURM output files will be stored. Default is 'slurm'.
+
+    :param node_list: A string specifying the nodes to use. Leave blank to use all available nodes. Default is an empty string.
+
+    :param node_list_exclude: A string specifying the nodes to exclude. Leave blank to use all nodes in the node list. Default is an empty string.
+
+    :param num_of_node: The number of nodes to request. Default is 1.
+
+    :param tasks_per_node: The number of tasks to run per node. Default is 1.
+
+    :param gpus_per_task: The number of GPUs to request per task. Default is 0.
+
+    :param cpus_per_task: The number of CPUs to request per task. Default is 1.
+
+    :param gpus_per_node: The number of GPUs to request per node. If this is set, `gpus_per_task` will be ignored. Default is None.
+
+    :param mem: The amount of memory to request. Leave blank to use the default memory configuration of the node. Default is an empty string.
+
+    :param timeout_min: The time limit for the job in minutes. Default is `sys.maxsize` for effectively no limit.
+
+    :param pack_code: Whether to pack the codebase before submission. Default is False.
+
+    :param use_packed_code: Whether to use the packed code for execution. Default is False.
+
+    :param code_root: The root directory of the codebase. Default is the current directory (`.`).
+
+    :param code_file_suffixes: A list of file extensions for code files to be included when packing. Default includes `.py`, `.sh`, `.yaml`, and `.toml`.
+
+    :param exclude_code_folders: A list of folder names relative to `code_root` that will be excluded from packing. Default excludes 'wandb', 'outputs', and 'datasets'.
+
+    :param use_distributed_env: Whether to use a distributed environment for the job. Default is False.
+
+    :param processes_per_task: The number of processes to run per task. This value is not used by SLURM but is relevant for distributed environments. Default is 1.
+
+    :param distributed_launch_command: The command to launch distributed environment setup, using environment variables like `{num_processes}`, `{num_machines}`, `{machine_rank}`, `{main_process_ip}`, `{main_process_port}`. Default is an empty string.
+
+    :param slurm_params_kwargs: Additional parameters for the SLURM job as a dictionary of key-value pairs. Default is an empty dictionary.
+
+    :param slurm_submit_kwargs: Additional submit parameters for the SLURM job as a dictionary of key-value pairs. Default is an empty dictionary.
+
+    :param slurm_task_kwargs: Additional task parameters for the SLURM job as a dictionary of key-value pairs. Default is an empty dictionary.
+    """
+
     # running mode
     mode: Literal["debug", "exec", "local", "slurm"] = "debug"
 

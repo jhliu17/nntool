@@ -4,9 +4,9 @@ nav:
   - Home: index.md
   - Documentation:
     - nntool.slurm:
-      - Make a Python Function to be executed on Slurm: documentation/nntool.slurm.md
+      - Configuration: documentation/slurm.md
       - SlurmFunction: documentation/slurm_function.md
-    - nntool.wandb: documentation/nntool.wandb.md
+    - nntool.wandb: documentation/wandb.md
 
 theme:
   name: 'material'

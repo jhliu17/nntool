@@ -23,7 +23,7 @@ class SlurmFunction:
         submit_fn: Callable[..., Any],
         default_submit_fn_args: Optional[Tuple[Any]] = None,
         default_submit_fn_kwargs: Optional[Dict[str, Any]] = None,
-    ):
+    ) -> "SlurmFunction":
         """A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
         :param submit_fn: function to be submitted to Slurm, defaults to None
@@ -53,21 +53,21 @@ class SlurmFunction:
         self.pack_code_include_fn: Callable[[str, str], bool]
         self.pack_code_exclude_fn: Callable[[str, str], bool]
 
-    def is_configured(self):
+    def is_configured(self) -> bool:
         """Whether the slurm function has been configured.
 
         :return: True if the slurm function has been configured, False otherwise
         """
         return self.submit_fn is not None and self.__configured
 
-    def is_distributed(self):
+    def is_distributed(self) -> bool:
         """Whether the slurm function is distributed.
 
         :return: True if the slurm function is distributed, False otherwise
         """
         return self.slurm_config.use_distributed_env
 
-    def prepare_executor(self):
+    def prepare_executor(self) -> submitit.AutoExecutor:
         slurm_config = self.slurm_config
         slurm_parameters_kwargs = self.slurm_params_kwargs
         slurm_submission_kwargs = self.slurm_submit_kwargs
@@ -116,7 +116,7 @@ class SlurmFunction:
 
     def get_executor(
         self,
-    ):
+    ) -> submitit.AutoExecutor:
         if self.__executor is not None:
             return self.__executor
         else:
@@ -126,9 +126,9 @@ class SlurmFunction:
 
     @staticmethod
     def slurm_has_been_set_up() -> bool:
-        """`NNTOOL_SLURM_HAS_BEEN_SET_UP` is a special environment variable to indicate that the slurm has been set up.
+        """This function checks whether the slurm has been set up by checking whether `NNTOOL_SLURM_HAS_BEEN_SET_UP` is existed in enviroment variables, which is a special environment variable to indicate that the slurm has been set up.
 
-        :return: bool
+        :return: True if the slurm has been set up, False otherwise
         """
         # check whether slurm has been set up
         has_been_set_up = False
@@ -174,11 +174,11 @@ class SlurmFunction:
 
         - `NNTOOL_SLURM_HAS_BEEN_SET_UP` is a special environment variable to indicate that the slurm has been set up.
         - After the set up, the distributed job will be launched and the following variables are exported:
-            - num_processes: int
-            - num_machines: int
-            - machine_rank: int
-            - main_process_ip: str
-            - main_process_port: int
+            - `num_processes`: int
+            - `num_machines`: int
+            - `machine_rank`: int
+            - `main_process_ip`: str
+            - `main_process_port`: int
 
         :param slurm_config: SlurmConfig, the slurm configuration dataclass, defaults to None
         :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
@@ -336,7 +336,7 @@ class SlurmFunction:
             raise Exception(f"Invalid submit mode: {submit_mode}")
 
     def submit(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
-        """An alias function to __call__.
+        """An alias function to `__call__`.
 
         :raises Exception: if the submit_fn is not set up
         :return: Slurm Job or the return value of the submit_fn
@@ -359,12 +359,12 @@ class SlurmFunction:
         self,
         jobs: Union[Job, List[Job], Tuple[Job]],
         condition: Literal["afterany", "afterok", "afternotok"] = "afterok",
-    ):
+    ) -> "SlurmFunction":
         """Mark this job should be executed after the provided slurm jobs have been done. This function allows combining different conditions by multiple calling.
 
         :param jobs: dependent jobs
         :param condition: run condition, defaults to "afterok"
-        :return: self
+        :return: the function itself
         """
         if not isinstance(jobs, (list, tuple)):
             jobs = [jobs]
@@ -382,13 +382,25 @@ class SlurmFunction:
         )
         return self
 
-    def afterok(self, *jobs: Tuple[Job]):
+    def afterok(self, *jobs: Tuple[Job]) -> "SlurmFunction":
+        """Mark the function should be executed after the provided slurm jobs have been done.
+
+        :return: the function itself
+        """
         return self.on_condition(jobs, "afterok")
 
-    def afterany(self, *jobs: Tuple[Job]):
+    def afterany(self, *jobs: Tuple[Job]) -> "SlurmFunction":
+        """Mark the function should be executed after any one of the provided slurm jobs has been done.
+
+        :return: the function itself
+        """
         return self.on_condition(jobs, "afterany")
 
-    def afternotok(self, *jobs: Tuple[Job]):
+    def afternotok(self, *jobs: Tuple[Job]) -> "SlurmFunction":
+        """Mark the function should be executed after any one of the provided slurm jobs has been failed.
+
+        :return: the function itself
+        """
         return self.on_condition(jobs, "afternotok")
 
     def __get_submit_args(
