@@ -3,7 +3,7 @@ import sys
 from warnings import warn
 from typing import Any, Callable, Type, Union, Dict, List
 
-from .args import SlurmConfig
+from .config import SlurmConfig
 from .function import SlurmFunction
 from ..parser import parse_from_cli
 
@@ -182,10 +182,19 @@ def slurm_fn(
 
     ```python
     @slurm_fn
-    def run_on_slurm(*args, **kwargs):
-        # do some staff
+    def run_on_slurm(a, b):
+        return a + b
 
-    job = run_on_slurm[slurm_config](*args, **kwargs)
+    slurm_config = SlurmConfig(
+        mode="slurm",
+        slurm_partition="PARTITION",
+        slurm_job_name="EXAMPLE",
+        tasks_per_node=1,
+        cpus_per_task=8,
+        mem="1GB",
+    )
+    job = run_on_slurm[slurm_config](1, b=2)
+    result = job.result()  # block and get the result
     ```
 
     :param submit_fn: the function to be run on slurm

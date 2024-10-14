@@ -40,17 +40,17 @@ class BaseExperimentConfig:
         self.project_path: str
         self.output_path: str
         self.current_time: str
-        self.env_toml: Dict[str, Any] = self.prepare_env_toml_dict()
+        self.env_toml: Dict[str, Any] = self.__prepare_env_toml_dict()
 
-        self.experiment_name = self.prepare_experiment_name()
+        self.experiment_name = self.__prepare_experiment_name()
         self.project_path, self.output_path, self.current_time = (
-            self.prepare_experiment_paths()
+            self.__prepare_experiment_paths()
         )
 
         # custom post update for the derived class
         self.set_up_stateful_fields()
 
-    def prepare_env_toml_dict(self):
+    def __prepare_env_toml_dict(self):
         env_toml_path = Path(self.env_toml_path)
         if not env_toml_path.exists():
             raise FileNotFoundError(f"{env_toml_path} does not exist")
@@ -59,10 +59,10 @@ class BaseExperimentConfig:
             config = toml.load(f)
         return config
 
-    def prepare_experiment_name(self):
+    def __prepare_experiment_name(self):
         return os.environ.get(self.experiment_name_key, "default")
 
-    def prepare_experiment_paths(self):
+    def __prepare_experiment_paths(self):
         project_path = self.env_toml["project"]["path"]
 
         output_path, current_time = get_output_path(
@@ -75,6 +75,23 @@ class BaseExperimentConfig:
         output_path = f"{project_path}/{output_path}"
         return project_path, output_path, current_time
 
+    def get_output_path(self) -> str:
+        """Return the output path prepared for the experiment.
+
+        :return: output path for the experiment
+        """
+        return self.output_path
+
+    def get_current_time(self) -> str:
+        """Return the current time for the experiment.
+
+        :return: current time for the experiment
+        """
+        return self.current_time
+
     def set_up_stateful_fields(self):
-        """post configuration steps for the derived class"""
+        """
+        Post configuration steps for stateful fields such as `output_path` in the derived class.
+        This method should be overridden in the derived class.
+        """
         pass
