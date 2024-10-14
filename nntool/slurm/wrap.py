@@ -180,7 +180,7 @@ def slurm_fn(
 
     Here's an example of how to use this function:
 
-    ```python
+    ``` py
     @slurm_fn
     def run_on_slurm(a, b):
         return a + b

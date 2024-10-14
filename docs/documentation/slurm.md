@@ -5,7 +5,7 @@
       members:
         - slurm_fn
 
-::: nntool.slurm.args
+::: nntool.slurm.config
     options:
         members:
             - SlurmConfig
