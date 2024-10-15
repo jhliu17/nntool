@@ -11,8 +11,8 @@ nav:
 
 theme:
   name: 'material'
-  favicon: asset/logo-large.png
-  logo: asset/logo-large.png
+  favicon: asset/logo.png
+  logo: asset/logo.png
   # icon:
     # logo: simple/runkit
   palette:
