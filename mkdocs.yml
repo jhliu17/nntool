@@ -11,8 +11,10 @@ nav:
 
 theme:
   name: 'material'
-  icon:
-    logo: simple/runkit
+  favicon: asset/logo-large.png
+  logo: asset/logo-large.png
+  # icon:
+    # logo: simple/runkit
   palette:
     - primary: white
     - accent: indigo
