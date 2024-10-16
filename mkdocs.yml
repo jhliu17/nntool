@@ -11,8 +11,8 @@ nav:
 
 theme:
   name: 'material'
-  favicon: asset/logo.png
-  logo: asset/logo.png
+  favicon: asset/logo-black.png
+  logo: asset/logo-black.png
   # icon:
     # logo: simple/runkit
   palette:
