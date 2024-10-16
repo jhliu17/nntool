@@ -6,7 +6,17 @@ hide:
 
 # Welcome to 🚂 NNTool
 
-``` py title="Using NNTool to submit a Python function to SLURM" hl_lines="3 7-15"
+Using NNTool to submit a Python function to SLURM
+
+## Installation
+
+```bash
+pip install nntool
+```
+
+## Quick Example
+
+``` py title="Create a Python function to be executed on Slurm" hl_lines="3 7-15"
   from nntool.slurm import SlurmConfig, slurm_fn
 
   @slurm_fn
