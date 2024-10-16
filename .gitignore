@@ -164,3 +164,4 @@ tests/outputs/
 out/
 .pypi_token
 outputs/
+.DS_Store
