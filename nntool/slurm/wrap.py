@@ -4,7 +4,7 @@ from warnings import warn
 from typing import Any, Callable, Type, Union, Dict, List
 
 from .config import SlurmConfig
-from .csrc import SlurmFunction
+from .function import SlurmFunction
 from ..parser import parse_from_cli
 
 
