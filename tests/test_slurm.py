@@ -6,7 +6,7 @@ import accelerate
 import pytest
 
 from dataclasses import dataclass
-from nntool.slurm import SlurmConfig, slurm_function, slurm_fn
+from nntool.slurm import SlurmConfig, slurm_fn
 from nntool.utils import get_current_time
 
 
@@ -141,7 +141,6 @@ def test_sequential_jobs(tmp_path):
     jobs.append(job2)
 
     fn2 = work_fn[slurm_settings]
-    print(fn2.slurm_params_kwargs)
     assert fn1 is not fn2
 
     fn2.afterany(job1, job2)

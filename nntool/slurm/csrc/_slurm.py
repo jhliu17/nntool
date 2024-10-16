@@ -1,11 +1,10 @@
 import os
 import sys
-import shlex
 import submitit
 
 from copy import deepcopy
 from functools import partial
-from submitit import Job, SlurmExecutor
+from submitit import Job
 from typing import Any, Callable, Literal, Tuple, Union, Dict, List, Optional
 
 from ..config import SlurmConfig
@@ -15,6 +14,7 @@ from ..task import (
     include_code_files,
     exclude_code_folders,
 )
+from ._slurm_context import patch_submitit_distributed_command_str
 
 
 class SlurmFunction:
@@ -465,34 +465,10 @@ class SlurmFunction:
                 **self.slurm_task_kwargs,
             )
 
-            # monkey patch the submitit command to set up distributed env
-            # in distributed training, if two jobs are launched in the same node, the second job will fail
-            # but directly use `sbatch`` to submit the second job without any issues
-            if self.slurm_config.mode == "slurm":
-
-                def _submitit_command_str(self) -> str:
-                    return " ".join(
-                        [
-                            self.python,
-                            "-u -m submitit.core._submit",
-                            shlex.quote(str(self.folder)),
-                            "\n".join(
-                                [
-                                    "\n",
-                                    "# nntool command",
-                                    "export NNTOOL_SLURM_HAS_BEEN_SET_UP=1",
-                                    f"source {shlex.quote(str(self.folder))}/nntool_distributed_env.sh",
-                                    f"{task.command()}",
-                                ]
-                            ),
-                        ]
-                    )
-
-                SlurmExecutor._submitit_command_str = property(_submitit_command_str)
-
-            executor = self.get_executor()
-            self.__mark_slurm_has_been_set_up()
-            job = executor.submit(task)
+            with patch_submitit_distributed_command_str(self.slurm_config, task):
+                executor = self.get_executor()
+                self.__mark_slurm_has_been_set_up()
+                job = executor.submit(task)
             return job
         else:
             return self.submit_fn(*submit_fn_args, **submit_fn_kwargs)
