@@ -8,7 +8,7 @@ from functools import partial
 from submitit import Job, SlurmExecutor
 from typing import Any, Callable, Literal, Tuple, Union, Dict, List, Optional
 
-from .config import SlurmConfig
+from ..config import SlurmConfig
 from .task import (
     PyTorchDistributedTask,
     pack_code_files,

@@ -4,7 +4,7 @@ import seaborn as sns
 
 from typing import Union
 from dataclasses import dataclass
-from .plot_module import SIZE_SMALL, latexify, savefig
+from .csrc.plot_module import SIZE_SMALL, latexify, savefig
 
 
 @dataclass

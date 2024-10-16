@@ -1,7 +1,3 @@
-import cythonpackage
-
-cythonpackage.init(__name__)
-
 from .config import SlurmConfig, SlurmArgs
 from .wrap import (
     slurm_function,
@@ -9,4 +5,4 @@ from .wrap import (
     slurm_launcher,
     slurm_distributed_launcher,
 )
-from .task import PyTorchDistributedTask
+from .csrc.task import PyTorchDistributedTask

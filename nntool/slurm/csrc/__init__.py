@@ -1,0 +1,3 @@
+import cythonpackage
+
+cythonpackage.init(__name__)

@@ -4,8 +4,42 @@ from warnings import warn
 from typing import Any, Callable, Type, Union, Dict, List
 
 from .config import SlurmConfig
-from .function import SlurmFunction
+from .csrc.function import SlurmFunction
 from ..parser import parse_from_cli
+
+
+def slurm_fn(
+    submit_fn: Callable,
+) -> SlurmFunction:
+    """A decorator to annoate a function to be run on slurm. The function decorated by this decorator should be launched on the way below. The decorated function `submit_fn` is non-blocking now. To block and get the return value, you can call `job.result()`.
+
+    **Example**
+
+    Here's an example of how to use this function:
+
+    ``` py
+    @slurm_fn
+    def run_on_slurm(a, b):
+        return a + b
+
+    slurm_config = SlurmConfig(
+        mode="slurm",
+        slurm_partition="PARTITION",
+        slurm_job_name="EXAMPLE",
+        tasks_per_node=1,
+        cpus_per_task=8,
+        mem="1GB",
+    )
+    job = run_on_slurm[slurm_config](1, b=2)
+    result = job.result()  # block and get the result
+    ```
+
+    :param submit_fn: the function to be run on slurm
+    :return: the function to be run on slurm
+    """
+    slurm_fn = SlurmFunction(submit_fn=submit_fn)
+
+    return slurm_fn
 
 
 def slurm_launcher(
@@ -102,7 +136,7 @@ def slurm_distributed_launcher(
     # check if args have slurm field
     if not hasattr(args, slurm_key):
         raise ValueError(
-            f"ArgsType should have a field named `{slurm_key}` to use `slurm_launcher` decorator."
+            f"ArgsType should have a field named `{slurm_key}` to use `slurm_distributed_launcher` decorator."
         )
     slurm_config: SlurmConfig = getattr(args, slurm_key)
 
@@ -157,6 +191,11 @@ def slurm_function(
         :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
         :return: the wrapped submit function with configured slurm paramters
         """
+        warn(
+            "`slurm_function` has been deprecated. Please use `slurm_fn` instead, which supports both distributed and non-distributed job (controlled by `use_distributed_env` in slurm field).",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         slurm_fn = SlurmFunction(
             submit_fn=submit_fn,
         ).configure(
@@ -169,37 +208,3 @@ def slurm_function(
         return slurm_fn
 
     return wrapper
-
-
-def slurm_fn(
-    submit_fn: Callable,
-) -> SlurmFunction:
-    """A decorator to annoate a function to be run on slurm. The function decorated by this decorator should be launched on the way below. The decorated function `submit_fn` is non-blocking now. To block and get the return value, you can call `job.result()`.
-
-    **Example**
-
-    Here's an example of how to use this function:
-
-    ``` py
-    @slurm_fn
-    def run_on_slurm(a, b):
-        return a + b
-
-    slurm_config = SlurmConfig(
-        mode="slurm",
-        slurm_partition="PARTITION",
-        slurm_job_name="EXAMPLE",
-        tasks_per_node=1,
-        cpus_per_task=8,
-        mem="1GB",
-    )
-    job = run_on_slurm[slurm_config](1, b=2)
-    result = job.result()  # block and get the result
-    ```
-
-    :param submit_fn: the function to be run on slurm
-    :return: the function to be run on slurm
-    """
-    slurm_fn = SlurmFunction(submit_fn=submit_fn)
-
-    return slurm_fn

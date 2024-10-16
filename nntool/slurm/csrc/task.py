@@ -6,8 +6,8 @@ import submitit
 from pathlib import Path
 from typing import Union, Generator, Callable
 from dataclasses import dataclass
-from .config import SlurmConfig
-from .accelerator.utils import nvidia_smi_gpu_memory_stats_str
+from ..config import SlurmConfig
+from ..accelerator.utils import nvidia_smi_gpu_memory_stats_str
 
 WANDB_DIRS = ("wandb", ".wandb")
 
