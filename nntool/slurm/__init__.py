@@ -5,4 +5,4 @@ from .wrap import (
     slurm_launcher,
     slurm_distributed_launcher,
 )
-from .csrc.task import PyTorchDistributedTask
+from .task import PyTorchDistributedTask

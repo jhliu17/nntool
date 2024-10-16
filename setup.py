@@ -1,10 +1,7 @@
 import os
-from pathlib import Path
-from typing import List, Tuple
 
 from Cython.Build import cythonize
 from setuptools import setup, find_packages, Command, Extension
-from cythonpackage.build import _build_py
 
 
 class CleanCython(Command):
@@ -24,37 +21,6 @@ class CleanCython(Command):
                     file_path = os.path.join(dirpath, filename)
                     print(f"Removing file: {file_path}")
                     os.remove(file_path)
-
-
-class custom_build_py(_build_py):
-    def find_package_modules(
-        self, package: str, package_dir: str
-    ) -> List[Tuple[str, str, str]]:
-        """Remove source code"""
-        modules: List[Tuple[str, str, str]] = super().find_package_modules(
-            package, package_dir
-        )
-        if self.remove_source:
-            filtered_modules = []
-            for pkg, mod, filepath in modules:
-                _path = Path(filepath)
-                if (
-                    _path.suffix in [".py", ".pyx"]
-                    and ("__init__.py" != _path.name)
-                    # and filepath not in self._exclude ) :
-                    and Path(_path.parent, "__compile__.py").exists()
-                ):
-                    continue
-                filtered_modules.append(
-                    (
-                        pkg,
-                        mod,
-                        filepath,
-                    )
-                )
-            return filtered_modules
-        else:
-            return modules
 
 
 package_info = dict(
@@ -114,17 +80,16 @@ else:
             sources=["nntool/plot/csrc/**.py"],
         ),
     ]
-    package_info["cmdclass"]["build_py"] = custom_build_py
     setup(
         packages=find_packages(exclude=["tests"]),
-        # cythonpackage={
-        #     "inject_ext_modules": False,
-        #     "inject_init": False,
-        #     "remove_source": True,
-        #     "compile_py": True,
-        #     "optimize": 1,
-        #     "exclude": ["tests/*"],  # List of glob
-        # },
+        cythonpackage={
+            "inject_ext_modules": False,
+            "inject_init": False,
+            "remove_source": True,
+            "compile_py": True,
+            "optimize": 1,
+            "exclude": ["tests/*"],  # List of glob
+        },
         setup_requires=["cython"],
         ext_modules=cythonize(
             cython_extensions,

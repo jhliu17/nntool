@@ -29,8 +29,8 @@ push_site:
 	cd $(LOCAL_DOCS) && git add ./* && git commit -m "Update docs" && git push
 
 releases:
-	CIBW_BEFORE_BUILD="pip install cython cythonpackage" CIBW_BUILD="cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64" cibuildwheel --platform linux
-	# CIBW_BEFORE_BUILD="pip install cython cythonpackage" CIBW_BUILD="cp310-manylinux_x86_64" CIBW_BUILD_VERBOSITY=1 cibuildwheel --platform linux
+	# CIBW_BEFORE_BUILD="pip install cython cythonpackage" CIBW_BUILD="cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64" cibuildwheel --platform linux
+	CIBW_BEFORE_BUILD="pip install cython; pip install misc/cythonpackage" CIBW_BUILD="cp310-manylinux_x86_64" CIBW_BUILD_VERBOSITY=1 cibuildwheel --platform linux
 
 push_releases:
 	cd $(LOCAL_CYTHON_CACHE) && rm -f index.html

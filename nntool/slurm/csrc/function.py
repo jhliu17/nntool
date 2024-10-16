@@ -9,7 +9,7 @@ from submitit import Job, SlurmExecutor
 from typing import Any, Callable, Literal, Tuple, Union, Dict, List, Optional
 
 from ..config import SlurmConfig
-from .task import (
+from ..task import (
     PyTorchDistributedTask,
     pack_code_files,
     include_code_files,
