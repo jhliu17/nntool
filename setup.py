@@ -23,6 +23,15 @@ class CleanCython(Command):
                     os.remove(file_path)
 
 
+def get_csrc_files(folder: str) -> list[str]:
+    source_files = []
+    for root, dirs, files in os.walk(folder):
+        for file in files:
+            if file.endswith(".py") and not file.endswith("__init__.py"):
+                source_files.append(os.path.join(root, file))
+    return source_files
+
+
 package_info = dict(
     name="nntool",
     version="1.1.0",
@@ -73,11 +82,11 @@ else:
     cython_extensions = [
         Extension(
             name="nntool.slurm.csrc.__compile__",
-            sources=["nntool/slurm/csrc/**.py"],
+            sources=get_csrc_files("nntool/slurm/csrc/"),
         ),
         Extension(
             name="nntool.plot.csrc.__compile__",
-            sources=["nntool/plot/csrc/**.py"],
+            sources=get_csrc_files("nntool/plot/csrc/"),
         ),
     ]
     setup(
