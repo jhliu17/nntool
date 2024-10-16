@@ -25,6 +25,9 @@ class SlurmFunction:
             submit_fn, default_submit_fn_args, default_submit_fn_kwargs
         )
 
+    def __create_copy(self) -> "SlurmFunction":
+        return copy.copy(self)
+
     def is_configured(self) -> bool:
         """Whether the slurm function has been configured.
 
@@ -73,7 +76,7 @@ class SlurmFunction:
         :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
         :return: the wrapped submit function with configured slurm paramters
         """
-        configured_slurm_function = copy.deepcopy(self)
+        configured_slurm_function = self.__create_copy()
         configured_slurm_function.engine = self.engine.configure(
             slurm_config,
             slurm_params_kwargs,
@@ -97,7 +100,7 @@ class SlurmFunction:
         :param slurm_config: SlurmConfig, the slurm configuration dataclass
         :return: the wrapped submit function with configured slurm paramters
         """
-        configured_slurm_function = copy.deepcopy(self)
+        configured_slurm_function = self.__create_copy()
         configured_slurm_function.engine = self.engine[slurm_config]
         return configured_slurm_function
 
@@ -136,7 +139,7 @@ class SlurmFunction:
         :param condition: run condition, defaults to "afterok"
         :return: the function itself
         """
-        configured_slurm_function = copy.deepcopy(self)
+        configured_slurm_function = self.__create_copy()
         configured_slurm_function.engine = self.engine.on_condition(jobs, condition)
         return configured_slurm_function
 
