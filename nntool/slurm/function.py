@@ -93,9 +93,15 @@ class SlurmFunction:
     ) -> "SlurmFunction":
         """Instantiate the slurm configuration for the slurm function. A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
-        #### Exported Distributed Enviroment Variables
-        1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
-        2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
+        **Exported Distributed Enviroment Variables**
+
+        - `NNTOOL_SLURM_HAS_BEEN_SET_UP` is a special environment variable to indicate that the slurm has been set up.
+        - After the set up, the distributed job will be launched and the following variables are exported:
+            - `num_processes`: int
+            - `num_machines`: int
+            - `machine_rank`: int
+            - `main_process_ip`: str
+            - `main_process_port`: int
 
         :param slurm_config: SlurmConfig, the slurm configuration dataclass
         :return: the wrapped submit function with configured slurm paramters

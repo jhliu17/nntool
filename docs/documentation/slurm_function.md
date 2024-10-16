@@ -2,6 +2,7 @@
     options:
         members:
           - __init__
+          - __getitem__
           - configure
           - __call__
           - submit
