@@ -22,9 +22,11 @@ theme:
     - navigation.tabs
     - navigation.expand
     - content.code.copy
+    - navigation.footer
   # Palette toggle for automatic mode
 
 plugins:
+  - search
   - mkdocstrings:
       handlers:
         python:
@@ -49,3 +51,13 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+
+copyright: "&copy; Copyright Junhao Liu."
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/jhliu17
+    - icon: fontawesome/solid/paper-plane
+      link: mailto:junhaoliu17@gmail.com
