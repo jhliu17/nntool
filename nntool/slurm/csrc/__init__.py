@@ -2,4 +2,4 @@ import cythonpackage
 
 cythonpackage.init(__name__)
 
-from ._function import SlurmFunction as _SlurmFunction
+from ._slurm import SlurmFunction as _SlurmFunction

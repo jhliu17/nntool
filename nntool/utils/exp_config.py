@@ -4,7 +4,7 @@ import toml
 from typing import Any, Dict
 from pathlib import Path
 from dataclasses import dataclass
-from .utils_module import get_output_path
+from .utils import get_output_path
 
 
 @dataclass

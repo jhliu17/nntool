@@ -1,1 +1,1 @@
-from .wandb_module import WandbConfig, init_wandb
+from .config import WandbConfig, init_wandb
