@@ -1,9 +1,9 @@
-::: nntool.wandb.wandb_module
+::: nntool.wandb.config
     options:
       members:
         - WandbConfig
 
-::: nntool.wandb.wandb_module
+::: nntool.wandb.config
     options:
       members:
         - init_wandb
