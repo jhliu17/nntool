@@ -35,5 +35,5 @@ NNTool is tested and supported on the following systems:
 * Linux systems
 
 ```bash title="Install NNTool with Python's pip package manager."
-pip install nntool
+pip install nntool-1.2.2-cp3xx-cp3xx-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 ```

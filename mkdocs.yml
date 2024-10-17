@@ -3,6 +3,7 @@ site_name: NNTool
 nav:
   - Home: index.md
   - Examples:
+    - Sequential Jobs: examples/sequential_jobs.md
     - Distributed Training with Hugging Face Accelerate: examples/distributed_training.md
   - Documentation:
     - nntool.slurm:
