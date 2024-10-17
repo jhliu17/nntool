@@ -2,10 +2,13 @@ site_name: NNTool
 
 nav:
   - Home: index.md
+  - Examples:
+    - Distributed Training with Hugging Face Accelerate: examples/distributed_training.md
   - Documentation:
     - nntool.slurm:
-      - Configuration: documentation/slurm.md
+      - slurm_fn: documentation/slurm.md
       - SlurmFunction: documentation/slurm_function.md
+    - nntool.experiment: documentation/experiment.md
     - nntool.wandb: documentation/wandb.md
     - nntool.utils: documentation/utils.md
 

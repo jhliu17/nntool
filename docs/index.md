@@ -3,20 +3,13 @@ hide:
   - navigation
   - toc
 ---
-
 # Welcome to 🚂 NNTool
 
-Using NNTool to submit a Python function to SLURM
+Using NNTool to submit a Python function to Slurm and boost deep learning research.
 
-## Installation
+## Get started with NNTool
 
-```bash
-pip install nntool
-```
-
-## Quick Example
-
-``` py title="Create a Python function to be executed on Slurm" hl_lines="3 7-15"
+```py
   from nntool.slurm import SlurmConfig, slurm_fn
 
   @slurm_fn
@@ -33,4 +26,15 @@ pip install nntool
   )
   job = run_on_slurm[slurm_config](1, b=2)
   result = job.result()  # block and get the result
+```
+
+### Install NNTool
+
+NNTool is tested and supported on the following systems:
+
+* Python 3.9–3.12
+* Linux systems
+
+```bash title="Install NNTool with Python's pip package manager."
+pip install nntool
 ```
