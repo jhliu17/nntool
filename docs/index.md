@@ -28,7 +28,7 @@ Using NNTool to submit a Python function to Slurm and boost deep learning resear
   result = job.result()  # block and get the result
 ```
 
-### Install NNTool
+## Install NNTool
 
 NNTool is tested and supported on the following systems:
 
