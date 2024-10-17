@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from nntool.slurm import SlurmConfig
-from nntool.utils.exp_config import BaseExperimentConfig
+from nntool.experiment import BaseExperimentConfig
 
 
 def test_output_path(tmp_path):

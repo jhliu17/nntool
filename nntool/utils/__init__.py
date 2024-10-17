@@ -3,4 +3,3 @@ from .utils import (
     get_output_path,
     read_toml_file,
 )
-from .exp_config import BaseExperimentConfig

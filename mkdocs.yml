@@ -52,7 +52,7 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.superfences
 
-copyright: "&copy; Copyright Junhao Liu."
+copyright: "&copy; Copyright 2024, Junhao Liu."
 
 extra:
   generator: false
