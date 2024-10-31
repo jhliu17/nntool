@@ -32,7 +32,7 @@ def test_output_path(tmp_path):
         slurm: SlurmConfig = field(default_factory=lambda: SlurmConfig)
 
         def set_up_stateful_fields(self):
-            self.slurm = self.slurm.set_output_path(self.output_path, self.current_time)
+            self.slurm = self.slurm.set_output_path(self.output_path)
 
     experiments = dict(
         base=ExperimentConfig(

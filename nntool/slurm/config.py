@@ -156,14 +156,12 @@ class SlurmConfig:
                 self.slurm_output_folder, f"slurm{output_folder_suffix}"
             )
 
-    def set_output_path(self, output_path: str, current_time: str) -> "SlurmConfig":
-        """Set output path and date for the slurm job. These two values will be cached into the environment variables as `NNTOOL_OUTPUT_PATH` and `NNTOOL_OUTPUT_PATH_DATE` when slurm starts running. This function also updates the `slurm_output_folder` to the new path."""
+    def set_output_path(self, output_path: str) -> "SlurmConfig":
+        """Set output path and date for the slurm job."""
         new_config = replace(
             self,
             slurm_output_folder=os.path.join(output_path, self.slurm_output_folder),
         )
-        new_config.output_path = output_path
-        new_config.output_path_date = current_time
         return new_config
 
 

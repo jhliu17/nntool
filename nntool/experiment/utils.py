@@ -52,12 +52,12 @@ def get_output_path(
         current_time = get_current_time()
         if append_date:
             output_path = os.path.join(output_path, current_time)
+        print(
+            f"OUTPUT_PATH is not found in environment variables. NNTOOL_OUTPUT_PATH is set using path: {output_path}"
+        )
 
         if cache_into_env:
             os.environ["NNTOOL_OUTPUT_PATH"] = output_path
             os.environ["NNTOOL_OUTPUT_PATH_DATE"] = current_time
-            print(
-                f"OUTPUT_PATH is not found in environment variables. NNTOOL_OUTPUT_PATH is set using path: {output_path}"
-            )
 
     return output_path, current_time

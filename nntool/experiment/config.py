@@ -1,10 +1,9 @@
 import os
-import toml
 
 from typing import Any, Dict
 from pathlib import Path
 from dataclasses import dataclass
-from ..utils.utils import get_output_path
+from .utils import get_output_path, read_toml_file
 
 
 @dataclass
@@ -55,8 +54,7 @@ class BaseExperimentConfig:
         if not env_toml_path.exists():
             raise FileNotFoundError(f"{env_toml_path} does not exist")
 
-        with open(self.env_toml_path, "r") as f:
-            config = toml.load(f)
+        config = read_toml_file(env_toml_path)
         return config
 
     def __prepare_experiment_name(self):
@@ -95,3 +93,10 @@ class BaseExperimentConfig:
         This method should be overridden in the derived class.
         """
         pass
+
+    def start(self):
+        """
+        Start the experiment. This will cache `NNTOOL_OUTPUT_PATH` and `NNTOOL_OUTPUT_PATH_DATE` into environment variables, which means the later launched processes would inherit these variables.
+        """
+        os.environ["NNTOOL_OUTPUT_PATH"] = self.get_output_path()
+        os.environ["NNTOOL_OUTPUT_PATH_DATE"] = self.get_current_time()

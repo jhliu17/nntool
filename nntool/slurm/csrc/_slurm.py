@@ -261,15 +261,6 @@ class SlurmFunction:
         if not self.is_configured():
             raise Exception("A `SlurmFunction` should be configured before calling it.")
 
-        # cache output path and current time into the environment variables for the second launch
-        # this `hasattr` check is for backward compatiablity that the previous `SlurmConfig` does not have the
-        # `output_path` and `output_path_date` attributes
-        if hasattr(self.slurm_config, "output_path") and hasattr(
-            self.slurm_config, "output_path_date"
-        ):
-            os.environ["NNTOOL_OUTPUT_PATH"] = self.slurm_config.output_path
-            os.environ["NNTOOL_OUTPUT_PATH_DATE"] = self.slurm_config.output_path_date
-
         # pack the code and scripts to the slurm output folder
         if self.slurm_config.pack_code:
             target_code_root = pack_code_files(
