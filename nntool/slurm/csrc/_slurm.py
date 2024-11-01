@@ -442,8 +442,12 @@ class SlurmFunction:
             *submit_fn_args, **submit_fn_kwargs
         )
 
-        if not self.slurm_has_been_set_up():
-            # prepare distributed env for the second launch
+        # the distributed job will be launched in the second launch
+        # the first launch is to set up the distributed environment
+        # the second launch is to run the submit function in the distributed environment directly
+        initial_launch = not self.slurm_has_been_set_up()
+        if initial_launch:
+            # prepare distributed env
             task = PyTorchDistributedTask(
                 self.slurm_config.distributed_launch_command,
                 (

@@ -16,6 +16,7 @@ class patch_submitit_distributed_command_str:
         # monkey patch the submitit command to set up distributed env
         # in distributed training, if two jobs are launched in the same node, the second job will fail
         # but directly use `sbatch`` to submit the second job without any issues
+        # this patch is only applied when the mode is `slurm`. otherwise, it will not be patched.
         if self.config.mode == "slurm":
             task_command = self.task.command()
 
