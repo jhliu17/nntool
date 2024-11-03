@@ -2,11 +2,9 @@
 hide:
   - navigation
 ---
-# Welcome to 🚂 NNTool
+# NNTool Documentation
 
-Using NNTool to submit a Python function to Slurm and boost deep learning research.
-
-## Get started with NNTool
+NNTool is a package built on top of `submitit` designed to provide simple abstractions to submit a Python function to Slurm for machine learning research. Below is an example to run a Python function on a slurm cluster using specific configurations.
 
 ```py
   from nntool.slurm import SlurmConfig, slurm_fn
@@ -24,10 +22,11 @@ Using NNTool to submit a Python function to Slurm and boost deep learning resear
       mem="1GB",
   )
   job = run_on_slurm[slurm_config](1, b=2)
-  result = job.result()  # block and get the result
+
+  result = job.result()  # block and get the result => 3
 ```
 
-## Install NNTool
+## Installation
 
 NNTool is tested and supported on the following systems:
 

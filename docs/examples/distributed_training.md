@@ -1,4 +1,6 @@
-```py title="main.py"
+# Using NNTool to launch distributed training jobs
+
+```py
 from accelerate import Accelerator
 from accelerate.utils import set_seed
 from nntool.slurm import slurm_fn, SlurmConfig

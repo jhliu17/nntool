@@ -1,33 +1,33 @@
-site_name: NNTool
+site_name: 🚂 NNTool
 
 nav:
-  - Home: index.md
   - Examples:
     - Sequential Jobs: examples/sequential_jobs.md
     - Distributed Training with Hugging Face Accelerate: examples/distributed_training.md
-  - Documentation:
-    - nntool.slurm:
-      - slurm_fn: documentation/slurm.md
-      - SlurmFunction: documentation/slurm_function.md
+  - NNTool API reference:
+    - nntool.slurm: documentation/slurm.md
     - nntool.experiment: documentation/experiment.md
     - nntool.wandb: documentation/wandb.md
     - nntool.utils: documentation/utils.md
 
+# theme:
+#   name: 'material'
+#   favicon: asset/logo-black.png
+#   logo: asset/logo-black.png
+#   # icon:
+#     # logo: simple/runkit
+#   palette:
+#     - primary: white
+#     - accent: indigo
+#   features:
+#     - navigation.tabs
+#     - navigation.expand
+#     - content.code.copy
+#     - navigation.footer
+#   # Palette toggle for automatic mode
+
 theme:
-  name: 'material'
-  favicon: asset/logo-black.png
-  logo: asset/logo-black.png
-  # icon:
-    # logo: simple/runkit
-  palette:
-    - primary: white
-    - accent: indigo
-  features:
-    - navigation.tabs
-    - navigation.expand
-    - content.code.copy
-    - navigation.footer
-  # Palette toggle for automatic mode
+  name: 'alabaster'
 
 plugins:
   - search
@@ -45,6 +45,8 @@ plugins:
             separate_signature: true
 
 markdown_extensions:
+  - toc:
+      permalink: "¶"
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -52,13 +54,11 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
-  - admonition
-  - pymdownx.details
-  - pymdownx.superfences
 
-copyright: "&copy; Copyright 2024, Junhao Liu."
+copyright: "Copyright 2024, Junhao Liu."
 
 extra:
+  favicon: asset/logo-black.png
   generator: false
   social:
     - icon: fontawesome/brands/github

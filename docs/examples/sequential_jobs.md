@@ -1,4 +1,6 @@
-```py title="Slurm Configuration"
+# Using NNTool to chain sequential jobs
+
+```py
 import time
 from nntool.slurm import SlurmConfig, slurm_fn
 
@@ -21,7 +23,7 @@ def work_fn(a, b):
     return a + b
 ```
 
-```py title="Mapping"
+```py
 fn = work_fn[slurm_settings]
 
 job = fn(1, 2)
@@ -35,7 +37,7 @@ print(results)
 assert results == [4, 6, 16, 18]
 ```
 
-```py title="Jobs on Conditions"
+```py
 jobs = []
 job1 = work_fn[slurm_settings](10, 2)
 jobs.append(job1)
