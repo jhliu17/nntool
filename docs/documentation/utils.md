@@ -1,5 +1,7 @@
-# Utils
+# Extra Utils
 
-**Please note that the `utils` module has been deprecated. They are preserved here for backward compactiblity. Please use `nntool.experiment.utils` instead.**
+**Deprecation Warning**
+
+Please note that the `utils` module has been deprecated since version 1.3.0. It is preserved here for backward compatibility. Please use `nntool.experiment.utils` instead.
 
 ::: nntool.experiment.utils

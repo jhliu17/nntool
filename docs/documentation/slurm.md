@@ -1,4 +1,4 @@
-# Create a Python function to be executed on Slurm
+# Wrap a Python function to be executed on Slurm
 
 ::: nntool.slurm.config
     options:
