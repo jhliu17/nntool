@@ -1,5 +1,7 @@
 # Using NNTool to chain sequential jobs
 
+## Example
+
 ```py
 import time
 from nntool.slurm import SlurmConfig, slurm_fn
@@ -23,6 +25,8 @@ def work_fn(a, b):
     return a + b
 ```
 
+### Map Array
+
 ```py
 fn = work_fn[slurm_settings]
 
@@ -36,6 +40,8 @@ results = [job.result() for job in jobs]
 print(results)
 assert results == [4, 6, 16, 18]
 ```
+
+### Chain
 
 ```py
 jobs = []

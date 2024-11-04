@@ -55,13 +55,23 @@ markdown_extensions:
   - pymdownx.snippets
   - pymdownx.superfences
 
-copyright: "Copyright 2024, Junhao Liu."
+copyright: "Copyright 2024, Junhao Liu. | Powered by MkDocs"
 
 extra:
   favicon: asset/logo-black.png
   generator: false
+  show_powered_by: false
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/jhliu17
     - icon: fontawesome/solid/paper-plane
       link: mailto:junhaoliu17@gmail.com
+  homepage_sidebars:
+    - about
+    - navigation
+    - related
+  homepage_nav: true
+  sidebars:
+    - about
+    - toc
+    - related

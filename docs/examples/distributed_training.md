@@ -1,5 +1,7 @@
 # Using NNTool to launch distributed training jobs
 
+## Example
+
 ```py
 from accelerate import Accelerator
 from accelerate.utils import set_seed
