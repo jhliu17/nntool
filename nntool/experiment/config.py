@@ -16,6 +16,7 @@ class BaseExperimentConfig:
     :param experiment_name_key: Key for experiment name in the environment variable, default is 'EXP_NAME'.
     :param env_toml_path: Path to the `env.toml` file, default is 'env.toml'.
     :param append_date_to_path: If True, the current date and time will be appended to the output path, default is True.
+    :param existing_output_path_ok: If True, the existing output path is ok to be reused, default is False.
     """
 
     # config name
@@ -32,6 +33,9 @@ class BaseExperimentConfig:
 
     # append date time to the output path
     append_date_to_path: bool = True
+
+    # exisiting output path is ok
+    existing_output_path_ok: bool = False
 
     def __post_init__(self):
         # annotations
@@ -96,7 +100,13 @@ class BaseExperimentConfig:
 
     def start(self):
         """
-        Start the experiment. This will cache `NNTOOL_OUTPUT_PATH` and `NNTOOL_OUTPUT_PATH_DATE` into environment variables, which means the later launched processes would inherit these variables.
+        Start the experimen. This will
+        - cache `NNTOOL_OUTPUT_PATH` and `NNTOOL_OUTPUT_PATH_DATE` into environment variables, which means the later launched processes would inherit these variables.
+        - create the output path if it does not exist.
         """
         os.environ["NNTOOL_OUTPUT_PATH"] = self.get_output_path()
         os.environ["NNTOOL_OUTPUT_PATH_DATE"] = self.get_current_time()
+
+        # create the output path
+        output_path = Path(self.get_output_path())
+        output_path.mkdir(parents=True, exist_ok=self.existing_output_path_ok)
