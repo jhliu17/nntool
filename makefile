@@ -23,6 +23,9 @@ push:
 	cd dist && cp index.html $(LOCAL_CACHE)
 	cd $(LOCAL_CACHE) && git add ./* && git commit -m "Update wheel" && git push
 
+serve_site:
+	sphinx-autobuild docs_sphinx docs_sphinx/_build
+
 build_site:
 	cd docs && rm -rf ./_build && make html
 
