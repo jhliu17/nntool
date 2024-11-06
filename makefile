@@ -31,7 +31,7 @@ build_site:
 
 push_site:
 	cd $(LOCAL_DOCS) && rm -rf ./*
-	cd docs/_build && cp -rf ./* $(LOCAL_DOCS)/
+	cd docs/_build/html/ && cp -rf ./* $(LOCAL_DOCS)/
 	cd $(LOCAL_DOCS) && git add ./* && git commit -m "Update docs" && git push
 
 releases:
