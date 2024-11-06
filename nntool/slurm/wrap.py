@@ -17,22 +17,22 @@ def slurm_fn(
 
     Here's an example of how to use this function:
 
-    ``` py
-    @slurm_fn
-    def run_on_slurm(a, b):
-        return a + b
+    .. code-block:: python
 
-    slurm_config = SlurmConfig(
-        mode="slurm",
-        slurm_partition="PARTITION",
-        slurm_job_name="EXAMPLE",
-        tasks_per_node=1,
-        cpus_per_task=8,
-        mem="1GB",
-    )
-    job = run_on_slurm[slurm_config](1, b=2)
-    result = job.result()  # block and get the result
-    ```
+        @slurm_fn
+        def run_on_slurm(a, b):
+            return a + b
+
+        slurm_config = SlurmConfig(
+            mode="slurm",
+            slurm_partition="PARTITION",
+            slurm_job_name="EXAMPLE",
+            tasks_per_node=1,
+            cpus_per_task=8,
+            mem="1GB",
+        )
+        job = run_on_slurm[slurm_config](1, b=2)
+        result = job.result()  # block and get the result
 
     :param submit_fn: the function to be run on slurm
     :return: the function to be run on slurm

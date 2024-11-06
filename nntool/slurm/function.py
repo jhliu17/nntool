@@ -8,6 +8,8 @@ from .csrc import _SlurmFunction
 
 
 class SlurmFunction:
+    """The function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass)."""
+
     def __init__(
         self,
         submit_fn: Callable[..., Any],
