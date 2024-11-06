@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-NNTool documentation
+NNTool Documentation
 ====================
 
 NNTool is a package built on top of ``submitit`` designed to provide simple abstractions to submit a Python function to Slurm for machine learning research. Below is an example to run a Python function on a slurm cluster using specific configurations.
