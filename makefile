@@ -23,9 +23,12 @@ push:
 	cd dist && cp index.html $(LOCAL_CACHE)
 	cd $(LOCAL_CACHE) && git add ./* && git commit -m "Update wheel" && git push
 
+build_site:
+	cd docs && rm -rf ./_build && make html
+
 push_site:
 	cd $(LOCAL_DOCS) && rm -rf ./*
-	cd site && cp -rf ./* $(LOCAL_DOCS)/
+	cd docs/_build && cp -rf ./* $(LOCAL_DOCS)/
 	cd $(LOCAL_DOCS) && git add ./* && git commit -m "Update docs" && git push
 
 releases:
