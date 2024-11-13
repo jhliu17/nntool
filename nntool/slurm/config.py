@@ -12,11 +12,11 @@ class SlurmConfig:
     :param mode: Running mode for the job. Options include:
                  "debug" (default), "exec", "local", or "slurm".
 
-    :param slurm_job_name: The name of the SLURM job. Default is 'YOUR_JOB_NAME'.
+    :param job_name: The name of the SLURM job. Default is 'JOB_NAME'.
 
-    :param slurm_partition: The name of the SLURM partition to use. Default is 'YOUR_PARTITION_NAME'.
+    :param partition: The name of the SLURM partition to use. Default is 'PARTITION_NAME'.
 
-    :param slurm_output_folder: The folder name where SLURM output files will be stored. Default is 'slurm'.
+    :param output_folder: The folder name where SLURM output files will be stored. Default is 'slurm'.
 
     :param node_list: A string specifying the nodes to use. Leave blank to use all available nodes. Default is an empty string.
 
@@ -52,24 +52,24 @@ class SlurmConfig:
 
     :param distributed_launch_command: The command to launch distributed environment setup, using environment variables like `{num_processes}`, `{num_machines}`, `{machine_rank}`, `{main_process_ip}`, `{main_process_port}`. Default is an empty string.
 
-    :param slurm_params_kwargs: Additional parameters for the SLURM job as a dictionary of key-value pairs. Default is an empty dictionary.
+    :param extra_params_kwargs: Additional parameters for the SLURM job as a dictionary of key-value pairs. Default is an empty dictionary.
 
-    :param slurm_submit_kwargs: Additional submit parameters for the SLURM job as a dictionary of key-value pairs. Default is an empty dictionary.
+    :param extra_submit_kwargs: Additional submit parameters for the SLURM job as a dictionary of key-value pairs. Default is an empty dictionary.
 
-    :param slurm_task_kwargs: Additional task parameters for the SLURM job as a dictionary of key-value pairs. Default is an empty dictionary.
+    :param extra_task_kwargs: Additional task parameters for the SLURM job as a dictionary of key-value pairs. Default is an empty dictionary.
     """
 
     # running mode
     mode: Literal["debug", "exec", "local", "slurm"] = "debug"
 
     # slurm job name
-    slurm_job_name: str = "YOUR_JOB_NAME"
+    job_name: str = "JOB_NAME"
 
     # slurm partition name
-    slurm_partition: str = "YOUR_PARTITION_NAME"
+    partition: str = "PARTITION_NAME"
 
     # slurm output folder name
-    slurm_output_folder: str = "slurm"
+    output_folder: str = "slurm"
 
     # node list string (leave blank to use all nodes)
     node_list: str = ""
@@ -134,33 +134,31 @@ class SlurmConfig:
     distributed_launch_command: str = ""
 
     # extra slurm job parameters
-    slurm_params_kwargs: Dict[str, str] = field(default_factory=dict)
+    extra_params_kwargs: Dict[str, str] = field(default_factory=dict)
 
     # extra slurm submit parameters
-    slurm_submit_kwargs: Dict[str, str] = field(default_factory=dict)
+    extra_submit_kwargs: Dict[str, str] = field(default_factory=dict)
 
     # extra slurm task parameters
-    slurm_task_kwargs: Dict[str, str] = field(default_factory=dict)
+    extra_task_kwargs: Dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self):
         # normalize the output folder
         output_folder_suffix = ""
         if self.mode != "slurm":
             output_folder_suffix = f"_{self.mode}"
-        if self.slurm_output_folder.endswith("slurm"):
-            self.slurm_output_folder = (
-                f"{self.slurm_output_folder}{output_folder_suffix}"
-            )
+        if self.output_folder.endswith("slurm"):
+            self.output_folder = f"{self.output_folder}{output_folder_suffix}"
         else:
-            self.slurm_output_folder = os.path.join(
-                self.slurm_output_folder, f"slurm{output_folder_suffix}"
+            self.output_folder = os.path.join(
+                self.output_folder, f"slurm{output_folder_suffix}"
             )
 
     def set_output_path(self, output_path: str) -> "SlurmConfig":
         """Set output path and date for the slurm job."""
         new_config = replace(
             self,
-            slurm_output_folder=os.path.join(output_path, self.slurm_output_folder),
+            slurm_output_folder=os.path.join(output_path, self.output_folder),
         )
         return new_config
 

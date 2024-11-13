@@ -15,8 +15,8 @@ def get_slurm_config(output_path, is_distributed: bool = False):
     if is_distributed:
         slurm_config = SlurmConfig(
             mode="slurm",
-            slurm_job_name="test_slurm",
-            slurm_partition="zhanglab.p",
+            job_name="test_slurm",
+            partition="zhanglab.p",
             node_list="galaxy",
             num_of_node=1,
             tasks_per_node=1,
@@ -34,8 +34,8 @@ def get_slurm_config(output_path, is_distributed: bool = False):
     else:
         slurm_config = SlurmConfig(
             mode="slurm",
-            slurm_job_name="test_slurm",
-            slurm_partition="zhanglab.p",
+            job_name="test_slurm",
+            partition="zhanglab.p",
             node_list="galaxy",
             num_of_node=1,
             tasks_per_node=1,

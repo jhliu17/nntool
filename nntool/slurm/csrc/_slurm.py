@@ -82,7 +82,7 @@ class SlurmFunction:
             "local": "local",
         }
         executor = submitit.AutoExecutor(
-            folder=slurm_config.slurm_output_folder,
+            folder=slurm_config.output_folder,
             cluster=cluster_dispatch.get(slurm_config.mode, slurm_config.mode),
         )
 
@@ -98,8 +98,8 @@ class SlurmFunction:
 
         # set slurm parameters
         executor.update_parameters(
-            name=slurm_config.slurm_job_name,
-            slurm_partition=slurm_config.slurm_partition,
+            name=slurm_config.job_name,
+            slurm_partition=slurm_config.partition,
             nodes=slurm_config.num_of_node,
             slurm_tasks_per_node=slurm_config.tasks_per_node,
             slurm_cpus_per_task=slurm_config.cpus_per_task,
@@ -206,9 +206,9 @@ class SlurmFunction:
         slurm_fn.system_argv = system_argv
 
         slurm_fn.__update_slurm_kwargs(
-            slurm_fn.slurm_config.slurm_params_kwargs,  # make sure the same parameters are controlled by the config
-            slurm_fn.slurm_config.slurm_submit_kwargs,
-            slurm_fn.slurm_config.slurm_task_kwargs,
+            slurm_fn.slurm_config.extra_params_kwargs,  # make sure the same parameters are controlled by the config
+            slurm_fn.slurm_config.extra_submit_kwargs,
+            slurm_fn.slurm_config.extra_task_kwargs,
         )
 
         slurm_fn.pack_code_include_fn = partial(
@@ -265,7 +265,7 @@ class SlurmFunction:
         if self.slurm_config.pack_code:
             target_code_root = pack_code_files(
                 self.slurm_config.code_root,
-                self.slurm_config.slurm_output_folder,
+                self.slurm_config.output_folder,
                 include_fn=self.pack_code_include_fn,
                 exclude_fn=self.pack_code_exclude_fn,
             )
