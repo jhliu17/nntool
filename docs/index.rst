@@ -6,7 +6,7 @@
 NNTool Documentation
 ====================
 
-NNTool is a package built on top of ``submitit`` designed to provide simple abstractions to submit a Python function to Slurm for machine learning research. Below is an example to run a Python function on a slurm cluster using specific configurations.
+NNTool is a package built on top of ``submitit`` designed to provide simple abstractions to conduct experiments on Slurm for machine learning research. Below is an example to run a Python function on a slurm cluster using specific configurations.
 
 .. code-block:: python
 
