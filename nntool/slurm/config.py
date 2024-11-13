@@ -120,6 +120,9 @@ class SlurmConfig:
     # whether to use distributed environment
     use_distributed_env: bool = False
 
+    # distributed enviroment task
+    distributed_env_task: Literal["torch"] = "torch"
+
     # processes per task (this value is not used by slurm, but in the distributed environment)
     processes_per_task: int = 1
 
@@ -132,6 +135,9 @@ class SlurmConfig:
     #   main_process_port: int
     # use braces to access the environment variables, e.g. {num_processes}
     distributed_launch_command: str = ""
+
+    # whether distributed_launch_command includes the entry point
+    distributed_launch_command_with_entry_point: bool = True
 
     # extra slurm job parameters
     extra_params_kwargs: Dict[str, str] = field(default_factory=dict)

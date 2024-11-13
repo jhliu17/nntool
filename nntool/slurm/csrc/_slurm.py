@@ -448,17 +448,26 @@ class SlurmFunction:
         initial_launch = not self.slurm_has_been_set_up()
         if initial_launch:
             # prepare distributed env
-            task = PyTorchDistributedTask(
-                self.slurm_config.distributed_launch_command,
-                (
-                    self.system_argv
-                    if self.system_argv is not None
-                    else list(sys.argv[1:])
-                ),
-                self.slurm_config,
-                verbose=True,
-                **self.slurm_task_kwargs,
-            )
+            if self.slurm_config.distributed_env_task == "torch":
+                task = PyTorchDistributedTask(
+                    self.slurm_config.distributed_launch_command,
+                    (
+                        self.system_argv
+                        if self.system_argv is not None
+                        else (
+                            list(sys.argv[1:])
+                            if self.slurm_config.distributed_launch_command_with_entry_point
+                            else list(sys.argv)
+                        )
+                    ),
+                    self.slurm_config,
+                    verbose=True,
+                    **self.slurm_task_kwargs,
+                )
+            else:
+                raise Exception(
+                    f"Unsupported distributed task: {self.slurm_config.distributed_env_task}"
+                )
 
             with patch_submitit_distributed_command_str(self.slurm_config, task):
                 executor = self.get_executor()
