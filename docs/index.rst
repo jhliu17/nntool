@@ -46,12 +46,13 @@ Please contact the developer at `junhaoliu17@gmail.com <junhaoliu17@gmail.com>`_
 
 
 .. toctree::
-   :caption: Examples
+   :caption: Getting started
    :maxdepth: 2
    :hidden:
 
-   examples/sequential_jobs
-   examples/distributed_training
+   introduction/sequential_jobs
+   introduction/distributed_training
+   introduction/sharp_bits
 
 
 .. toctree::
