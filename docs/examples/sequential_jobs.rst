@@ -15,8 +15,8 @@ Example
 
     slurm_settings = SlurmConfig(
         mode="slurm",
-        slurm_job_name="JOB_NAME",
-        slurm_partition="PATITION",
+        job_name="JOB_NAME",
+        partition="PATITION",
         num_of_node=1,
         tasks_per_node=1,
         gpus_per_task=0,

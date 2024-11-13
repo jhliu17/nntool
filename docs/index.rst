@@ -18,8 +18,8 @@ NNTool is a package built on top of ``submitit`` designed to provide simple abst
 
    slurm_config = SlurmConfig(
       mode="slurm",
-      slurm_partition="PARTITION",
-      slurm_job_name="EXAMPLE",
+      partition="PARTITION",
+      job_name="EXAMPLE",
       tasks_per_node=1,
       cpus_per_task=8,
       mem="1GB",

@@ -22,8 +22,8 @@ Example
     if __name__ == "__main__":
         slurm_config = SlurmConfig(
             mode="slurm",
-            slurm_partition="PARITITION",
-            slurm_job_name="JOB_NAME",
+            partition="PARITITION",
+            job_name="JOB_NAME",
             tasks_per_node=1,
             cpus_per_task=8,
             gpus_per_node=4,
