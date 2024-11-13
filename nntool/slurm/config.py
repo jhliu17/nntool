@@ -158,7 +158,7 @@ class SlurmConfig:
         """Set output path and date for the slurm job."""
         new_config = replace(
             self,
-            slurm_output_folder=os.path.join(output_path, self.output_folder),
+            output_folder=os.path.join(output_path, self.output_folder),
         )
         return new_config
 
