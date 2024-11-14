@@ -1,7 +1,7 @@
 import os
 import git
 import wandb
-import toml
+import tomli
 import warnings
 
 from dataclasses import dataclass, field
@@ -80,7 +80,7 @@ def init_wandb(args: WandbConfig, run_config: dict) -> Run | RunDisabled | None:
         wandb.login(key=os.environ["WANDB_API_KEY"])
     elif args.api_key_config_file:
         with open(args.api_key_config_file, "r") as config_file:
-            config_data = toml.load(config_file)
+            config_data = tomli.load(config_file)
         wandb.login(key=config_data["wandb"]["key"])
         project = config_data["wandb"].get("project", args.project)
         entity = config_data["wandb"].get("entity", args.entity)
