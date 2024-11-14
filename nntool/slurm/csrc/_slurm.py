@@ -82,7 +82,7 @@ class SlurmFunction:
             "local": "local",
         }
         executor = submitit.AutoExecutor(
-            folder=slurm_config.output_folder,
+            folder=slurm_config.output_path,
             cluster=cluster_dispatch.get(slurm_config.mode, slurm_config.mode),
         )
 
@@ -265,7 +265,7 @@ class SlurmFunction:
         if self.slurm_config.pack_code:
             target_code_root = pack_code_files(
                 self.slurm_config.code_root,
-                self.slurm_config.output_folder,
+                self.slurm_config.output_path,
                 include_fn=self.pack_code_include_fn,
                 exclude_fn=self.pack_code_exclude_fn,
             )
