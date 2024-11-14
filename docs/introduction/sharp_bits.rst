@@ -11,7 +11,8 @@ The Sharp Bits
 .. warning::
    The submitted function should be a pure function. This means that the function should not have any side effects.
 
-- The function should not modify any global variables, read from or write to a file, or modify any external state.
+To be a pure function, the function should satisfy the following conditions:
+- The function should not modify any global variables or modify any external state.
 - The function should only depend on the input arguments and should return the output based on the input arguments.
 
 
