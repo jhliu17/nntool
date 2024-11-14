@@ -4,7 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from jax.scipy.stats import t, norm, laplace
-from nntool.plot import latexify, savefig, is_latexify_enabled, enable_latexify
+from nntool.plot import latexify, savefig, is_latexify_enabled, latexify_plot
 
 
 def test_latexify(tmp_path):
@@ -92,7 +92,7 @@ def test_latexify(tmp_path):
 
 
 def test_context(tmp_path):
-    with enable_latexify(fig_width=0.45 * 6, fig_height=1.5) as ctx:
+    with latexify_plot(fig_width=0.45 * 6, fig_height=1.5) as ctx:
         x = jnp.linspace(-4, 4, 100)
         normal = norm.pdf(x, loc=0, scale=1)
         laplace_ = laplace.pdf(x, loc=0, scale=1 / (2**0.5))

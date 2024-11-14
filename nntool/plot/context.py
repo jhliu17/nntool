@@ -8,7 +8,7 @@ from .csrc.latexify import SIZE_SMALL, latexify, savefig
 
 
 @dataclass
-class enable_latexify:
+class latexify_plot:
     enable: bool = True
     width_scale_factor: float = 1
     height_scale_factor: float = 1
@@ -42,3 +42,7 @@ class enable_latexify:
         if despine:
             sns.despine()
         savefig(filename, fig_dir=fig_dir, **kwargs)
+
+
+# This is for backward compatibility
+enable_latexify = latexify_plot
