@@ -16,6 +16,8 @@ class SlurmConfig:
 
     :param partition: The name of the SLURM partition to use. Default is 'PARTITION_NAME'.
 
+    :param output_parent_path: The parent directory name for saving slurm folder. Default is './'.
+
     :param output_folder: The folder name where SLURM output files will be stored. Default is 'slurm'.
 
     :param node_list: A string specifying the nodes to use. Leave blank to use all available nodes. Default is an empty string.
@@ -67,6 +69,9 @@ class SlurmConfig:
 
     # slurm partition name
     partition: str = "PARTITION_NAME"
+
+    # slurm output parent path
+    output_parent_path: str = "./"
 
     # slurm output folder name
     output_folder: str = "slurm"
@@ -161,13 +166,15 @@ class SlurmConfig:
             )
 
         # output path
-        self.output_path: str = self.output_folder
+        self.output_path: str = os.path.join(
+            self.output_parent_path, self.output_folder
+        )
 
-    def set_output_path(self, output_path: str) -> "SlurmConfig":
+    def set_output_path(self, output_parent_path: str) -> "SlurmConfig":
         """Set output path and date for the slurm job."""
         new_config = replace(
             self,
-            output_path=os.path.join(output_path, self.output_folder),
+            output_parent_path=output_parent_path,
         )
         return new_config
 
