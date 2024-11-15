@@ -79,7 +79,7 @@ def init_wandb(args: WandbConfig, run_config: dict) -> Run | RunDisabled | None:
         warnings.warn("WANDB_API_KEY is found in environment variables. Using it.")
         wandb.login(key=os.environ["WANDB_API_KEY"])
     elif args.api_key_config_file:
-        with open(args.api_key_config_file, "r") as config_file:
+        with open(args.api_key_config_file, "rb") as config_file:
             config_data = tomli.load(config_file)
         wandb.login(key=config_data["wandb"]["key"])
         project = config_data["wandb"].get("project", args.project)
