@@ -2,9 +2,6 @@
 Sequential jobs
 ###############
 
-.. toctree::
-   :maxdepth: 2
-
 Example
 =======
 

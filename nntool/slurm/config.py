@@ -40,9 +40,9 @@ class SlurmConfig:
 
     :param use_packed_code: Whether to use the packed code for execution. Default is False.
 
-    :param code_root: The root directory of the codebase. Default is the current directory (`.`).
+    :param code_root: The root directory of the codebase. Default is the current directory (``.``).
 
-    :param code_file_suffixes: A list of file extensions for code files to be included when packing. Default includes `.py`, `.sh`, `.yaml`, and `.toml`.
+    :param code_file_suffixes: A list of file extensions for code files to be included when packing. Default includes ``.py``, ``.sh``, ``.yaml``, and ``.toml``.
 
     :param exclude_code_folders: A list of folder names relative to `code_root` that will be excluded from packing. Default excludes 'wandb', 'outputs', and 'datasets'.
 
@@ -50,7 +50,7 @@ class SlurmConfig:
 
     :param processes_per_task: The number of processes to run per task. This value is not used by SLURM but is relevant for distributed environments. Default is 1.
 
-    :param distributed_launch_command: The command to launch distributed environment setup, using environment variables like `{num_processes}`, `{num_machines}`, `{machine_rank}`, `{main_process_ip}`, `{main_process_port}`. Default is an empty string.
+    :param distributed_launch_command: The command to launch distributed environment setup, using environment variables like ``{num_processes}``, ``{num_machines}``, ``{machine_rank}``, ``{main_process_ip}``, ``{main_process_port}``. Default is an empty string.
 
     :param extra_params_kwargs: Additional parameters for the SLURM job as a dictionary of key-value pairs. Default is an empty dictionary.
 

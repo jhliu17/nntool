@@ -11,7 +11,7 @@ from ..parser import parse_from_cli
 def slurm_fn(
     submit_fn: Callable,
 ) -> SlurmFunction:
-    """A decorator to wrap a function to be run on slurm. The function decorated by this decorator should be launched on the way below. The decorated function `submit_fn` is non-blocking now. To block and get the return value, you can call `job.result()`.
+    """A decorator to wrap a function to be run on slurm. The function decorated by this decorator should be launched on the way below. The decorated function `submit_fn` is non-blocking now. To block and get the return value, you can call ``job.result()``.
 
     **Example**
 

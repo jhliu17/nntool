@@ -63,13 +63,13 @@ class SlurmFunction:
 
         **Exported Distributed Enviroment Variables**
 
-        - `NNTOOL_SLURM_HAS_BEEN_SET_UP` is a special environment variable to indicate that the slurm has been set up.
+        - ``NNTOOL_SLURM_HAS_BEEN_SET_UP`` is a special environment variable to indicate that the slurm has been set up.
         - After the set up, the distributed job will be launched and the following variables are exported:
-            - `num_processes`: int
-            - `num_machines`: int
-            - `machine_rank`: int
-            - `main_process_ip`: str
-            - `main_process_port`: int
+            - ``num_processes``: int
+            - ``num_machines``: int
+            - ``machine_rank``: int
+            - ``main_process_ip``: str
+            - ``main_process_port``: int
 
         :param slurm_config: SlurmConfig, the slurm configuration dataclass, defaults to None
         :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
@@ -97,13 +97,13 @@ class SlurmFunction:
 
         **Exported Distributed Enviroment Variables**
 
-        - `NNTOOL_SLURM_HAS_BEEN_SET_UP` is a special environment variable to indicate that the slurm has been set up.
+        - ``NNTOOL_SLURM_HAS_BEEN_SET_UP`` is a special environment variable to indicate that the slurm has been set up.
         - After the set up, the distributed job will be launched and the following variables are exported:
-            - `num_processes`: int
-            - `num_machines`: int
-            - `machine_rank`: int
-            - `main_process_ip`: str
-            - `main_process_port`: int
+            - ``num_processes``: int
+            - ``num_machines``: int
+            - ``machine_rank``: int
+            - ``main_process_ip``: str
+            - ``main_process_port``: int
 
         :param slurm_config: SlurmConfig, the slurm configuration dataclass
         :return: the wrapped submit function with configured slurm paramters
@@ -121,7 +121,7 @@ class SlurmFunction:
         return self.engine(*submit_fn_args, **submit_fn_kwargs)
 
     def submit(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
-        """An alias function to `__call__`.
+        """An alias function to ``__call__``.
 
         :raises Exception: if the submit_fn is not set up
         :return: Slurm Job or the return value of the submit_fn

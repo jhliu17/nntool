@@ -2,11 +2,8 @@
 The Sharp Bits
 ###############
 
-.. toctree::
-   :maxdepth: 2
-
 🔪 Pure functions
-=======
+=================
 
 .. warning::
    The submitted function should be a pure function. This means that the function should not have any side effects.
@@ -18,7 +15,7 @@ To be a pure function, the function should satisfy the following conditions:
 
 
 🔪 Code stateless submissions
-=======
+=============================
 
 .. warning::
    When a job is submitted, it doesn't mean it would save the current code state. The code is executed based on the latest code in the repository.
