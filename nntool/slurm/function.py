@@ -76,7 +76,7 @@ class SlurmFunction:
         :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
         :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
         :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
-        :return: the wrapped submit function with configured slurm paramters
+        :return: a new copy with configured slurm parameters
         """
         configured_slurm_function = self.__create_copy()
         configured_slurm_function.engine = self.engine.configure(

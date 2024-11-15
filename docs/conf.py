@@ -18,7 +18,12 @@ author = "Junhao Liu"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosummary", "sphinx.ext.githubpages"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.githubpages",
+    "sphinx_autodoc_typehints",
+]
 
 templates_path = ["_templates"]
 exclude_patterns = []
@@ -33,6 +38,4 @@ autodoc_typehints = "none"
 
 html_theme = "sphinx_book_theme"
 html_static_path = ["_static"]
-html_theme_options = {
-    "collapse_navbar": False,
-}
+html_theme_options = {"collapse_navbar": False, "show_toc_level": 2}
