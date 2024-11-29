@@ -5,6 +5,8 @@ Sequential jobs
 Example
 =======
 
+Each configuration of a ``SlurmFunction`` will create a new copy of the function. This is useful when you want to run the same function with different configurations.
+
 .. code-block:: python
 
     import time

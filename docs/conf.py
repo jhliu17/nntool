@@ -38,4 +38,5 @@ autodoc_typehints = "none"
 
 html_theme = "sphinx_book_theme"
 html_static_path = ["_static"]
+html_css_files = ["style/custom.css"]
 html_theme_options = {"collapse_navbar": False, "show_toc_level": 2}

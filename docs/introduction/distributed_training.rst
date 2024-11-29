@@ -5,6 +5,8 @@ Distributed training jobs
 Example
 =======
 
+Here is an example of using ``nntool`` to launch a distributed training with ``accelerate``.
+
 .. code-block:: python
 
     from accelerate import Accelerator
@@ -18,6 +20,19 @@ Example
         # TRAINING
         ...
 
+
+Important variables
+===================
+
+To launch a distributed job, it is necessary to set up the ``use_distributed_env`` and ``distributed_lanch_command`` in the ``SlurmConfig`` function. The ``distributed_launch_command`` is a command that is used to launch the distributed job. There are several arguments exposed by the ``nntool`` which are useful to set up the distributed job. The arguments are as follows:
+
+- ``num_processes``: int
+- ``num_machines``: int
+- ``machine_rank``: int
+- ``main_process_ip``: str
+- ``main_process_port``: int
+
+.. code-block:: python
 
     if __name__ == "__main__":
         slurm_config = SlurmConfig(
