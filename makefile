@@ -1,6 +1,6 @@
-LOCAL_CACHE = /Users/junhao/Working/code/homepage/wheel/nntool/sdist
-LOCAL_DOCS = /Users/junhao/Working/code/homepage/site/nntool
-LOCAL_CYTHON_CACHE = /Users/junhao/Working/code/homepage/wheel/nntool/releases/
+LOCAL_CACHE = /Users/junhao/Hub/code/homepage/wheel/nntool/sdist
+LOCAL_DOCS = /Users/junhao/Hub/code/homepage/site/nntool
+LOCAL_CYTHON_CACHE = /Users/junhao/Hub/code/homepage/wheel/nntool/releases/
 
 all: wheel
 
@@ -23,8 +23,8 @@ push:
 	cd dist && cp index.html $(LOCAL_CACHE)
 	cd $(LOCAL_CACHE) && git add ./* && git commit -m "Update wheel" && git push
 
-serve_site:
-	sphinx-autobuild docs docs/_build
+livehtml:
+	sphinx-autobuild docs docs/_build -a
 
 build_site:
 	cd docs && rm -rf ./_build && make html

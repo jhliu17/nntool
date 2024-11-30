@@ -1,13 +1,16 @@
-#########################
-Distributed training jobs
+Distributed Training
 #########################
 
-Example
-=======
+This example shows how to submit a distributed training job with ``nntool``.
 
-Here is an example of using ``nntool`` to launch a distributed training with ``accelerate``.
+
+Training function
+=================
+
+Here is an example of using ``accelerate`` to conduct a distributed training. Please refer to the ``accelerate`` `documentation <https://huggingface.co/docs/accelerate/index>`_ for more information.
 
 .. code-block:: python
+    :caption: main.py
 
     from accelerate import Accelerator
     from accelerate.utils import set_seed
@@ -16,15 +19,35 @@ Here is an example of using ``nntool`` to launch a distributed training with ``a
     @slurm_fn
     def main(config: SlurmConfig):
         accelerator = Accelerator()
+        set_seed(2024)
+        ...
+        model, optimizer, training_dataloader, scheduler = accelerator.prepare(
+            model, optimizer, training_dataloader, scheduler
+        )
 
         # TRAINING
-        ...
+        for batch in training_dataloader:
+            optimizer.zero_grad()
+            inputs, targets = batch
+            inputs = inputs.to(device)
+            targets = targets.to(device)
+            outputs = model(inputs)
+            loss = loss_function(outputs, targets)
+            accelerator.backward(loss)
+            optimizer.step()
+            scheduler.step()
 
 
-Important variables
-===================
+Distributed launch command
+==========================
 
-To launch a distributed job, it is necessary to set up the ``use_distributed_env`` and ``distributed_lanch_command`` in the ``SlurmConfig`` function. The ``distributed_launch_command`` is a command that is used to launch the distributed job. There are several arguments exposed by the ``nntool`` which are useful to set up the distributed job. The arguments are as follows:
+To launch a distributed job, it is necessary to set up the ``use_distributed_env`` and ``distributed_lanch_command`` in the ``SlurmConfig`` function.
+
+
+Exported variables
+------------------
+
+The ``distributed_launch_command`` is a command that is used to launch the distributed job. There are several arguments exposed by the ``nntool`` which are useful to set up the distributed job. The arguments are as follows:
 
 - ``num_processes``: int
 - ``num_machines``: int
@@ -32,7 +55,23 @@ To launch a distributed job, it is necessary to set up the ``use_distributed_env
 - ``main_process_ip``: str
 - ``main_process_port``: int
 
+Set up the entry point
+----------------------
+
+Here is an example of how to use the ``distributed_launch_command`` in the ``SlurmConfig`` function. The command is used to launch the distributed job with ``accelerate``. The command is as follows:
+
 .. code-block:: python
+    :caption: distributed_launch_command with main.py
+
+    accelerate launch --config_file CONFIG_FILE --num_processes {num_processes} --num_machines {num_machines} --machine_rank {machine_rank} --main_process_ip {main_process_ip} --main_process_port {main_process_port} main.py
+
+The CONFIG_FILE is a ``accelerate`` configuration file that is used to set up the distributed type. It is worth noting that the ``main.py`` is the main file that is used to run the training. Based on the distributed training type, one can properly set up the required ``gpus_per_node`` and ``processes_per_task`` in the ``SlurmConfig`` function.
+
+.. code-block:: python
+    :caption: main.py
+    :emphasize-lines: 10,11,14,15,18
+
+    ...
 
     if __name__ == "__main__":
         slurm_config = SlurmConfig(
@@ -48,5 +87,6 @@ To launch a distributed job, it is necessary to set up the ``use_distributed_env
             use_distributed_env=True,
             distributed_launch_command="accelerate launch --config_file CONFIG_FILE --num_processes {num_processes} --num_machines {num_machines} --machine_rank {machine_rank} --main_process_ip {main_process_ip} --main_process_port {main_process_port} main.py",
         )
+
         main[slurm_config](config)
 

@@ -1,13 +1,15 @@
-###############
-Sequential jobs
+Sequential Jobs
 ###############
 
-Example
-=======
+This example shows how to submit a series of jobs with ``nntool``.
 
-Each configuration of a ``SlurmFunction`` will create a new copy of the function. This is useful when you want to run the same function with different configurations.
+Configuration of SlurmFunction
+==============================
+
+The ``slurm_fn`` decorator converts a Python function into a SlurmFunction. The SlurmFunction can be used to submit jobs to the Slurm cluster. Each configuration of a SlurmFunction will create a new copy of the function. This is useful when you want to run the same function with different configurations.
 
 .. code-block:: python
+    :caption: A worker function with slurm settings
 
     import time
     from nntool.slurm import SlurmConfig, slurm_fn
@@ -31,10 +33,16 @@ Each configuration of a ``SlurmFunction`` will create a new copy of the function
         return a + b
 
 
-Map Array
+.. important::
+
+    A ``SlurmFunction`` executed on the Slurm cluster is non-blocking. The ``result()`` method is used to get the result of the job. The ``result()`` method will block until the job is finished.
+
+
+Map array
 =========
 
 .. code-block:: python
+    :caption: A worker function maps an array
 
     fn = work_fn[slurm_settings]
 
@@ -49,10 +57,11 @@ Map Array
     assert results == [4, 6, 16, 18]
 
 
-Chain
-=====
+Dependency between jobs
+=======================
 
 .. code-block:: python
+    :caption: A worker function runs sequentially
 
     jobs = []
     job1 = work_fn[slurm_settings](10, 2)
