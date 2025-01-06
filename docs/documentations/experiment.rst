@@ -2,6 +2,11 @@
 Experiment Settings
 ###################
 
+.. autosummary::
+
+  nntool.experiment.config.BaseExperimentConfig
+  nntool.experiment.utils
+
 .. automodule:: nntool.experiment.config
    :members: BaseExperimentConfig
 
