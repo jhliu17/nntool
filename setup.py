@@ -34,7 +34,7 @@ def get_csrc_files(folder: str) -> list[str]:
 
 package_info = dict(
     name="nntool",
-    version="1.3.0",
+    version="1.3.1",
     python_requires=">=3.9",
     install_requires=[
         # List your package dependencies here

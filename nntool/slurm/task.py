@@ -151,7 +151,9 @@ class PyTorchDistributedTask(Task):
         self.log("exporting PyTorch distributed environment variables")
 
         # prepare enviroment variables
-        dist_env = submitit.helpers.TorchDistributedEnvironment().export()
+        dist_env = submitit.helpers.TorchDistributedEnvironment().export(
+            set_cuda_visible_devices=False
+        )
 
         # other setup
         env_setup = {
@@ -169,6 +171,7 @@ class PyTorchDistributedTask(Task):
 
         # other environment variables set by the user
         env_setup.update(self.env_setup_kwargs)
+        self.log(f"env_setup: {env_setup}")
 
         # update environment variables
         os.environ.update(**env_setup)
