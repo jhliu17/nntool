@@ -35,14 +35,11 @@ Installation
 NNTool is tested and supported on the following systems:
 
 * Python 3.9–3.12
-* Linux systems
+* Linux systems with Slurm installed
 
 .. code-block:: sh
 
-   pip install nntool-1.2.2-cp3xx.whl
-
-
-Please contact the developer at `junhaoliu17@gmail.com <junhaoliu17@gmail.com>`_ to request pre-built wheels.
+   pip install nntool
 
 
 .. toctree::
