@@ -1,17 +1,17 @@
 """
-   Copyright 2021 Philippe PRADOS
+Copyright 2021 Philippe PRADOS
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-       http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 """
 
 import io
@@ -144,7 +144,7 @@ class _build_py(original_build_py):
     def build_module(self, module, module_file, package) -> Tuple[str, int]:
         """Inject init() in __init__ files"""
         outfile, copied = super().build_module(module, module_file, package)
-        inject = "import cythonpackage; cythonpackage.init(__name__);"
+        inject = "import cythonpackage\ncythonpackage.init(__name__)\n"
         if self.inject_init:
             if outfile.endswith("__init__.py"):
                 # print(f"**** patch {outfile}")

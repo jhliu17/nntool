@@ -93,7 +93,7 @@ else:
         packages=find_packages(exclude=["tests"]),
         cythonpackage={
             "inject_ext_modules": False,
-            "inject_init": False,
+            "inject_init": True,
             "remove_source": True,
             "compile_py": True,
             "optimize": 1,
