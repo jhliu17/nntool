@@ -1,6 +1,2 @@
-import cythonpackage
-
-cythonpackage.init(__name__)
-
-from .csrc.latexify import *
+from .csrc import latexify, savefig
 from .context import latexify_plot, enable_latexify
