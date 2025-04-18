@@ -34,13 +34,13 @@ def get_csrc_files(folder: str) -> list[str]:
 
 package_info = dict(
     name="nntool",
-    version="1.3.1",
+    version="1.4.0",
     python_requires=">=3.9",
     install_requires=[
         # List your package dependencies here
         # e.g., 'requests>=2.0',
         "setuptools>=68.0.0",
-        "submitit==1.5.2",
+        "submitit>=1.5.2",
         "tyro>=0.8.12",
         "matplotlib>=3.8.0",
         "seaborn>=0.13.2",
@@ -57,13 +57,13 @@ package_info = dict(
             "jax[cpu]>=0.4.0",
             "torch>=2.2.0",
             "mypy",
-            "accelerate",
+            "accelerate>=1.6.0",
         ]
     },
     # Additional metadata
     author="Junhao Liu",
     author_email="junhaoliu17@gmail.com",
-    description="neural network tool for research",
+    description="NNTool is a package built on top of submitit designed to provide simple abstractions to conduct experiments on Slurm for machine learning research.",
     license="MIT",
     keywords="deep learning, neural network, research",
     url="https://github.com/jhliu17/nntool",  # Project home page
