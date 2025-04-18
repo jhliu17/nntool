@@ -454,11 +454,7 @@ class SlurmFunction:
                     (
                         self.system_argv
                         if self.system_argv is not None
-                        else (
-                            list(sys.argv[1:])
-                            if self.slurm_config.distributed_launch_command_with_entry_point
-                            else list(sys.argv)
-                        )
+                        else list(sys.argv[1:])
                     ),
                     self.slurm_config,
                     verbose=True,

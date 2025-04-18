@@ -12,9 +12,9 @@ class SlurmConfig:
     :param mode: Running mode for the job. Options include:
                  "debug" (default), "exec", "local", or "slurm".
 
-    :param job_name: The name of the SLURM job. Default is 'JOB_NAME'.
+    :param job_name: The name of the SLURM job. Default is ''.
 
-    :param partition: The name of the SLURM partition to use. Default is 'PARTITION_NAME'.
+    :param partition: The name of the SLURM partition to use. Default is ''.
 
     :param output_parent_path: The parent directory name for saving slurm folder. Default is './'.
 
@@ -65,10 +65,10 @@ class SlurmConfig:
     mode: Literal["debug", "exec", "local", "slurm"] = "debug"
 
     # slurm job name
-    job_name: str = "JOB_NAME"
+    job_name: str = "Job"
 
     # slurm partition name
-    partition: str = "PARTITION_NAME"
+    partition: str = ""
 
     # slurm output parent path
     output_parent_path: str = "./"
@@ -141,9 +141,6 @@ class SlurmConfig:
     # use braces to access the environment variables, e.g. {num_processes}
     distributed_launch_command: str = ""
 
-    # whether distributed_launch_command includes the entry point
-    distributed_launch_command_with_entry_point: bool = True
-
     # extra slurm job parameters
     extra_params_kwargs: Dict[str, str] = field(default_factory=dict)
 
@@ -154,6 +151,16 @@ class SlurmConfig:
     extra_task_kwargs: Dict[str, str] = field(default_factory=dict)
 
     def __post_init__(self):
+        # check partition
+        if self.partition == "":
+            raise ValueError("partition must be set")
+
+        # check distributed enviroment task
+        if self.use_distributed_env and self.distributed_launch_command == "":
+            raise ValueError(
+                "distributed_launch_command must be set when use_distributed_env is True"
+            )
+
         # normalize the output folder
         output_folder_suffix = ""
         if self.mode != "slurm":
