@@ -5,7 +5,7 @@ from typing import Any, Callable, Type, Union, Dict, List
 
 from .config import SlurmConfig
 from .function import SlurmFunction
-from ..parser import parse_from_cli
+from .parser import parse_from_cli
 
 
 def slurm_fn(

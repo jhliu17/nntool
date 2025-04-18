@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from nntool.parser import parse_from_cli
+from nntool.slurm.parser import parse_from_cli
 
 
 def test_parser():
