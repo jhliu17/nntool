@@ -49,7 +49,7 @@ def get_slurm_config(output_path, is_distributed: bool = False):
             use_distributed_env=False,
         )
 
-    slurm_config = slurm_config.set_output_path(output_path, get_current_time())
+    slurm_config = slurm_config.set_output_path(output_path)
     return slurm_config
 
 
