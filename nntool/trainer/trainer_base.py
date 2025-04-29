@@ -35,6 +35,19 @@ class TrainerConfig:
     output_path: str = "outputs"
     resume_trainer_from_dir: Optional[str] = None
 
+    def __post_init__(self):
+        if self.checkpoint_interval is None:
+            self.checkpoint_interval = self.eval_interval
+            warnings.warn(
+                "`checkpoint_interval` is not set. Using `eval_interval` as the default value for `checkpoint_interval`.",
+                UserWarning,
+            )
+
+        if self.eval_interval % self.checkpoint_interval != 0:
+            raise ValueError(
+                f"`eval_interval` {self.eval_interval} should be divisible by `checkpoint_interval` {self.checkpoint_interval}"
+            )
+
 
 @dataclass
 class TrainerState:
@@ -69,17 +82,7 @@ class BaseTrainer(ABC):
         self._trainer_init()
 
     def _config_check(self):
-        if self.config.checkpoint_interval is None:
-            self.config.checkpoint_interval = self.config.eval_interval
-            warnings.warn(
-                "`checkpoint_interval` is not set. Using `eval_interval` as the default value for `checkpoint_interval`.",
-                UserWarning,
-            )
-
-        if self.config.eval_interval % self.config.checkpoint_interval != 0:
-            raise ValueError(
-                f"`eval_interval` {self.config.eval_interval} should be divisible by `checkpoint_interval` {self.config.checkpoint_interval}"
-            )
+        pass
 
     def _trainer_init(self):
         # prepare dataloaders
