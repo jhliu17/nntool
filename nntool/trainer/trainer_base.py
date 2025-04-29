@@ -4,8 +4,6 @@ import warnings
 
 from abc import ABC, abstractmethod
 from torch.utils.data import Dataset, DataLoader
-from accelerate import Accelerator
-from lightning.fabric import Fabric
 from torch import nn
 from torch import optim
 from typing import Any, Dict, Optional, Tuple, Union
@@ -35,6 +33,19 @@ class TrainerConfig:
     random_seed: int = 42
     output_path: str = "outputs"
     resume_trainer_from_dir: Optional[str] = None
+
+    def __post_init__(self):
+        if self.checkpoint_interval is None:
+            self.checkpoint_interval = self.eval_interval
+            warnings.warn(
+                "`checkpoint_interval` is not set. Using `eval_interval` as the default value for `checkpoint_interval`.",
+                UserWarning,
+            )
+
+        if self.eval_interval % self.checkpoint_interval != 0:
+            raise ValueError(
+                f"`eval_interval` {self.eval_interval} should be divisible by `checkpoint_interval` {self.checkpoint_interval}"
+            )
 
 
 @dataclass
@@ -70,17 +81,7 @@ class BaseTrainer(ABC):
         self._trainer_init()
 
     def _config_check(self):
-        if self.config.checkpoint_interval is None:
-            self.config.checkpoint_interval = self.config.eval_interval
-            warnings.warn(
-                "`checkpoint_interval` is not set. Using `eval_interval` as the default value for `checkpoint_interval`.",
-                UserWarning,
-            )
-
-        if self.config.eval_interval % self.config.checkpoint_interval != 0:
-            raise ValueError(
-                f"`eval_interval` {self.config.eval_interval} should be divisible by `checkpoint_interval` {self.config.checkpoint_interval}"
-            )
+        pass
 
     def _trainer_init(self):
         # prepare dataloaders
@@ -245,40 +246,40 @@ class BaseTrainer(ABC):
 
     @property
     @abstractmethod
-    def device(self):
+    def device(self) -> torch.Device:
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def is_main_process(self):
+    def is_main_process(self) -> bool:
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def use_distributed(self):
+    def use_distributed(self) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def gather_for_metrics(self, *args, **kwargs):
+    def gather_for_metrics(self, *args, **kwargs) -> Any:
         raise NotImplementedError
 
     @abstractmethod
-    def print(self, *args, **kwargs):
+    def print(self, *args, **kwargs) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def save(self, milestone: Union[int, str]):
+    def save(self, milestone: Union[int, str]) -> None:
         raise NotImplementedError
 
     @abstractmethod
     def load(
         self,
         state_dir: str,
-    ):
+    ) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def model_forward(self, batch_data):
+    def model_forward(self, batch_data) -> Any:
         raise NotImplementedError
 
     @abstractmethod
@@ -297,252 +298,3 @@ class BaseTrainer(ABC):
         """
 
         raise NotImplementedError
-
-
-@dataclass
-class AccelerateTrainer(BaseTrainer):
-    accelerator: Accelerator
-
-    def _trainer_init(self):
-        # register inner trainer state
-        self.accelerator.register_for_checkpointing(self.trainer_state)
-
-        # prepare dataloaders
-        self.dataloader, self.eval_dataloader, self.test_dataloader = (
-            self._create_dataloaders(
-                self.train_dataset, self.eval_dataset, self.test_dataset
-            )
-        )
-
-        # prepare accelerator components
-        (
-            self.model,
-            self.optimizer,
-            self.lr_scheduler,
-            self.dataloader,
-        ) = self.accelerator.prepare(
-            self.model,
-            self.optimizer,
-            self.lr_scheduler,
-            self.dataloader,
-        )
-
-        if self.eval_dataloader is not None:
-            self.eval_dataloader = self.accelerator.prepare(self.eval_dataloader)
-        if self.test_dataloader is not None:
-            self.test_dataloader = self.accelerator.prepare(self.test_dataloader)
-
-        # print model architecture
-        self.print(self.model)
-
-        # load state if necessary
-        if self.config.resume_trainer_from_dir is not None:
-            self.load(self.config.resume_trainer_from_dir)
-
-    @property
-    def device(self):
-        return self.accelerator.device
-
-    @property
-    def is_main_process(self):
-        return self.accelerator.is_main_process
-
-    @property
-    def use_distributed(self):
-        return self.accelerator.use_distributed
-
-    def gather_for_metrics(self, *args, **kwargs):
-        return self.accelerator.gather_for_metrics(*args, **kwargs)
-
-    def print(self, *args, **kwargs):
-        self.accelerator.print(*args, **kwargs)
-
-    def save(self, milestone: Union[int, str]):
-        # save checkpoint for all processes
-        self.accelerator.save_state(
-            f"{self.config.output_path}/checkpoints/checkpoints_{milestone}"
-        )
-
-        # save model checkpoints
-        if self.accelerator.is_main_process:
-            self.accelerator.save_model(
-                self.model, f"{self.config.output_path}/models/model_{milestone}"
-            )
-
-        # wait for all processes to complete
-        self.accelerator.wait_for_everyone()
-
-    def load(
-        self,
-        state_dir: str,
-    ):
-        self.print("resume trainer from:", state_dir)
-
-        # load the latest state from checkpoint folder
-        self.accelerator.load_state(state_dir)
-
-    def model_forward(self, batch_data):
-        with self.accelerator.autocast():
-            inputs, targets = batch_data
-            outputs = self.model(inputs)
-            loss = self.loss_fn(outputs, targets)
-        return loss, outputs
-
-    def _train_step(self, batch_data) -> Tuple[float, Dict[str, Any]]:
-        with self.accelerator.accumulate(self.model):
-            # train batch
-            loss, _ = self.model_forward(batch_data)
-
-            # train step
-            self.accelerator.backward(loss)
-            self.accelerator.clip_grad_norm_(
-                self.model.parameters(), self.config.max_grad_norm
-            )
-
-            self.optimizer.step()
-            self.lr_scheduler.step()
-            self.optimizer.zero_grad()
-        return loss.item(), {}
-
-
-@dataclass
-class FabricTrainer(BaseTrainer):
-    """The FabricTrainer class is a subclass of the Trainer class, which uses the Lightning Fabric for training.
-
-    Fabric doesn't provide a method for `gather_for_metrics`, one might need to implement a custom one.
-    For example, if you want to gather predictions and references for metrics calculation, you can do it like this: https://github.com/huggingface/accelerate/blob/4b6be8991059f39a8df8893333d11c54bc51fc60/examples/by_feature/multi_process_metrics.py#L188
-
-    samples_seen = 0
-    for step, batch in enumerate(eval_dataloader):
-        # We could avoid this line since we set the accelerator with `device_placement=True`.
-        batch.to(accelerator.device)
-        with torch.no_grad():
-            outputs = model(**batch)
-        predictions = outputs.logits.argmax(dim=-1)
-        predictions, references = accelerator.gather((predictions, batch["labels"]))
-        # New Code #
-        # First we check if it's a distributed system
-        if accelerator.use_distributed:
-            # Then see if we're on the last batch of our eval dataloader
-            if step == len(eval_dataloader) - 1:
-                # Last batch needs to be truncated on distributed systems as it contains additional samples
-                predictions = predictions[: len(eval_dataloader.dataset) - samples_seen]
-                references = references[: len(eval_dataloader.dataset) - samples_seen]
-            else:
-                # Otherwise we add the number of samples seen
-                samples_seen += references.shape[0]
-    """
-
-    accelerator: Fabric
-
-    def _trainer_init(self):
-        # prepare dataloaders
-        self.dataloader, self.eval_dataloader, self.test_dataloader = (
-            self._create_dataloaders(
-                self.train_dataset, self.eval_dataset, self.test_dataset
-            )
-        )
-
-        # prepare accelerator components
-        (
-            self.model,
-            self.optimizer,
-        ) = self.accelerator.setup(
-            self.model,
-            self.optimizer,
-        )
-
-        self.dataloader = self.accelerator.setup_dataloaders(self.dataloader)
-        if self.eval_dataloader is not None:
-            self.eval_dataloader = self.accelerator.setup_dataloaders(
-                self.eval_dataloader
-            )
-        if self.test_dataloader is not None:
-            self.test_dataloader = self.accelerator.setup_dataloaders(
-                self.test_dataloader
-            )
-
-        # print model architecture
-        self.print(self.model)
-
-        # load state if necessary
-        if self.config.resume_trainer_from_dir is not None:
-            self.load(self.config.resume_trainer_from_dir)
-
-    @property
-    def device(self):
-        return self.accelerator.device
-
-    @property
-    def is_main_process(self):
-        return self.accelerator.is_global_zero
-
-    @property
-    def use_distributed(self):
-        return self.accelerator.world_size > 1
-
-    def gather_for_metrics(self, *args, **kwargs):
-        raise Exception(
-            "Fabric doesn't provide a method for `gather_for_metrics`. Please implement a custom one to truncate the repeated data."
-        )
-
-    def print(self, *args, **kwargs):
-        self.accelerator.print(*args, **kwargs)
-
-    def save(self, milestone: Union[int, str]):
-        # save model checkpoints
-        state = {
-            "model": self.model,
-            "optimizer": self.optimizer,
-            "lr_scheduler": self.lr_scheduler.state_dict(),
-            "trainer_state": self.trainer_state.state_dict(),
-        }
-
-        self.accelerator.save(
-            f"{self.config.output_path}/checkpoints/checkpoints_{milestone}",
-            state,
-        )
-
-    def load(
-        self,
-        state_dir: str,
-    ):
-        self.print("resume trainer from:", state_dir)
-
-        # load the latest state from checkpoint folder
-        state = {
-            "model": self.model,
-            "optimizer": self.optimizer,
-        }
-        remainder = self.accelerator.load(state_dir, state)
-
-        self.lr_scheduler.load_state_dict(remainder["lr_scheduler"])
-        self.trainer_state.load_state_dict(remainder["trainer_state"])
-
-    def model_forward(self, batch_data):
-        with self.accelerator.autocast():
-            inputs, targets = batch_data
-            outputs = self.model(inputs)
-            loss = self.loss_fn(outputs, targets)
-        return loss, outputs
-
-    def _train_step(self, batch_data) -> Tuple[float, Dict[str, Any]]:
-        # Accumulate gradient at a time
-        is_accumulating = (
-            self.global_step % self.config.gradient_accumulation_steps != 0
-        )
-
-        with self.accelerator.no_backward_sync(self.model, enabled=is_accumulating):
-            # train batch
-            loss, _ = self.model_forward(batch_data)
-            self.accelerator.backward(loss)
-
-        # train step
-        if not is_accumulating:
-            self.accelerator.clip_gradients(
-                self.model, self.optimizer, max_norm=self.config.max_grad_norm
-            )
-            self.optimizer.step()
-            self.lr_scheduler.step()
-            self.optimizer.zero_grad()
-        return loss.item(), {}

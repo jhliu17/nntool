@@ -34,7 +34,7 @@ def get_csrc_files(folder: str) -> list[str]:
 
 package_info = dict(
     name="nntool",
-    version="1.4.0",
+    version="1.4.1",
     python_requires=">=3.9",
     install_requires=[
         # List your package dependencies here
@@ -87,6 +87,10 @@ else:
         Extension(
             name="nntool.plot.csrc.__compile__",
             sources=get_csrc_files("nntool/plot/csrc/"),
+        ),
+        Extension(
+            name="nntool.trainer.__compile__",
+            sources=get_csrc_files("nntool/trainer/"),
         ),
     ]
     setup(
