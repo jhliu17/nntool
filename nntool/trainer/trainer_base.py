@@ -6,9 +6,10 @@ from abc import ABC, abstractmethod
 from torch.utils.data import Dataset, DataLoader
 from torch import nn
 from torch import optim
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Literal, Optional, Tuple, Union
 from dataclasses import dataclass, field
 from tqdm import tqdm
+from wandb import AlertLevel
 
 from .trainer_utils import cycle_dataloader, divisible_by
 
@@ -33,19 +34,6 @@ class TrainerConfig:
     random_seed: int = 42
     output_path: str = "outputs"
     resume_trainer_from_dir: Optional[str] = None
-
-    def __post_init__(self):
-        if self.checkpoint_interval is None:
-            self.checkpoint_interval = self.eval_interval
-            warnings.warn(
-                "`checkpoint_interval` is not set. Using `eval_interval` as the default value for `checkpoint_interval`.",
-                UserWarning,
-            )
-
-        if self.eval_interval % self.checkpoint_interval != 0:
-            raise ValueError(
-                f"`eval_interval` {self.eval_interval} should be divisible by `checkpoint_interval` {self.checkpoint_interval}"
-            )
 
 
 @dataclass
@@ -81,7 +69,17 @@ class BaseTrainer(ABC):
         self._trainer_init()
 
     def _config_check(self):
-        pass
+        if self.config.checkpoint_interval is None:
+            self.config.checkpoint_interval = self.config.eval_interval
+            warnings.warn(
+                "`checkpoint_interval` is not set. Using `eval_interval` as the default value for `checkpoint_interval`.",
+                UserWarning,
+            )
+
+        if self.config.eval_interval % self.config.checkpoint_interval != 0:
+            raise ValueError(
+                f"`eval_interval` {self.config.eval_interval} should be divisible by `checkpoint_interval` {self.config.checkpoint_interval}"
+            )
 
     def _trainer_init(self):
         # prepare dataloaders
@@ -145,12 +143,30 @@ class BaseTrainer(ABC):
         return self.global_step // self.config.checkpoint_interval
 
     def log(self, log_dict: dict, step: int = None, section: str = "train"):
-        if self.is_main_process:
-            if not self.log_to_wandb:
-                return
+        if self.is_main_process and self.log_to_wandb:
             if step is None:
                 step = self.global_step
             wandb.log({f"{section}/{k}": v for k, v in log_dict.items()}, step=step)
+
+    def alert(
+        self,
+        title: str,
+        log_text: Union[str, Dict[str, Any]],
+        level: Literal["warning", "info", "error"] = "info",
+    ):
+        if self.is_main_process and self.log_to_wandb:
+            current_run = wandb.run
+            alert_level_mapping = {
+                "warning": AlertLevel.WARN,
+                "info": AlertLevel.INFO,
+                "error": AlertLevel.ERROR,
+            }
+            if current_run is not None:
+                current_run.alert(
+                    title=title,
+                    text=str(log_text),
+                    level=alert_level_mapping.get(level, None),
+                )
 
     @torch.no_grad()
     def eval_during_training(self, dataloader: torch.utils.data.DataLoader = None):
@@ -218,6 +234,11 @@ class BaseTrainer(ABC):
                     results = self.eval_during_training(self.eval_dataloader)
                     self.log(results, section="eval")
                     self.print("eval:", results)
+                    self.alert(
+                        title=f"eval results at step {self.global_step}",
+                        log_text=results,
+                        level="info",
+                    )
 
                 batch_data = next(dataloader)
                 loss, additional_info = self._train_step(batch_data)
@@ -241,45 +262,55 @@ class BaseTrainer(ABC):
         results = self.eval(self.test_dataloader)
         self.log(results, section="test")
         self.print("test:", results)
+        self.alert(
+            title="final test results",
+            log_text=results,
+            level="info",
+        )
         self.print("final step:", self.global_step)
         self.print("training complete")
+        self.alert(
+            title="training complete",
+            log_text=f"final step: {self.global_step}",
+            level="info",
+        )
 
     @property
     @abstractmethod
-    def device(self) -> torch.Device:
+    def device(self):
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def is_main_process(self) -> bool:
+    def is_main_process(self):
         raise NotImplementedError
 
     @property
     @abstractmethod
-    def use_distributed(self) -> bool:
+    def use_distributed(self):
         raise NotImplementedError
 
     @abstractmethod
-    def gather_for_metrics(self, *args, **kwargs) -> Any:
+    def gather_for_metrics(self, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
-    def print(self, *args, **kwargs) -> None:
+    def print(self, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
-    def save(self, milestone: Union[int, str]) -> None:
+    def save(self, milestone: Union[int, str]):
         raise NotImplementedError
 
     @abstractmethod
     def load(
         self,
         state_dir: str,
-    ) -> None:
+    ):
         raise NotImplementedError
 
     @abstractmethod
-    def model_forward(self, batch_data) -> Any:
+    def model_forward(self, batch_data):
         raise NotImplementedError
 
     @abstractmethod
