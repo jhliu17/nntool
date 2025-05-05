@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.abspath("/Users/junhao/Hub/code/nntool"))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "🚂 NNTool"
-copyright = "2024"
+copyright = "2025"
 author = "Junhao Liu"
 
 # -- General configuration ---------------------------------------------------
@@ -36,7 +36,8 @@ autodoc_typehints = "none"
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "sphinx_book_theme"
-html_static_path = ["_static"]
-html_css_files = ["style/custom.css"]
-html_theme_options = {"collapse_navbar": False, "show_toc_level": 2}
+html_permalinks_icon = "<span>#</span>"
+html_theme = "sphinxawesome_theme"
+# html_static_path = ["_static"]
+# html_css_files = ["style/custom.css"]
+# html_theme_options = {"collapse_navbar": False, "show_toc_level": 2}

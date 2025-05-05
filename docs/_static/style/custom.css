@@ -1,6 +1,0 @@
-/* https://github.com/executablebooks/sphinx-book-theme/issues/777 */
-.bd-sidebar-primary div#rtd-footer-container {
-    bottom: -1rem;
-    margin: -1rem;
-    position: fixed;
-}
