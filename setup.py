@@ -88,10 +88,6 @@ else:
             name="nntool.plot.csrc.__compile__",
             sources=get_csrc_files("nntool/plot/csrc/"),
         ),
-        Extension(
-            name="nntool.trainer.__compile__",
-            sources=get_csrc_files("nntool/trainer/"),
-        ),
     ]
     setup(
         packages=find_packages(exclude=["tests"]),
