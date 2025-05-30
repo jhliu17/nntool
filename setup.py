@@ -41,7 +41,6 @@ package_info = dict(
         # e.g., 'requests>=2.0',
         "setuptools>=68.0.0",
         "submitit>=1.5.3",
-        "tyro>=0.8.12",
         "matplotlib>=3.8.0",
         "seaborn>=0.13.2",
         "wandb>=0.15.0",
@@ -57,7 +56,6 @@ package_info = dict(
             "jax[cpu]>=0.4.0",
             "torch>=2.2.0",
             "mypy",
-            "accelerate>=1.6.0",
         ]
     },
     # Additional metadata
@@ -87,10 +85,6 @@ else:
         Extension(
             name="nntool.plot.csrc.__compile__",
             sources=get_csrc_files("nntool/plot/csrc/"),
-        ),
-        Extension(
-            name="nntool.trainer.__compile__",
-            sources=get_csrc_files("nntool/trainer/"),
         ),
     ]
     setup(
