@@ -60,6 +60,5 @@ NNTool is available on PyPI and can be installed using pip: https://pypi.org/pro
    :hidden:
 
    nntool.slurm<documentations/slurm>
-   nntool.experiment<documentations/experiment>
    nntool.wandb<documentations/wandb>
-   nntool.utils<documentations/utils>
+   nntool.experiment<documentations/experiment>

@@ -1,7 +1,24 @@
-Distributed Training
-#########################
+Distributed Training with PyTorch
+#################################
 
-This example shows how to submit a distributed training job with ``nntool``.
+The distributed training with ``nntool`` has been tested with the following features:
+
+
+**Single Node**
+
+- ✅ Single-process training
+- ✅ Mixed precising training
+- ✅ Gradient accumulation
+- ✅ DDP training
+- ✅ FSDP training (FSDP2 with Accelerate)
+
+**Multiple Nodes**
+
+- ❓ Multi-node DDP training
+- ❓ Multi-node FSDP training
+
+
+Below is an example shows how to submit a distributed training job with ``nntool``.
 
 
 Training function
@@ -61,7 +78,7 @@ Set up the entry point
 Here is an example of how to use the ``distributed_launch_command`` in the ``SlurmConfig`` function. The command is used to launch the distributed job with ``accelerate``. The command is as follows:
 
 .. code-block:: python
-    :caption: distributed_launch_command with main.py
+    :caption: distributed_launch_command in SlurmConfig
 
     accelerate launch --config_file CONFIG_FILE --num_processes {num_processes} --num_machines {num_machines} --machine_rank {machine_rank} --main_process_ip {main_process_ip} --main_process_port {main_process_port} main.py
 

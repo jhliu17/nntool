@@ -1,5 +1,5 @@
-Sequential Jobs
-###############
+Sequential Jobs with Slurm
+##########################
 
 This example shows how to submit a series of jobs with ``nntool``.
 
