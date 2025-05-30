@@ -109,6 +109,9 @@ class SlurmFunction:
                 else slurm_config.gpus_per_node
             ),  # gpu cannot be assigned in the task level
             timeout_min=slurm_config.timeout_min,
+            # refer to https://samuelstevens.me/writing/submitit#multi-gpu-training-in-torch
+            stderr_to_stdout=slurm_config.stderr_to_stdout,
+            setup=slurm_config.setup,
             slurm_additional_parameters=slurm_additional_parameters,
             **slurm_submission_kwargs,
         )

@@ -1,7 +1,8 @@
 import os
 import sys
+
 from dataclasses import dataclass, field, replace
-from typing import Literal, Dict, Optional
+from typing import List, Literal, Dict, Optional
 
 
 @dataclass
@@ -37,6 +38,10 @@ class SlurmConfig:
     :param mem: The amount of memory to request. Leave blank to use the default memory configuration of the node. Default is an empty string.
 
     :param timeout_min: The time limit for the job in minutes. Default is `sys.maxsize` for effectively no limit.
+
+    :param stderr_to_stdout: Whether to redirect stderr to stdout. Default is False.
+
+    :param setup: A list of environment variables setup commands. Default is an empty list.
 
     :param pack_code: Whether to pack the codebase before submission. Default is False.
 
@@ -102,6 +107,12 @@ class SlurmConfig:
 
     # time out min
     timeout_min: int = sys.maxsize
+
+    # whether to redirect stderr to stdout
+    stderr_to_stdout: bool = False
+
+    # environment variables setup command
+    setup: List[str] = field(default_factory=list)
 
     # whether to pack code
     pack_code: bool = False
