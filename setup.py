@@ -34,13 +34,13 @@ def get_csrc_files(folder: str) -> list[str]:
 
 package_info = dict(
     name="nntool",
-    version="1.4.1",
+    version="1.5.0",
     python_requires=">=3.9",
     install_requires=[
         # List your package dependencies here
         # e.g., 'requests>=2.0',
         "setuptools>=68.0.0",
-        "submitit>=1.5.2",
+        "submitit>=1.5.3",
         "tyro>=0.8.12",
         "matplotlib>=3.8.0",
         "seaborn>=0.13.2",
