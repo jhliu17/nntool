@@ -1,6 +1,4 @@
 import os
-
-from Cython.Build import cythonize
 from setuptools import setup, find_packages, Command, Extension
 
 
@@ -45,6 +43,7 @@ package_info = dict(
         "seaborn>=0.13.2",
         "wandb>=0.15.0",
         "tomli>=2.0.1",
+        "Cython",
         "cythonpackage",
     ],
     cmdclass={
@@ -52,10 +51,10 @@ package_info = dict(
     },
     extras_require={
         "dev": [
+            "ruff",
             "pytest>=8.0.2",
             "jax[cpu]>=0.4.0",
             "torch>=2.2.0",
-            "mypy",
         ]
     },
     # Additional metadata
@@ -76,6 +75,8 @@ if os.getenv("NNTOOL_PYTHON_BUILD"):
         **package_info,
     )
 else:
+    from Cython.Build import cythonize
+
     # Specify the Cython modules to build
     cython_extensions = [
         Extension(
