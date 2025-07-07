@@ -7,7 +7,6 @@ import pytest
 
 from dataclasses import dataclass
 from nntool.slurm import SlurmConfig, slurm_fn
-from nntool.utils import get_current_time
 
 
 def get_slurm_config(output_path, is_distributed: bool = False):
@@ -80,6 +79,8 @@ def run_job(sleep_time: int = 30):
         print(torch.cuda.device_count())
         a = torch.randn(1000, 1000).to(device)
         time.sleep(sleep_time)
+
+    del a
 
 
 @slurm_fn

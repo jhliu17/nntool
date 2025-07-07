@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68.0.0", "wheel", "Cython", "cythonpackage"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+# Specify the Python version you're targeting
+target-version = "py311"
+
+# Set the maximum line length
+line-length = 100
+
+# Enable auto-fixing for specific rule categories
+fix = true
+
+# Directories to include/exclude
+include = ["*.py", "*.pyi", "**/pyproject.toml"]
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "*.ipynb",        # Exclude notebooks from ruff checks
+    "buildkit",
+]
+
+[tool.ruff.lint]
+ignore = ["F405", "F403", "E741", "E712"]
