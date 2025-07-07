@@ -37,6 +37,7 @@ package_info = dict(
     install_requires=[
         # List your package dependencies here
         # e.g., 'requests>=2.0',
+        "tyro",
         "setuptools>=68.0.0",
         "submitit>=1.5.3",
         "matplotlib>=3.8.0",
@@ -52,6 +53,7 @@ package_info = dict(
     extras_require={
         "dev": [
             "ruff",
+            "accelerate",
             "pytest>=8.0.2",
             "jax[cpu]>=0.4.0",
             "torch>=2.2.0",

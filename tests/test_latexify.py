@@ -1,12 +1,15 @@
 import os
+import pytest
 import jax.numpy as jnp
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 from jax.scipy.stats import t, norm, laplace
 from nntool.plot import latexify, savefig, is_latexify_enabled, latexify_plot
+from .utils import is_latex_available
 
 
+@pytest.mark.skipif(not is_latex_available(), reason="LATEX is not installed on this system")
 def test_latexify(tmp_path):
     os.environ["LATEXIFY"] = "1"
     latexify(fig_width=0.45 * 6, fig_height=1.5)
@@ -91,6 +94,7 @@ def test_latexify(tmp_path):
     savefig("studentLaplaceLogpdf3.pdf", fig_dir=tmp_path)
 
 
+@pytest.mark.skipif(not is_latex_available(), reason="LATEX is not installed on this system")
 def test_context(tmp_path):
     with latexify_plot(fig_width=0.45 * 6, fig_height=1.5) as ctx:
         x = jnp.linspace(-4, 4, 100)

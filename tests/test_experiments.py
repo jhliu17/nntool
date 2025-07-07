@@ -53,12 +53,12 @@ def test_output_path(tmp_path):
 
     args = experiments["base"]
     assert (
-        args.slurm.output_folder
+        args.slurm.output_path
         == f"{args.project_path}/{tmp_path}/base/{args.experiment_name}/{args.current_time}/slurm"
     )
 
     args = experiments["lite"]
     assert (
-        args.slurm.output_folder
+        args.slurm.output_path
         == f"{args.project_path}/{tmp_path}/lite/{args.experiment_name}/{args.current_time}/slurm"
     )

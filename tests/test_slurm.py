@@ -1,4 +1,3 @@
-import sys
 import os
 import torch
 import time
@@ -7,6 +6,7 @@ import pytest
 
 from dataclasses import dataclass
 from nntool.slurm import SlurmConfig, slurm_fn
+from .utils import is_slurm_available
 
 
 def get_slurm_config(output_path, is_distributed: bool = False):
@@ -103,7 +103,7 @@ def work_fn(a, b):
     return a + b
 
 
-@pytest.mark.skipif(sys.platform != "linux", reason="Test only runs on Linux")
+@pytest.mark.skipif(not is_slurm_available(), reason="SLURM is not installed on this system")
 def test_distributed_slurm_function(tmp_path):
     slurm_settings = get_slurm_config("tests/outputs/", is_distributed=True)
     job = distributed_fn[slurm_settings](1, k=1)
@@ -114,7 +114,7 @@ def test_distributed_slurm_function(tmp_path):
     ]
 
 
-@pytest.mark.skipif(sys.platform != "linux", reason="Test only runs on Linux")
+@pytest.mark.skipif(not is_slurm_available(), reason="SLURM is not installed on this system")
 def test_job_array_slurm_function(tmp_path):
     slurm_settings = get_slurm_config("tests/outputs/", is_distributed=False)
     fn = work_fn[slurm_settings]
@@ -130,7 +130,7 @@ def test_job_array_slurm_function(tmp_path):
     assert results == [4, 6, 16, 18]
 
 
-@pytest.mark.skipif(sys.platform != "linux", reason="Test only runs on Linux")
+@pytest.mark.skipif(not is_slurm_available(), reason="SLURM is not installed on this system")
 def test_sequential_jobs(tmp_path):
     slurm_settings = get_slurm_config("tests/outputs/", is_distributed=False)
 
@@ -154,7 +154,7 @@ def test_sequential_jobs(tmp_path):
     assert results == [12, 19, 32]
 
 
-@pytest.mark.skipif(sys.platform != "linux", reason="Test only runs on Linux")
+@pytest.mark.skipif(not is_slurm_available(), reason="SLURM is not installed on this system")
 def test_class_slurm_function(tmp_path):
     worker = WorkerTest("test_worker")
     slurm_settings = get_slurm_config("tests/outputs/", is_distributed=False)
