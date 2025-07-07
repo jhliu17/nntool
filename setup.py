@@ -57,6 +57,10 @@ package_info = dict(
             "pytest>=8.0.2",
             "jax[cpu]>=0.4.0",
             "torch>=2.2.0",
+            "sphinx",
+            "sphinxawesome_theme",
+            "myst_parser",
+            "sphinx-autodoc-typehints",
         ]
     },
     # Additional metadata
