@@ -77,7 +77,7 @@ class SlurmFunction:
         # which is equivalent to the `debug` mode in the submitit library
         cluster_dispatch = {
             "slurm": None,
-            "exec": "debug",
+            "exec": "local",
             "debug": "debug",
             "local": "local",
         }
