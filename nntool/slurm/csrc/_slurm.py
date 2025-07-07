@@ -233,9 +233,7 @@ class SlurmFunction:
         slurm_fn.__configured = True
         return slurm_fn
 
-    def __getitem__(
-        self, slurm_config: Union[Dict[str, Any], Tuple[Any], Any]
-    ) -> "SlurmFunction":
+    def __getitem__(self, slurm_config: Union[Dict[str, Any], Tuple[Any], Any]) -> "SlurmFunction":
         """Instantiate the slurm configuration for the slurm function. A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
         #### Exported Distributed Enviroment Variables
@@ -402,9 +400,7 @@ class SlurmFunction:
         *submit_fn_args,
         **submit_fn_kwargs,
     ):
-        submit_fn_args = (
-            self.default_submit_fn_args if not submit_fn_args else submit_fn_args
-        )
+        submit_fn_args = self.default_submit_fn_args if not submit_fn_args else submit_fn_args
         submit_fn_kwargs = (
             self.default_submit_fn_kwargs if not submit_fn_kwargs else submit_fn_kwargs
         )
@@ -454,11 +450,7 @@ class SlurmFunction:
             if self.slurm_config.distributed_env_task == "torch":
                 task = PyTorchDistributedTask(
                     self.slurm_config.distributed_launch_command,
-                    (
-                        self.system_argv
-                        if self.system_argv is not None
-                        else list(sys.argv[1:])
-                    ),
+                    (self.system_argv if self.system_argv is not None else list(sys.argv[1:])),
                     self.slurm_config,
                     verbose=True,
                     **self.slurm_task_kwargs,

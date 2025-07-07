@@ -85,17 +85,13 @@ def init_wandb(args: WandbConfig, run_config: dict) -> Run | RunDisabled | None:
         project = config_data["wandb"].get("project", args.project)
         entity = config_data["wandb"].get("entity", args.entity)
     else:
-        warnings.warn(
-            "WANDB_API_KEY is not found in environment variables or the local key file."
-        )
+        warnings.warn("WANDB_API_KEY is not found in environment variables or the local key file.")
         pass
 
     if args.log_git_hash:
         repo = git.Repo(search_parent_directories=True)
         git_hash = repo.head.object.hexsha
-        args.notes = (
-            f"{args.notes + ', ' if args.notes else ''}" + f"git hash: {git_hash}"
-        )
+        args.notes = f"{args.notes + ', ' if args.notes else ''}" + f"git hash: {git_hash}"
 
     wandb_run = wandb.init(
         project=project,
@@ -105,14 +101,10 @@ def init_wandb(args: WandbConfig, run_config: dict) -> Run | RunDisabled | None:
         config=run_config,
     )
     if not is_wandb_enabled():
-        warnings.warn(
-            "wandb is not enabled after intialization. Please check `wandb enabled`."
-        )
+        warnings.warn("wandb is not enabled after intialization. Please check `wandb enabled`.")
 
     wandb_run.log_code(
         root=args.code_root,
-        include_fn=lambda path, root: any(
-            [path.endswith(ext) for ext in args.code_ext]
-        ),
+        include_fn=lambda path, root: any([path.endswith(ext) for ext in args.code_ext]),
     )
     return wandb_run

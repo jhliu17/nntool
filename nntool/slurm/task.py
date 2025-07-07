@@ -31,8 +31,7 @@ def exclude_code_folders(path: str, root: str, code_folders: list[str]):
 
 def exclude_wandb_fn(path: str, root: str) -> bool:
     return any(
-        os.path.relpath(path, root).startswith(wandb_dir + os.sep)
-        for wandb_dir in WANDB_DIRS
+        os.path.relpath(path, root).startswith(wandb_dir + os.sep) for wandb_dir in WANDB_DIRS
     )
 
 
@@ -53,12 +52,8 @@ def filtered_dir(
 def pack_code_files(
     root: str,
     target_root: str,
-    include_fn: Union[
-        Callable[[str, str], bool], Callable[[str], bool]
-    ] = _is_py_or_dockerfile,
-    exclude_fn: Union[
-        Callable[[str, str], bool], Callable[[str], bool]
-    ] = exclude_wandb_fn,
+    include_fn: Union[Callable[[str, str], bool], Callable[[str], bool]] = _is_py_or_dockerfile,
+    exclude_fn: Union[Callable[[str, str], bool], Callable[[str], bool]] = exclude_wandb_fn,
 ):
     root = os.path.abspath(root)
     code_root = Path(os.path.abspath(root))
@@ -86,9 +81,7 @@ def reconstruct_command_line(argv):
 
 
 class Task:
-    def __init__(
-        self, argv: list[str], slurm_config: SlurmConfig, verbose: bool = False
-    ):
+    def __init__(self, argv: list[str], slurm_config: SlurmConfig, verbose: bool = False):
         self.argv = argv
         self.slurm_config = slurm_config
         self.verbose = verbose

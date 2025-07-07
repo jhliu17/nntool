@@ -36,9 +36,7 @@ class latexify_plot:
             os.environ.pop("LATEXIFY")
             matplotlib.rcParams.update(matplotlib.rcParamsDefault)
 
-    def savefig(
-        self, filename, despine: bool = True, fig_dir: str = "tests/plot", **kwargs
-    ):
+    def savefig(self, filename, despine: bool = True, fig_dir: str = "tests/plot", **kwargs):
         if despine:
             sns.despine()
         savefig(filename, fig_dir=fig_dir, **kwargs)

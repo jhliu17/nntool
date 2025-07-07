@@ -55,9 +55,7 @@ def latexify(
     plt.rc("text", usetex=True)
     plt.rc("font", family="serif")
     plt.rc("figure", figsize=(fig_width, fig_height))
-    plt.rcParams[
-        "text.latex.preamble"
-    ] = r"""
+    plt.rcParams["text.latex.preamble"] = r"""
     \usepackage{amsmath}
     \usepackage{bm}
     """
@@ -97,9 +95,7 @@ def savefig(
     if len(f_name) == 0:
         return
     if "FIG_DIR" not in os.environ and fig_dir is None:
-        warnings.warn(
-            "set FIG_DIR environment variable or pass fig_dir argument to save figures"
-        )
+        warnings.warn("set FIG_DIR environment variable or pass fig_dir argument to save figures")
         return
 
     fig_dir = fig_dir if fig_dir is not None else os.environ["FIG_DIR"]
@@ -117,9 +113,7 @@ def savefig(
 
     if tight_bbox:
         # This changes the size of the figure
-        plt.savefig(
-            fname_full, pad_inches=pad_inches, bbox_inches="tight", *args, **kwargs
-        )
+        plt.savefig(fname_full, pad_inches=pad_inches, bbox_inches="tight", *args, **kwargs)
     else:
         plt.savefig(fname_full, pad_inches=pad_inches, *args, **kwargs)
 
@@ -130,8 +124,6 @@ def savefig(
             fname_full = fname_full[:-4] + ".pdf"
         if tight_bbox:
             # This changes the size of the figure
-            plt.savefig(
-                fname_full, pad_inches=pad_inches, bbox_inches="tight", *args, **kwargs
-            )
+            plt.savefig(fname_full, pad_inches=pad_inches, bbox_inches="tight", *args, **kwargs)
         else:
             plt.savefig(fname_full, pad_inches=pad_inches, *args, **kwargs)

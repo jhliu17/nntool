@@ -124,9 +124,7 @@ class SlurmConfig:
     code_root: str = "."
 
     # code file extensions
-    code_file_suffixes: list[str] = field(
-        default_factory=lambda: [".py", ".sh", ".yaml", ".toml"]
-    )
+    code_file_suffixes: list[str] = field(default_factory=lambda: [".py", ".sh", ".yaml", ".toml"])
 
     # exclude folders (relative to the code root)
     exclude_code_folders: list[str] = field(
@@ -179,14 +177,10 @@ class SlurmConfig:
         if self.output_folder.endswith("slurm"):
             self.output_folder = f"{self.output_folder}{output_folder_suffix}"
         else:
-            self.output_folder = os.path.join(
-                self.output_folder, f"slurm{output_folder_suffix}"
-            )
+            self.output_folder = os.path.join(self.output_folder, f"slurm{output_folder_suffix}")
 
         # output path
-        self.output_path: str = os.path.join(
-            self.output_parent_path, self.output_folder
-        )
+        self.output_path: str = os.path.join(self.output_parent_path, self.output_folder)
 
     def set_output_path(self, output_parent_path: str) -> "SlurmConfig":
         """Set output path and date for the slurm job."""

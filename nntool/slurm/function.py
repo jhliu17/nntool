@@ -23,9 +23,7 @@ class SlurmFunction:
         :param default_submit_fn_kwargs: default known word args for submit_fn, defaults to {}
         :return: the wrapped submit function with configured slurm paramters
         """
-        self.engine = _SlurmFunction(
-            submit_fn, default_submit_fn_args, default_submit_fn_kwargs
-        )
+        self.engine = _SlurmFunction(submit_fn, default_submit_fn_args, default_submit_fn_kwargs)
 
     def __create_copy(self) -> "SlurmFunction":
         return copy.copy(self)
@@ -90,9 +88,7 @@ class SlurmFunction:
         )
         return configured_slurm_function
 
-    def __getitem__(
-        self, slurm_config: Union[Dict[str, Any], Tuple[Any], Any]
-    ) -> "SlurmFunction":
+    def __getitem__(self, slurm_config: Union[Dict[str, Any], Tuple[Any], Any]) -> "SlurmFunction":
         """Instantiate the slurm configuration for the slurm function. A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
         **Exported Distributed Enviroment Variables**

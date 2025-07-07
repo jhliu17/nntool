@@ -22,9 +22,7 @@ def nvidia_smi_gpu_memory_stats() -> dict:
                 gpu_key = f"gpu_{gpu_idx}_mem_used_gb"
                 out_dict[gpu_key] = int(mem_used.strip().split(" ")[0]) / 1024
     except FileNotFoundError:
-        raise Exception(
-            "Failed to find the 'nvidia-smi' executable for printing GPU stats"
-        )
+        raise Exception("Failed to find the 'nvidia-smi' executable for printing GPU stats")
     except subprocess.CalledProcessError as e:
         raise Exception(f"nvidia-smi returned non zero error code: {e.returncode}")
 

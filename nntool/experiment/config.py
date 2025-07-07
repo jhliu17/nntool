@@ -46,9 +46,7 @@ class BaseExperimentConfig:
         self.env_toml: Dict[str, Any] = self.__prepare_env_toml_dict()
 
         self.experiment_name = self.__prepare_experiment_name()
-        self.project_path, self.output_path, self.current_time = (
-            self.__prepare_experiment_paths()
-        )
+        self.project_path, self.output_path, self.current_time = self.__prepare_experiment_paths()
 
         # custom post update for the derived class
         self.set_up_stateful_fields()
@@ -68,9 +66,7 @@ class BaseExperimentConfig:
         project_path = self.env_toml["project"]["path"]
 
         output_path, current_time = get_output_path(
-            output_path=os.path.join(
-                self.output_folder, self.config_name, self.experiment_name
-            ),
+            output_path=os.path.join(self.output_folder, self.config_name, self.experiment_name),
             append_date=self.append_date_to_path,
             cache_into_env=False,
         )
