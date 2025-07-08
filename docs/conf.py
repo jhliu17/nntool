@@ -1,8 +1,3 @@
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath("/Users/junhao/Hub/code/nntool"))
-
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -36,8 +31,7 @@ autodoc_typehints = "none"
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_permalinks_icon = "<span>#</span>"
-html_theme = "sphinxawesome_theme"
+html_theme = "furo"
 # html_static_path = ["_static"]
 # html_css_files = ["style/custom.css"]
 # html_theme_options = {"collapse_navbar": False, "show_toc_level": 2}

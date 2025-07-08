@@ -7,11 +7,10 @@ Slurm
 .. important::
   Please be aware of the sharp bits when using the ``nntool`` library. Please refer to the `Sharp Bits <../introduction/sharp_bits.html>`_ section for more information.
 
-.. automodule:: nntool.slurm.config
-  :members: SlurmConfig
+.. autoclass:: nntool.slurm.config.SlurmConfig
+  :members:
 
-.. automodule:: nntool.slurm.wrap
-  :members: slurm_fn
+.. autofunction:: nntool.slurm.wrap.slurm_fn
 
-.. automodule:: nntool.slurm.function
-  :members: SlurmFunction
+.. autoclass:: nntool.slurm.function.SlurmFunction
+  :members:

@@ -45,7 +45,7 @@ NNTool is available on PyPI and can be installed using pip: https://pypi.org/pro
 
 
 .. toctree::
-   :caption: Getting started
+   :caption: Tutorials
    :maxdepth: 2
    :hidden:
 

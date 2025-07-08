@@ -58,7 +58,7 @@ package_info = dict(
             "jax[cpu]>=0.4.0",
             "torch>=2.2.0",
             "sphinx",
-            "sphinxawesome_theme",
+            "furo",
             "myst_parser",
             "sphinx-autodoc-typehints",
         ]
