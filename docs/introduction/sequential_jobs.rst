@@ -1,4 +1,4 @@
-Slurm Jobs with nntool
+Slurm Jobs with NNTool
 ######################
 
 This example shows how to submit a series of jobs with ``nntool``.

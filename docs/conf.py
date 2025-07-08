@@ -25,7 +25,9 @@ exclude_patterns = []
 
 add_module_names = False
 autosummary_generate = True
-autodoc_typehints = "none"
+autodoc_typehints = "description"
+autodoc_typehints_description_target = "documented"
+autodoc_typehints_format = "short"
 
 
 # -- Options for HTML output -------------------------------------------------
