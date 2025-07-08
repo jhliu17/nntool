@@ -1,6 +1,4 @@
 LOCAL_CACHE = /Users/junhao/Hub/code/homepage/wheel/nntool/sdist
-LOCAL_DOCS = /Users/junhao/Hub/code/homepage/site/nntool
-LOCAL_CYTHON_CACHE = /Users/junhao/Hub/code/homepage/wheel/nntool/releases/
 
 all: wheel
 
@@ -16,7 +14,7 @@ test:
 pyi:
 	stubgen --include-docstrings nntool
 
-push:
+push2homepage:
 	cd $(LOCAL_CACHE) && rm -f index.html
 	cd dist && cp *.whl $(LOCAL_CACHE)
 	bash index.sh $(LOCAL_CACHE) dist
@@ -26,26 +24,11 @@ push:
 livehtml:
 	sphinx-autobuild docs docs/_build -a
 
-build_site:
-	cd docs && rm -rf ./_build && make html
-
-push_site:
-	cd $(LOCAL_DOCS) && rm -rf ./*
-	cd docs/_build/html/ && cp -rf ./* $(LOCAL_DOCS)/ && cp -rf ./.nojekyll $(LOCAL_DOCS)/ && cp -rf ./.buildinfo $(LOCAL_DOCS)/
-	cd $(LOCAL_DOCS) && git add ./* && git commit -m "Update docs" && git push
-
 releases:
 	CIBW_BEFORE_BUILD="pip install cython; pip install buildkit/cythonpackage" CIBW_BUILD="cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64" cibuildwheel --platform linux
 
 releases_test:
 	CIBW_BEFORE_BUILD="pip install cython; pip install buildkit/cythonpackage" CIBW_BUILD="cp310-manylinux_x86_64" CIBW_BUILD_VERBOSITY=1 cibuildwheel --platform linux
-
-push_releases:
-	cd $(LOCAL_CYTHON_CACHE) && rm -f index.html
-	cd wheelhouse && cp *.whl $(LOCAL_CYTHON_CACHE)
-	bash index.sh $(LOCAL_CYTHON_CACHE) wheelhouse
-	cd wheelhouse && cp index.html $(LOCAL_CYTHON_CACHE)
-	cd $(LOCAL_CYTHON_CACHE) && git add ./* && git commit -m "Update wheel" && git push
 
 # Clean the build
 clean:
