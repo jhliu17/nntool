@@ -47,7 +47,7 @@ class SlurmConfig:
 
     :param use_packed_code: Whether to use the packed code for execution. Default is False.
 
-    :param code_root: The root directory of the codebase. Default is the current directory (``.``).
+    :param code_root: The root directory of the codebase, which will be used by the code packing. Default is the current directory (``.``).
 
     :param code_file_suffixes: A list of file extensions for code files to be included when packing. Default includes ``.py``, ``.sh``, ``.yaml``, and ``.toml``.
 
@@ -55,7 +55,7 @@ class SlurmConfig:
 
     :param use_distributed_env: Whether to use a distributed environment for the job. Default is False.
 
-    :param processes_per_task: The number of processes to run per task. This value is not used by SLURM but is relevant for distributed environments. Default is 1.
+    :param processes_per_task: The number of processes to run per task. This value is not used by SLURM but is relevant for correctly set up distributed environments. Default is 1.
 
     :param distributed_launch_command: The command to launch distributed environment setup, using environment variables like ``{num_processes}``, ``{num_machines}``, ``{machine_rank}``, ``{main_process_ip}``, ``{main_process_port}``. Default is an empty string.
 
