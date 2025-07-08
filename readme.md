@@ -1,6 +1,8 @@
 # 🚂 NNTool
 
-"nicely neat tool" and "neural network tool"
+[![Pytest](https://github.com/jhliu17/nntool/actions/workflows/pytest.yml/badge.svg)](https://github.com/jhliu17/nntool/actions/workflows/pytest.yml) [![Documentation](https://github.com/jhliu17/nntool/actions/workflows/documentation.yml/badge.svg)](https://github.com/jhliu17/nntool/actions/workflows/documentation.yml)
+
+NNTool is a package built on top of submitit designed to provide simple abstractions to conduct experiments on Slurm for machine learning research.
 
 ## Installation
 
