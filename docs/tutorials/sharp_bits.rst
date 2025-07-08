@@ -4,7 +4,7 @@
 Although the ``nntool`` library is designed to be simple and easy to use, there are some sharp bits that you should be aware of. This section covers some of the sharp bits that you should be aware of when using the ``nntool`` library.
 
 ‼️ Pure functions
-==============
+=================
 
 The submitted function should be a pure function. This means that the function should not have any side effects.
 
@@ -17,7 +17,7 @@ The submitted function should be a pure function. This means that the function s
 
 
 ‼️ Stateless pending jobs
-========================
+=========================
 
 When you submit a job to the Slurm cluster, the job is pending until it is executed. If you make changes to the code after submitting the job, the job will be executed with the latest code version, not the code version that was submitted.
 

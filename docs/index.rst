@@ -49,9 +49,9 @@ NNTool is available on PyPI and can be installed using pip: https://pypi.org/pro
    :maxdepth: 2
    :hidden:
 
-   introduction/sequential_jobs
-   introduction/distributed_training
-   introduction/sharp_bits
+   tutorials/sequential_jobs
+   tutorials/distributed_training
+   tutorials/sharp_bits
 
 
 .. toctree::
