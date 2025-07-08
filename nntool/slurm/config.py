@@ -11,13 +11,13 @@ class SlurmConfig:
     Configuration class for SLURM job submission and execution.
 
     :param mode: Running mode for the job. Options include:
-                 "debug" (default), "exec", "local", or "slurm".
+                 "debug" (default, run debugging which will involve pdb), "exec" (alias of local), "local" (run the job locally), or "slurm" (run the job on a SLURM cluster).
 
-    :param job_name: The name of the SLURM job. Default is ''.
+    :param job_name: The name of the SLURM job. Default is 'Job'.
 
     :param partition: The name of the SLURM partition to use. Default is ''.
 
-    :param output_parent_path: The parent directory name for saving slurm folder. Default is './'.
+    :param output_parent_path: The parent directory path for saving the slurm folder. Default is './'.
 
     :param output_folder: The folder name where SLURM output files will be stored. Default is 'slurm'.
 
@@ -41,7 +41,7 @@ class SlurmConfig:
 
     :param stderr_to_stdout: Whether to redirect stderr to stdout. Default is False.
 
-    :param setup: A list of environment variables setup commands. Default is an empty list.
+    :param setup: A list of environment variable setup commands. Default is an empty list.
 
     :param pack_code: Whether to pack the codebase before submission. Default is False.
 
