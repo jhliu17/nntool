@@ -33,6 +33,22 @@ The ``slurm_fn`` decorator converts a Python function into a SlurmFunction. The 
         return a + b
 
 
+Submitting and blocking to get the result
+=========================================
+
+This example demonstrates how to submit a job to the Slurm cluster and block until the job is finished. The ``SlurmFunction`` is used to submit the job, and the ``result()`` method is used to get the result of the job.
+
+.. code-block:: python
+    :caption: A worker function return the result
+
+    fn = work_fn[slurm_settings]
+
+    job = fn(1, 2) # The job is submitted to the Slurm cluster
+    result = job.result()  # This will block execution until the job is finished
+    print(result)
+    assert result == 3
+
+
 .. important::
 
     A ``SlurmFunction`` executed on the Slurm cluster is non-blocking. The ``result()`` method is used to get the result of the job. The ``result()`` method will block until the job is finished.
@@ -41,16 +57,15 @@ The ``slurm_fn`` decorator converts a Python function into a SlurmFunction. The 
 Map array
 =========
 
+You can even map an array of values to a worker function. This will create a job for each element in the array and return a list of jobs. Each job can be executed in parallel on the Slurm cluster.
+
 .. code-block:: python
     :caption: A worker function maps an array
 
     fn = work_fn[slurm_settings]
 
-    job = fn(1, 2)
-    result = job.result()
-    print(result)
-    assert result == 3
-
+    # This will create a job for each element in the array
+    # and return a list of jobs.
     jobs = fn.map_array([1, 2, 8, 9], [3, 4, 8, 9])
     results = [job.result() for job in jobs]
     print(results)
@@ -60,6 +75,8 @@ Map array
 Dependency between jobs
 =======================
 
+You can create dependencies between jobs using the ``on_condition()``, ``afterok()``, ``afternotok``, and ``afterany()`` methods. This allows you to run jobs sequentially or in parallel based on the completion of other jobs. Please check the `SlurmFunction` documentation for more details on these methods.
+
 .. code-block:: python
     :caption: A worker function runs sequentially
 
@@ -67,18 +84,17 @@ Dependency between jobs
     job1 = work_fn[slurm_settings](10, 2)
     jobs.append(job1)
 
-    fn1 = work_fn[slurm_settings]
-    fn1.on_condition(job1)
-    job2 = fn1(7, 12)
+    fn2 = work_fn[slurm_settings]
+    fn2.on_condition(job1)
+    job2 = fn2(7, 12)
     jobs.append(job2)
 
-    fn2 = work_fn[slurm_settings]
-    assert fn1 is not fn2
+    fn3 = work_fn[slurm_settings]
+    assert fn2 is not fn3  # Each configuration creates a new copy of the function
 
-    fn2.afterany(job1, job2)
-    job3 = fn2(2, 30)
+    fn3.afterany(job1, job2)
+    job3 = fn3(2, 30)
     jobs.append(job3)
 
-    results = [job.result() for job in jobs]
+    results = [job.result() for job in jobs]  # This will block until all jobs are finished
     assert results == [12, 19, 32]
-

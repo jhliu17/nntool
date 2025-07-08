@@ -1,16 +1,16 @@
 Distributed Training with PyTorch
 #################################
 
-The distributed training with ``nntool`` has been tested with the following features:
+The distributed training with ``nntool`` has been extensively tested with the following features:
 
 
 **Single Node**
 
 - ✅ Single-process training
-- ✅ Mixed precising training
-- ✅ Gradient accumulation
 - ✅ DDP training
-- ✅ FSDP training (FSDP2 with Accelerate)
+- ✅ FSDP training (e.g., FSDP2 with Accelerate)
+
+We haven't tested the following features yet, but they are expected to work:
 
 **Multiple Nodes**
 
@@ -18,7 +18,7 @@ The distributed training with ``nntool`` has been tested with the following feat
 - ❓ Multi-node FSDP training
 
 
-Below is an example shows how to submit a distributed training job with ``nntool``.
+Below is an example shows how to submit a distributed training job with ``nntool`` and use ``accelerate`` for distributed training.
 
 
 Training function
@@ -34,25 +34,15 @@ Here is an example of using ``accelerate`` to conduct a distributed training. Pl
     from nntool.slurm import slurm_fn, SlurmConfig
 
     @slurm_fn
-    def main(config: SlurmConfig):
+    def main(config: SlurmConfig) -> None:
         accelerator = Accelerator()
         set_seed(2024)
-        ...
         model, optimizer, training_dataloader, scheduler = accelerator.prepare(
             model, optimizer, training_dataloader, scheduler
         )
 
-        # TRAINING
-        for batch in training_dataloader:
-            optimizer.zero_grad()
-            inputs, targets = batch
-            inputs = inputs.to(device)
-            targets = targets.to(device)
-            outputs = model(inputs)
-            loss = loss_function(outputs, targets)
-            accelerator.backward(loss)
-            optimizer.step()
-            scheduler.step()
+        ...  # your training loop here
+
 
 
 Distributed launch command
