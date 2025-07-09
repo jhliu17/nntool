@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-NNTool Documentation
-====================
+NNTool
+======
 
 NNTool is a package built on top of ``submitit`` designed to provide simple abstractions to conduct experiments on Slurm for machine learning research. Below is an example to run a Python function on a slurm cluster using specific configurations.
 
@@ -45,13 +45,11 @@ NNTool is available on PyPI and can be installed using pip: https://pypi.org/pro
 
 
 .. toctree::
-   :caption: Tutorials
+   :caption: Getting started
    :maxdepth: 2
    :hidden:
 
-   tutorials/sequential_jobs
-   tutorials/distributed_training
-   tutorials/sharp_bits
+   tutorials
 
 
 .. toctree::
@@ -59,6 +57,4 @@ NNTool is available on PyPI and can be installed using pip: https://pypi.org/pro
    :maxdepth: 2
    :hidden:
 
-   nntool.slurm<documentations/slurm>
-   nntool.wandb<documentations/wandb>
-   nntool.experiment<documentations/experiment>
+   api

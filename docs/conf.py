@@ -13,6 +13,8 @@ import pathlib
 import re
 import subprocess
 
+import nntool
+
 project = "🚂 NNTool"
 copyright = "2025"
 author = "Junhao Liu"
@@ -28,26 +30,34 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.githubpages",
     "sphinx.ext.linkcode",
-    "sphinx_autodoc_typehints",
+    # "sphinx_autodoc_typehints",
+    "sphinx.ext.napoleon",
 ]
 
-templates_path = ["_templates"]
-exclude_patterns = []
-
-add_module_names = False
-autosummary_generate = True
+autodoc_default_options = {
+    "members": True,
+    "member-order": "bysource",
+}
+autodoc_inherit_docstrings = False
 autodoc_typehints = "description"
 autodoc_typehints_description_target = "documented"
 autodoc_typehints_format = "short"
 
+autosummary_ignore_module_all = False
+add_function_parentheses = False
+default_role = "literal"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "furo"
-# html_static_path = ["_static"]
+html_static_path = ["_static"]
 # html_css_files = ["style/custom.css"]
 # html_theme_options = {"collapse_navbar": False, "show_toc_level": 2}
+templates_path = ["_templates"]
+html_css_files = [
+    "custom.css",
+]
 
 
 def linkcode_resolve(domain: str, info: dict) -> str:
@@ -74,3 +84,28 @@ def linkcode_resolve(domain: str, info: dict) -> str:
         return None
     else:
         return f"{repository}/blob/{commit}/{file}#L{start}-L{end}"
+
+
+## Edit HTML
+
+
+def edit_html(app, exception):
+    if exception:
+        raise exception
+
+    for file in glob.glob(f"{app.outdir}/**/*.html", recursive=True):
+        with open(file, "r") as f:
+            text = f.read()
+
+        # fmt: off
+        text = text.replace('<a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>\'s', '')
+        text = text.replace('<span class="pre">[source]</span>', '<i class="fa-solid fa-code"></i>')
+        text = re.sub(r'(<a class="reference external".*</a>)(<a class="headerlink".*</a>)', r'\2\1', text)
+        # fmt: on
+
+        with open(file, "w") as f:
+            f.write(text)
+
+
+def setup(app):
+    app.connect("build-finished", edit_html)

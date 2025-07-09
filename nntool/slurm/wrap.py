@@ -20,23 +20,19 @@ def slurm_fn(
         the function to be run on slurm
 
     Example:
-
-    .. code-block:: python
-
-        @slurm_fn
-        def run_on_slurm(a, b):
-            return a + b
-
-        slurm_config = SlurmConfig(
-            mode="slurm",
-            partition="PARTITION",
-            job_name="EXAMPLE",
-            tasks_per_node=1,
-            cpus_per_task=8,
-            mem="1GB",
-        )
-        job = run_on_slurm[slurm_config](1, b=2)
-        result = job.result()  # block and get the result
+        >>> @slurm_fn
+        ... def run_on_slurm(a, b):
+        ...     return a + b
+        >>> slurm_config = SlurmConfig(
+        ...     mode="slurm",
+        ...     partition="PARTITION",
+        ...     job_name="EXAMPLE",
+        ...     tasks_per_node=1,
+        ...     cpus_per_task=8,
+        ...     mem="1GB",
+        ... )
+        >>> job = run_on_slurm[slurm_config](1, b=2)
+        >>> result = job.result()  # block and get the result
     """
     slurm_fn = SlurmFunction(submit_fn=submit_fn)
 
@@ -168,14 +164,21 @@ def slurm_function(
     submit_fn: Callable,
 ):
     """A decorator to annoate a function to be run in slurm. The function decorated by this decorator should be launched in the way below.
-    ```
-    @slurm_function
-    def run_in_slurm(*args, **kwargs):
-        pass
 
-    job = run_in_slurm(slurm_config)(*args, **kwargs)
-    ```
-    The decorated function `submit_fn` is non-blocking now. To block and get the return value, you can call `job.result()`.
+    Example:
+        >>> @slurm_function
+        ... def run_on_slurm(a, b):
+        ...     return a + b
+        >>> slurm_config = SlurmConfig(
+        ...     mode="slurm",
+        ...     partition="PARTITION",
+        ...     job_name="EXAMPLE",
+        ...     tasks_per_node=1,
+        ...     cpus_per_task=8,
+        ...     mem="1GB",
+        ... )
+        >>> job = run_on_slurm(slurm_config)(1, b=2)
+        >>> result = job.result()  # block and get the result
     """
 
     def wrapper(

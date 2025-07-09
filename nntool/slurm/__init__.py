@@ -12,10 +12,10 @@ from .task import PyTorchDistributedTask
 __all__ = [
     "SlurmConfig",
     "SlurmArgs",
-    "slurm_function",
     "slurm_fn",
-    "slurm_launcher",
-    "slurm_distributed_launcher",
     "SlurmFunction",
     "PyTorchDistributedTask",
+    "slurm_function",
+    "slurm_launcher",
+    "slurm_distributed_launcher",
 ]
