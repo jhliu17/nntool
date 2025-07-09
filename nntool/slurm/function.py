@@ -18,10 +18,13 @@ class SlurmFunction:
     ) -> None:
         """A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
-        :param submit_fn: function to be submitted to Slurm, defaults to None
-        :param default_submit_fn_args: default args for submit_fn, defaults to ()
-        :param default_submit_fn_kwargs: default known word args for submit_fn, defaults to {}
-        :return: the wrapped submit function with configured slurm paramters
+        Args:
+            submit_fn: function to be submitted to Slurm, defaults to None
+            default_submit_fn_args: default args for submit_fn, defaults to ()
+            default_submit_fn_kwargs: default known word args for submit_fn, defaults to {}
+
+        Returns:
+            the wrapped submit function with configured slurm paramters
         """
         self.engine = _SlurmFunction(submit_fn, default_submit_fn_args, default_submit_fn_kwargs)
 
@@ -31,14 +34,16 @@ class SlurmFunction:
     def is_configured(self) -> bool:
         """Whether the slurm function has been configured.
 
-        :return: True if the slurm function has been configured, False otherwise
+        Returns:
+            True if the slurm function has been configured, False otherwise
         """
         return self.engine.is_configured()
 
     def is_distributed(self) -> bool:
         """Whether the slurm function is distributed.
 
-        :return: True if the slurm function is distributed, False otherwise
+        Returns:
+            True if the slurm function is distributed, False otherwise
         """
         return self.engine.is_distributed()
 
@@ -69,12 +74,15 @@ class SlurmFunction:
             - ``main_process_ip``: str
             - ``main_process_port``: int
 
-        :param slurm_config: SlurmConfig, the slurm configuration dataclass, defaults to None
-        :param slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
-        :param slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
-        :param slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
-        :param system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
-        :return: a new copy with configured slurm parameters
+        Args:
+            slurm_config: SlurmConfig, the slurm configuration dataclass, defaults to None
+            slurm_params_kwargs: extra slurm arguments for the slurm configuration, defaults to {}
+            slurm_submit_kwargs: extra slurm arguments for `srun` or `sbatch`, defaults to {}
+            slurm_task_kwargs: extra arguments for the setting of distributed task, defaults to {}
+            system_argv: the system arguments for the second launch in the distributed task (by default it will use the current system arguments `sys.argv[1:]`), defaults to None
+
+        Returns:
+            a new copy with configured slurm parameters
         """
         configured_slurm_function = self.__create_copy()
         configured_slurm_function.engine = self.engine.configure(
@@ -101,8 +109,11 @@ class SlurmFunction:
             - ``main_process_ip``: str
             - ``main_process_port``: int
 
-        :param slurm_config: SlurmConfig, the slurm configuration dataclass
-        :return: the wrapped submit function with configured slurm paramters
+        Args:
+            slurm_config: SlurmConfig, the slurm configuration dataclass
+
+        Returns:
+            the wrapped submit function with configured slurm paramters
         """
         configured_slurm_function = self.__create_copy()
         configured_slurm_function.engine = self.engine[slurm_config]
@@ -111,24 +122,47 @@ class SlurmFunction:
     def __call__(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
         """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
 
-        :raises Exception: if the submit_fn is not set up
-        :return: Slurm Job or the return value of the submit_fn
+        Args:
+            submit_fn_args: arguments for the submit_fn
+            submit_fn_kwargs: keyword arguments for the submit_fn
+
+        Returns:
+            Slurm Job or the return value of the submit_fn, depends on the submit mode
+
+        Raises:
+            Exception: if the submit_fn is not set up
         """
         return self.engine(*submit_fn_args, **submit_fn_kwargs)
 
     def submit(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
         """An alias function to ``__call__``.
 
-        :raises Exception: if the submit_fn is not set up
-        :return: Slurm Job or the return value of the submit_fn
+        Args:
+            submit_fn_args: arguments for the submit_fn
+            submit_fn_kwargs: keyword arguments for the submit_fn
+
+        Raises:
+            Exception: if the submit_fn is not set up
+
+        Returns:
+            Slurm Job or the return value of the submit_fn
         """
         return self(*submit_fn_args, **submit_fn_kwargs)
 
-    def map_array(self, *submit_fn_args, **submit_fn_kwargs) -> List[Job]:
+    def map_array(
+        self, *submit_fn_args, **submit_fn_kwargs
+    ) -> Union[Job[Any], List[Job[Any]], Any]:
         """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
 
-        :raises Exception: if the submit_fn is not set up
-        :return: Slurm Job or the return value of the submit_fn
+        Args:
+            submit_fn_args: arguments for the submit_fn
+            submit_fn_kwargs: keyword arguments for the submit_fn
+
+        Raises:
+            Exception: if the submit_fn is not set up
+
+        Returns:
+            Slurm Job or the return value of the submit_fn
         """
         return self.engine.map_array(*submit_fn_args, **submit_fn_kwargs)
 
@@ -139,9 +173,12 @@ class SlurmFunction:
     ) -> "SlurmFunction":
         """Mark this job should be executed after the provided slurm jobs have been done. This function allows combining different conditions by multiple calling.
 
-        :param jobs: dependent jobs
-        :param condition: run condition, defaults to "afterok"
-        :return: the function itself
+        Args:
+            jobs: dependent jobs
+            condition: run condition, defaults to "afterok"
+
+        Returns:
+            the function itself
         """
         configured_slurm_function = self.__create_copy()
         configured_slurm_function.engine = self.engine.on_condition(jobs, condition)
@@ -150,20 +187,23 @@ class SlurmFunction:
     def afterok(self, *jobs: Job) -> "SlurmFunction":
         """Mark the function should be executed after the provided slurm jobs have been done.
 
-        :return: the function itself
+        Returns:
+            the new slurm function with the condition
         """
         return self.on_condition(list(jobs), "afterok")
 
     def afterany(self, *jobs: Job) -> "SlurmFunction":
         """Mark the function should be executed after any one of the provided slurm jobs has been done.
 
-        :return: the function itself
+        Returns:
+            the new slurm function with the condition
         """
         return self.on_condition(list(jobs), "afterany")
 
     def afternotok(self, *jobs: Job) -> "SlurmFunction":
         """Mark the function should be executed after any one of the provided slurm jobs has been failed.
 
-        :return: the function itself
+        Returns:
+            the new slurm function with the condition
         """
         return self.on_condition(list(jobs), "afternotok")
