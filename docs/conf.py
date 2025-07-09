@@ -44,8 +44,38 @@ autodoc_typehints_description_target = "documented"
 autodoc_typehints_format = "short"
 
 autosummary_ignore_module_all = False
-add_function_parentheses = False
-default_role = "literal"
+
+
+def linkcode_resolve(domain: str, info: dict) -> str | None:
+    module = info.get("module", "")
+    fullname = info.get("fullname", "")
+
+    if not module or not fullname:
+        return None
+
+    try:
+        objct = importlib.import_module(module)
+        for name in fullname.split("."):
+            objct = getattr(objct, name)
+
+        while hasattr(objct, "__wrapped__"):
+            objct = objct.__wrapped__
+
+        file = inspect.getsourcefile(objct)
+        if file is None:
+            return None
+
+        file_path = pathlib.Path(file).relative_to(root)
+        lines, start = inspect.getsourcelines(objct)
+        end = start + len(lines) - 1
+
+        return f"{repository}/blob/{commit}/{file_path}#L{start}-L{end}"
+    except Exception:
+        return None
+
+
+# add_function_parentheses = False
+# default_role = "literal"
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
@@ -58,54 +88,9 @@ templates_path = ["_templates"]
 html_css_files = [
     "custom.css",
 ]
-
-
-def linkcode_resolve(domain: str, info: dict) -> str:
-    module = info.get("module", "")
-    fullname = info.get("fullname", "")
-
-    if not module or not fullname:
-        return None
-
-    objct = importlib.import_module(module)
-    for name in fullname.split("."):
-        objct = getattr(objct, name)
-
-    while hasattr(objct, "__wrapped__"):
-        objct = objct.__wrapped__
-
-    try:
-        file = inspect.getsourcefile(objct)
-        file = pathlib.Path(file).relative_to(root)
-
-        lines, start = inspect.getsourcelines(objct)
-        end = start + len(lines) - 1
-    except Exception:
-        return None
-    else:
-        return f"{repository}/blob/{commit}/{file}#L{start}-L{end}"
-
-
-## Edit HTML
-
-
-def edit_html(app, exception):
-    if exception:
-        raise exception
-
-    for file in glob.glob(f"{app.outdir}/**/*.html", recursive=True):
-        with open(file, "r") as f:
-            text = f.read()
-
-        # fmt: off
-        text = text.replace('<a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>\'s', '')
-        text = text.replace('<span class="pre">[source]</span>', '<i class="fa-solid fa-code"></i>')
-        text = re.sub(r'(<a class="reference external".*</a>)(<a class="headerlink".*</a>)', r'\2\1', text)
-        # fmt: on
-
-        with open(file, "w") as f:
-            f.write(text)
-
-
-def setup(app):
-    app.connect("build-finished", edit_html)
+html_show_sourcelink = False
+html_sourcelink_suffix = ""
+html_theme_options = {
+    "sidebar_hide_name": True,
+    "top_of_page_buttons": ["view"],
+}

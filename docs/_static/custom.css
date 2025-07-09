@@ -4,9 +4,6 @@
     overflow-wrap: break-word;
 }
 
-a {
-    text-decoration: none;
-}
 
 h2 {
     font-size: 1.75em;
@@ -91,14 +88,14 @@ mjx-container[display="true"] {
 
 /* Sidebar */
 
-.sidebar-drawer {
+/* .sidebar-drawer {
     left: -18em;
     min-width: 18em;
 }
 
 div.sidebar-container {
     width: 18em;
-}
+} */
 
 img.sidebar-logo {
     max-width: 50%;
@@ -115,19 +112,19 @@ div.sidebar-tree label .icon {
 
 /* Signatures */
 
-dl.py>dt.sig>a.headerlink {
+/* dl.py>dt.sig>a.headerlink {
     margin-right: 2em;
-}
+} */
 
-dl.py>dt.sig>a.reference {
+/* dl.py>dt.sig>a.reference {
     float: right;
     text-indent: 0;
-    width: 0;
-}
+    width: 10%;
+} */
 
-dl.py>dt.sig>a.reference>span.viewcode-link {
+/* dl.py>dt.sig>a.reference>span.viewcode-link {
     width: unset;
-}
+} */
 
 /* Table */
 
