@@ -12,7 +12,7 @@ from .accelerator.utils import nvidia_smi_gpu_memory_stats_str
 WANDB_DIRS = ("wandb", ".wandb")
 
 
-def _is_py_or_dockerfile(path: str) -> bool:
+def _is_py_or_dockerfile(path: str, root: str) -> bool:
     file = os.path.basename(path)
     return file.endswith(".py") or file.startswith("Dockerfile")
 
@@ -37,8 +37,8 @@ def exclude_wandb_fn(path: str, root: str) -> bool:
 
 def filtered_dir(
     root: str,
-    include_fn: Union[Callable[[str, str], bool], Callable[[str], bool]],
-    exclude_fn: Union[Callable[[str, str], bool], Callable[[str], bool]],
+    include_fn: Callable[[str, str], bool],
+    exclude_fn: Callable[[str, str], bool],
 ) -> Generator[str, None, None]:
     """Simple generator to walk a directory."""
 
@@ -52,8 +52,8 @@ def filtered_dir(
 def pack_code_files(
     root: str,
     target_root: str,
-    include_fn: Union[Callable[[str, str], bool], Callable[[str], bool]] = _is_py_or_dockerfile,
-    exclude_fn: Union[Callable[[str, str], bool], Callable[[str], bool]] = exclude_wandb_fn,
+    include_fn: Callable[[str, str], bool] = _is_py_or_dockerfile,
+    exclude_fn: Callable[[str, str], bool] = exclude_wandb_fn,
 ):
     root = os.path.abspath(root)
     code_root = Path(os.path.abspath(root))

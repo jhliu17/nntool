@@ -15,7 +15,7 @@ class SlurmFunction:
         submit_fn: Callable[..., Any],
         default_submit_fn_args: Optional[Tuple[Any]] = None,
         default_submit_fn_kwargs: Optional[Dict[str, Any]] = None,
-    ) -> "SlurmFunction":
+    ) -> None:
         """A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
         :param submit_fn: function to be submitted to Slurm, defaults to None
@@ -147,23 +147,23 @@ class SlurmFunction:
         configured_slurm_function.engine = self.engine.on_condition(jobs, condition)
         return configured_slurm_function
 
-    def afterok(self, *jobs: Tuple[Job]) -> "SlurmFunction":
+    def afterok(self, *jobs: Job) -> "SlurmFunction":
         """Mark the function should be executed after the provided slurm jobs have been done.
 
         :return: the function itself
         """
-        return self.on_condition(jobs, "afterok")
+        return self.on_condition(list(jobs), "afterok")
 
-    def afterany(self, *jobs: Tuple[Job]) -> "SlurmFunction":
+    def afterany(self, *jobs: Job) -> "SlurmFunction":
         """Mark the function should be executed after any one of the provided slurm jobs has been done.
 
         :return: the function itself
         """
-        return self.on_condition(jobs, "afterany")
+        return self.on_condition(list(jobs), "afterany")
 
-    def afternotok(self, *jobs: Tuple[Job]) -> "SlurmFunction":
+    def afternotok(self, *jobs: Job) -> "SlurmFunction":
         """Mark the function should be executed after any one of the provided slurm jobs has been failed.
 
         :return: the function itself
         """
-        return self.on_condition(jobs, "afternotok")
+        return self.on_condition(list(jobs), "afternotok")

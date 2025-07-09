@@ -23,7 +23,7 @@ class SlurmFunction:
         submit_fn: Callable[..., Any],
         default_submit_fn_args: Optional[Tuple[Any]] = None,
         default_submit_fn_kwargs: Optional[Dict[str, Any]] = None,
-    ) -> "SlurmFunction":
+    ) -> None:
         """A slurm function for the slurm job, which can be used for distributed or non-distributed job (controlled by `use_distributed_env` in the slurm dataclass).
 
         :param submit_fn: function to be submitted to Slurm, defaults to None
@@ -42,7 +42,7 @@ class SlurmFunction:
 
         # slurm funcion is configured after calling `configure`
         self.__configured: bool = False
-        self.__executor = None  # to be set up by `get_executor`
+        self.__executor: Optional[submitit.AutoExecutor] = None  # to be set up by `get_executor`
 
         # annotations here, will be set up after instantiation
         self.slurm_config: SlurmConfig
@@ -335,7 +335,9 @@ class SlurmFunction:
         """
         return self(*submit_fn_args, **submit_fn_kwargs)
 
-    def map_array(self, *submit_fn_args, **submit_fn_kwargs) -> List[Job]:
+    def map_array(
+        self, *submit_fn_args, **submit_fn_kwargs
+    ) -> Union[Job[Any], List[Job[Any]], Any]:
         """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
 
         :raises Exception: if the submit_fn is not set up
@@ -374,26 +376,26 @@ class SlurmFunction:
         )
         return self
 
-    def afterok(self, *jobs: Tuple[Job]) -> "SlurmFunction":
+    def afterok(self, *jobs: Job) -> "SlurmFunction":
         """Mark the function should be executed after the provided slurm jobs have been done.
 
         :return: the function itself
         """
-        return self.on_condition(jobs, "afterok")
+        return self.on_condition(list(jobs), "afterok")
 
-    def afterany(self, *jobs: Tuple[Job]) -> "SlurmFunction":
+    def afterany(self, *jobs: Job) -> "SlurmFunction":
         """Mark the function should be executed after any one of the provided slurm jobs has been done.
 
         :return: the function itself
         """
-        return self.on_condition(jobs, "afterany")
+        return self.on_condition(list(jobs), "afterany")
 
-    def afternotok(self, *jobs: Tuple[Job]) -> "SlurmFunction":
+    def afternotok(self, *jobs: Job) -> "SlurmFunction":
         """Mark the function should be executed after any one of the provided slurm jobs has been failed.
 
         :return: the function itself
         """
-        return self.on_condition(jobs, "afternotok")
+        return self.on_condition(list(jobs), "afternotok")
 
     def __get_submit_args(
         self,
