@@ -61,7 +61,7 @@ package_info = dict(
             "furo",
             "myst_parser",
             "sphinx-autodoc-typehints",
-            "sphinx-copybutton"
+            "sphinx-copybutton",
         ]
     },
     # Additional metadata

@@ -30,7 +30,7 @@ extensions = [
     "sphinx.ext.linkcode",
     # "sphinx_autodoc_typehints",
     "sphinx.ext.napoleon",
-    "sphinx_copybutton"
+    "sphinx_copybutton",
 ]
 
 autodoc_default_options = {
