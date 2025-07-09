@@ -1,5 +1,5 @@
-API
-###
+nntool
+######
 
 .. module:: nntool
 
