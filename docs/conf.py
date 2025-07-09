@@ -90,6 +90,6 @@ html_css_files = [
 html_show_sourcelink = False
 html_sourcelink_suffix = ""
 html_theme_options = {
-    "sidebar_hide_name": True,
+    # "sidebar_hide_name": True,
     "top_of_page_buttons": ["view"],
 }
