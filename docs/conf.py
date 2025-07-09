@@ -6,11 +6,9 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-import glob
 import importlib
 import inspect
 import pathlib
-import re
 import subprocess
 
 import nntool
@@ -32,6 +30,7 @@ extensions = [
     "sphinx.ext.linkcode",
     # "sphinx_autodoc_typehints",
     "sphinx.ext.napoleon",
+    "sphinx_copybutton"
 ]
 
 autodoc_default_options = {
