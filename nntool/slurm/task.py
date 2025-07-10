@@ -81,16 +81,17 @@ def reconstruct_command_line(argv):
 
 
 class Task:
-    def __init__(self, argv: list[str], slurm_config: SlurmConfig, verbose: bool = False):
-        """The base class for all tasks that will be run on Slurm. Especially useful for
-        distributed tasks that need to set up the distributed environment variables.
+    """The base class for all tasks that will be run on Slurm. Especially useful for
+    distributed tasks that need to set up the distributed environment variables.
 
-        Args:
-            argv (list[str]): the command line arguments to run the task.
-            This will be passed to the command method to reconstruct the command line.
-            slurm_config (SlurmConfig): the Slurm configuration to use for the task.
-            verbose (bool, optional): whether to print verbose output. Defaults to False.
-        """
+    Args:
+        argv (list[str]): the command line arguments to run the task.
+        This will be passed to the command method to reconstruct the command line.
+        slurm_config (SlurmConfig): the Slurm configuration to use for the task.
+        verbose (bool, optional): whether to print verbose output. Defaults to False.
+    """
+
+    def __init__(self, argv: list[str], slurm_config: SlurmConfig, verbose: bool = False):
         self.argv = argv
         self.slurm_config = slurm_config
         self.verbose = verbose
@@ -126,6 +127,15 @@ class Task:
 class DistributedTaskConfig:
     """Configuration for distributed tasks. This is used to set up the distributed environment
     variables for PyTorch distributed training.
+
+    Args:
+        num_processes (int): The total number of processes to run across all machines.
+        num_machines (int): The number of machines to run the task on.
+        machine_rank (int): The rank of the current machine in the distributed setup.
+        main_process_ip (str): The IP address of the main process (rank 0)
+            in the distributed setup.
+        main_process_port (int): The port of the main process (rank 0)
+            in the distributed setup.
     """
 
     # The number of processes to run in total across all machines.
@@ -158,6 +168,20 @@ class DistributedTaskConfig:
 
 
 class PyTorchDistributedTask(Task):
+    """A task that runs on Slurm and sets up the PyTorch distributed environment variables.
+
+    Args:
+        launch_cmd (str): The command to launch the task.
+        argv (list[str]): The command line arguments for the task.
+        slurm_config (SlurmConfig): The Slurm configuration to use for the task.
+        verbose (bool, optional): _description_. Defaults to False.
+
+    References:
+        https://github.com/huggingface/accelerate/issues/1239
+        https://github.com/yuvalkirstain/PickScore/blob/main/trainer/slurm_scripts/slurm_train.py
+        https://github.com/facebookincubator/submitit/pull/1703
+    """
+
     def __init__(
         self,
         launch_cmd: str,
@@ -166,19 +190,6 @@ class PyTorchDistributedTask(Task):
         verbose: bool = False,
         **env_setup_kwargs,
     ):
-        """A task that runs on Slurm and sets up the PyTorch distributed environment variables.
-
-        Args:
-            launch_cmd (str): The command to launch the task.
-            argv (list[str]): The command line arguments for the task.
-            slurm_config (SlurmConfig): The Slurm configuration to use for the task.
-            verbose (bool, optional): _description_. Defaults to False.
-
-        References:
-            https://github.com/huggingface/accelerate/issues/1239
-            https://github.com/yuvalkirstain/PickScore/blob/main/trainer/slurm_scripts/slurm_train.py
-            https://github.com/facebookincubator/submitit/pull/1703
-        """
         super().__init__(argv, slurm_config, verbose)
         self.launch_cmd = launch_cmd
         self.env_setup_kwargs = env_setup_kwargs
