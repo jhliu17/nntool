@@ -280,11 +280,15 @@ class PyTorchDistributedTask(Task):
             print(f"running command: {cmd}")
             if self.slurm_config.mode == "slurm":
                 try:
+                    # export distributed environment variables to a bash script
+                    # the fn will be launched after the job is scheduled
                     self.dist_args.export_bash(shlex.quote(str(job_env.paths.folder)))
                 except Exception as e:
                     print(f"failed to export distributed environment variables: {e}")
                     return -1
             else:
+                # if not slurm, we can just run the command directly
+                # this is useful for local testing or when running on a single machine
                 return os.system(cmd)
 
         return 0

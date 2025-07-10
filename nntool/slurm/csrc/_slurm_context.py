@@ -5,7 +5,7 @@ from ..config import SlurmConfig
 from ..task import Task
 
 
-class patch_submitit_distributed_command_str:
+class SubmititDistributedCommandContext:
     def __init__(self, config: SlurmConfig, task: Task):
         self.config = config
         self.task = task

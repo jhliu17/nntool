@@ -14,7 +14,7 @@ from ..task import (
     include_code_files,
     exclude_code_folders,
 )
-from ._slurm_context import patch_submitit_distributed_command_str
+from ._slurm_context import SubmititDistributedCommandContext
 
 
 class SlurmFunction:
@@ -443,12 +443,13 @@ class SlurmFunction:
             *submit_fn_args, **submit_fn_kwargs
         )
 
-        # the distributed job will be launched in the second launch
-        # the first launch is to set up the distributed environment
-        # the second launch is to run the submit function in the distributed environment directly
-        initial_launch = not self.slurm_has_been_set_up()
-        if initial_launch:
-            # prepare distributed env
+        # The distributed job in slurm mode will be launched twice:
+        #   1. the first launch is to set up the distributed environment
+        #   2. the second launch is to run the submit function in the distributed environment directly
+        is_first_launch = not self.slurm_has_been_set_up()
+        if is_first_launch:
+            # The task to be submitted is to request enough resources and set up the distributed environment if
+            # in slurm mode. Otherwise, it will just run the submit function directly.
             if self.slurm_config.distributed_env_task == "torch":
                 task = PyTorchDistributedTask(
                     self.slurm_config.distributed_launch_command,
@@ -458,14 +459,18 @@ class SlurmFunction:
                     **self.slurm_task_kwargs,
                 )
             else:
-                raise Exception(
-                    f"Unsupported distributed task: {self.slurm_config.distributed_env_task}"
+                raise ValueError(
+                    f"Unsupported distributed environment task: {self.slurm_config.distributed_env_task}"
                 )
 
-            with patch_submitit_distributed_command_str(self.slurm_config, task):
+            # We need to patch the submitit command string to include the task and the second launch
+            # command.
+            with SubmititDistributedCommandContext(self.slurm_config, task):
                 executor = self.get_executor()
                 self.__mark_slurm_has_been_set_up()
                 job = executor.submit(task)
             return job
         else:
+            # Execute the submit function directly in the created distributed environment at the first launch.
+            # This is the second launch, so we can just run the submit function directly.
             return self.submit_fn(*submit_fn_args, **submit_fn_kwargs)
