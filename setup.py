@@ -30,9 +30,10 @@ def get_csrc_files(folder: str) -> list[str]:
     return source_files
 
 
+exec(open("nntool/version.py").read())
 package_info = dict(
     name="nntool",
-    version="1.5.0",
+    version=VERSION,  # noqa: F821 # type: ignore
     python_requires=">=3.9",
     install_requires=[
         # List your package dependencies here
