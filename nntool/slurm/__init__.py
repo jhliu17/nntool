@@ -3,7 +3,6 @@ from .wrap import (
     slurm_function,
     slurm_fn,
     slurm_launcher,
-    slurm_distributed_launcher,
 )
 from .function import SlurmFunction
 from .task import Task, DistributedTaskConfig, PyTorchDistributedTask
@@ -16,7 +15,6 @@ __all__ = [
     "slurm_fn",
     "slurm_function",
     "slurm_launcher",
-    "slurm_distributed_launcher",
     "Task",
     "DistributedTaskConfig",
     "PyTorchDistributedTask",
