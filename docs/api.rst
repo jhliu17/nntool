@@ -5,6 +5,7 @@ nntool
 
 .. autosummary::
    :toctree: api
+   :hidden:
    :recursive:
 
    nntool.slurm
