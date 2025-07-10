@@ -6,16 +6,18 @@ from .wrap import (
     slurm_distributed_launcher,
 )
 from .function import SlurmFunction
-from .task import PyTorchDistributedTask
+from .task import Task, DistributedTaskConfig, PyTorchDistributedTask
 
 
 __all__ = [
     "SlurmConfig",
     "SlurmArgs",
-    "slurm_fn",
     "SlurmFunction",
-    "PyTorchDistributedTask",
+    "slurm_fn",
     "slurm_function",
     "slurm_launcher",
     "slurm_distributed_launcher",
+    "Task",
+    "DistributedTaskConfig",
+    "PyTorchDistributedTask",
 ]

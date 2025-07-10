@@ -159,7 +159,7 @@ class SlurmConfig:
     # extra slurm task parameters
     extra_task_kwargs: Dict[str, str] = field(default_factory=dict)
 
-    def __post_init__(self):
+    def _configuration_check(self):
         # check partition
         if self.partition == "":
             raise ValueError("partition must be set")
@@ -169,6 +169,10 @@ class SlurmConfig:
             raise ValueError(
                 "distributed_launch_command must be set when use_distributed_env is True"
             )
+
+    def __post_init__(self):
+        # check configuration
+        self._configuration_check()
 
         # normalize the output folder
         output_folder_suffix = ""
@@ -183,7 +187,14 @@ class SlurmConfig:
         self.output_path: str = os.path.join(self.output_parent_path, self.output_folder)
 
     def set_output_path(self, output_parent_path: str) -> "SlurmConfig":
-        """Set output path and date for the slurm job."""
+        """Set output path and date for the slurm job.
+
+        Args:
+            output_parent_path (str): The parent path for the output.
+
+        Returns:
+            SlurmConfig: The updated SlurmConfig instance.
+        """
         new_config = replace(
             self,
             output_parent_path=output_parent_path,

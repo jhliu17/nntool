@@ -51,10 +51,6 @@ def slurm_launcher(
 ) -> Callable[[Callable[..., Any]], SlurmFunction]:
     """A slurm launcher decorator for distributed or non-distributed job (controlled by `use_distributed_env` in slurm field). This decorator should be used as the program entry. The decorated function is non-blocking in the mode of `slurm`, while other modes cause blocking.
 
-    #### Exported Distributed Enviroment Variables
-    1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
-    2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
-
     Args:
         ArgsType: the experiment arguments type, which should be a dataclass (it
                          mush have a slurm field defined by `slurm_key`)
@@ -69,6 +65,10 @@ def slurm_launcher(
 
     Returns:
         decorator function with main entry
+
+    Exported Distributed Enviroment Variables:
+        1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
+        2. After the set up, the distributed job will be launched and the following variables are exported: num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
     """
     argv = list(sys.argv[1:])
     args = parse_from_cli(ArgsType, parser, *extra_args, **extra_kwargs)
@@ -109,10 +109,6 @@ def slurm_distributed_launcher(
 ) -> Callable[[Callable[..., Any]], SlurmFunction]:
     """A slurm launcher decorator for the distributed job. This decorator should be used for the distributed job only and as the program entry. The decorated function is non-blocking in the mode of `slurm`, while other modes cause blocking.
 
-    #### Exported Distributed Enviroment Variables
-    1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
-    2. After the set up, the distributed job will be launched and the following variables are exported:         num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
-
     Args:
         ArgsType: the experiment arguments type, which should be a dataclass (it
                          mush have a slurm field defined by `slurm_key`)
@@ -127,6 +123,10 @@ def slurm_distributed_launcher(
 
     Returns:
         decorator function with main entry
+
+    Exported Distributed Enviroment Variables:
+        1. NNTOOL_SLURM_HAS_BEEN_SET_UP is a special environment variable to indicate that the slurm has been set up.
+        2. After the set up, the distributed job will be launched and the following variables are exported: num_processes: int, num_machines: int, machine_rank: int, main_process_ip: str, main_process_port: int.
     """
     warn(
         "`slurm_distributed_launcher` has been deprecated. Please use `slurm_launcher` instead, which supports both distributed and non-distributed job (controlled by `use_distributed_env` in slurm field).",
