@@ -85,8 +85,7 @@ class Task:
     distributed tasks that need to set up the distributed environment variables.
 
     Args:
-        argv (list[str]): the command line arguments to run the task.
-        This will be passed to the command method to reconstruct the command line.
+        argv (list[str]): the command line arguments to run the task. This will be passed to the command method to reconstruct the command line.
         slurm_config (SlurmConfig): the Slurm configuration to use for the task.
         verbose (bool, optional): whether to print verbose output. Defaults to False.
     """
