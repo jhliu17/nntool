@@ -167,7 +167,8 @@ class DistributedTaskConfig:
 
 
 class PyTorchDistributedTask(Task):
-    """A task that runs on Slurm and sets up the PyTorch distributed environment variables.
+    """A task that runs on Slurm and sets up the PyTorch distributed environment variables. It runs the command locally
+    if in other modes.
 
     Args:
         launch_cmd (str): The command to launch the task.
@@ -265,30 +266,29 @@ class PyTorchDistributedTask(Task):
         return cmd
 
     def __call__(self):
-        # set up distributed environment
+        # Set up distributed environment
         self.set_up_dist_env()
 
-        # job environment
+        # Job environment
         job_env = submitit.helpers.JobEnvironment()
 
-        # concrete run command
+        # Concrete run command
         cmd = self.command()
 
-        # export distributed environment variables
-        # only the global rank 0 process will run the command
+        # Export distributed environment variables only the global rank 0 process will run the command
         if self.dist_env.rank == 0:
             print(f"running command: {cmd}")
             if self.slurm_config.mode == "slurm":
                 try:
-                    # export distributed environment variables to a bash script
-                    # the fn will be launched after the job is scheduled
+                    # Export distributed environment variables to a bash script
+                    # and the fn will be launched after the job is scheduled
                     self.dist_args.export_bash(shlex.quote(str(job_env.paths.folder)))
                 except Exception as e:
                     print(f"failed to export distributed environment variables: {e}")
                     return -1
             else:
-                # if not slurm, we can just run the command directly
-                # this is useful for local testing or when running on a single machine
+                # If not on slurm mode, we can just run the command directly
+                # This is useful for local testing or when running on a single machine
                 return os.system(cmd)
 
         return 0
