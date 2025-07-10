@@ -56,6 +56,8 @@ class SlurmConfig:
 
         use_distributed_env (bool): Whether to use a distributed environment for the job. Default is False.
 
+        distributed_env_task (Literal["torch"]): The type of distributed environment task to use. Currently, only "torch" is supported. Default is "torch".
+
         processes_per_task (int): The number of processes to run per task. This value is not used by SLURM but is relevant for correctly set up distributed environments. Default is 1.
 
         distributed_launch_command (str): The command to launch distributed environment setup, using environment variables like ``{num_processes}``, ``{num_machines}``, ``{machine_rank}``, ``{main_process_ip}``, ``{main_process_port}``. Default is an empty string.
