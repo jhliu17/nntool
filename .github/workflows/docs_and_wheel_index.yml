@@ -42,6 +42,17 @@ jobs:
           bash index.sh docs/wheel/ docs/wheel/
           cp -rf docs/wheel docs/_build/
 
+      - name: Check for changes in wheel directory
+        id: check_changes
+        run: |
+          if git diff --quiet docs/wheel/; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "No changes detected in docs/wheel/"
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in docs/wheel/"
+          fi
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
@@ -53,6 +64,7 @@ jobs:
 
       - name: Create Pull Request for Wheel Index Updates
         uses: peter-evans/create-pull-request@v5
+        if: ${{ steps.check_changes.outputs.changes == 'true' }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Update wheel index with new builds"
