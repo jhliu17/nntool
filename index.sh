@@ -12,7 +12,11 @@ echo "<html><head><title>Resource Index</title></head><body><h1>Links for nntool
 # Loop through each file in the directory and add it to the HTML file
 for file in "$resource_dir"/*; do
     filename=$(basename "$file")
-    echo "<a href='$filename'>$filename</a><br>" >> "$output_file"
+
+    # Skip index.html file to avoid self-reference
+    if [ "$filename" != "index.html" ]; then
+        echo "<a href='$filename'>$filename</a><br>" >> "$output_file"
+    fi
 done
 
 # End of the HTML file
