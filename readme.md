@@ -10,7 +10,7 @@ NNTool is a package built on top of submitit designed to provide simple abstract
 pip install git+https://github.com/jhliu17/nntool.git
 
 # install latest built from sdist
-pip install -f https://jhliu17.github.io/wheel/nntool/sdist nntool
+pip install -f https://jhliu17.github.io/nntool/wheel nntool
 ```
 
 ## Reinstallation
@@ -45,5 +45,5 @@ python setup.py sdist bdist_wheel
 
 ## Pre-built Download
 ```bash
-pip install -f https://jhliu17.github.io/wheel/nntool/sdist nntool
+pip install -f https://jhliu17.github.io/nntool/wheel nntool
 ```
