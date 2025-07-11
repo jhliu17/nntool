@@ -40,6 +40,16 @@ jobs:
           mkdir -p docs/wheel
           cp dist/*.whl docs/wheel/
           bash index.sh docs/wheel/ docs/wheel/
+          cp -rf docs/wheel docs/_build/
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/_build/
+          force_orphan: true
 
       - name: Create Pull Request for Wheel Index Updates
         uses: peter-evans/create-pull-request@v5
@@ -60,16 +70,3 @@ jobs:
           base: main
           add-paths: |
             docs/wheel/
-
-      - name: Upload Wheel Artifact
-        run: |
-          cp -rf docs/wheel docs/_build/
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        with:
-          publish_branch: gh-pages
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: docs/_build/
-          force_orphan: true
