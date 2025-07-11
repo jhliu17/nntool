@@ -30,11 +30,34 @@ jobs:
         run: |
           NNTOOL_PYTHON_BUILD=1 python setup.py sdist bdist_wheel
 
-      - name: Upload Wheel Artifact
+      - name: Update the wheel index
         run: |
           mkdir -p docs/wheel
           cp dist/*.whl docs/wheel/
           bash index.sh docs/wheel/ docs/wheel/
+
+      - name: Create Pull Request for Wheel Index Updates
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Update wheel index with new builds"
+          title: "Auto-update: Wheel index updated"
+          body: |
+            This pull request was automatically created to track updates to the wheel index.
+
+            Changes include:
+            - Updated wheel files in `docs/wheel/`
+            - Regenerated wheel index
+
+            Please review the changes before merging.
+          branch: auto-update-wheel-index
+          delete-branch: true
+          base: main
+          add-paths: |
+            docs/wheel/
+
+      - name: Upload Wheel Artifact
+        run: |
           cp -rf docs/wheel docs/_build/
 
       - name: Deploy to GitHub Pages
