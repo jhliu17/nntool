@@ -32,6 +32,7 @@ jobs:
 
       - name: Upload Wheel Artifact
         run: |
+          mkdir -p docs/wheel
           cp dist/*.whl docs/wheel/
           bash index.sh docs/wheel/ docs/wheel/
           cp -rf docs/wheel docs/_build/
