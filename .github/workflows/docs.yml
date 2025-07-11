@@ -26,6 +26,7 @@ jobs:
       - name: Sphinx build
         run: |
           sphinx-build docs docs/_build
+          mkdir -p docs/wheel
           cp -rf docs/wheel docs/_build/
 
       - name: Deploy to GitHub Pages
