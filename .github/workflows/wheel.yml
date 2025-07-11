@@ -1,10 +1,8 @@
 name: Build and Publish Documentation and Wheel Index
 
 on:
-  pull_request:
-  push:
-    branches:
-      - main
+  release:
+    types: [created]
 
 permissions:
   contents: write
@@ -67,8 +65,8 @@ jobs:
         if: ${{ steps.check_changes.outputs.changes == 'true' }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Update wheel index with new builds"
-          title: "Auto-update: Wheel index updated"
+          commit-message: "New wheel releases and index update"
+          title: "Auto-update: Wheel index updated and new wheels released"
           body: |
             This pull request was automatically created to track updates to the wheel index.
 
