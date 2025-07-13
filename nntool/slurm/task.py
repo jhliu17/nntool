@@ -195,8 +195,8 @@ class PyTorchDistributedTask(Task):
         self.env_setup_kwargs = env_setup_kwargs
 
         # to be set up in the dist_set_up method
-        self.dist_args: DistributedTaskConfig
-        self.dist_env: Union[None, submitit.helpers.TorchDistributedEnvironment]
+        self.dist_args: DistributedTaskConfig = DistributedTaskConfig()
+        self.dist_env: Union[None, submitit.helpers.TorchDistributedEnvironment] = None
 
     def set_up_dist_env(self):
         """Set up the distributed environment variables for PyTorch distributed training."""
