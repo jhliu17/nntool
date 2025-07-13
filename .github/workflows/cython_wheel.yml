@@ -1,6 +1,10 @@
 name: Build Cython Wheel
 
-on: [pull_request]
+on:
+  push:
+    branches: [main]
+  release:
+    types: [created]
 
 jobs:
   build_wheels:
@@ -28,3 +32,11 @@ jobs:
         with:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
+
+      - name: Upload wheels to PyPI
+        if: ${{ github.event_name == 'release' }}
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          pip install twine
+          twine upload --username __token__ --password $PYPI_TOKEN wheelhouse/*.whl
