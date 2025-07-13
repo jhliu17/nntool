@@ -22,6 +22,7 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.0.1
         env:
+          CIBW_BEFORE_BUILD: "pip install buildkit/cythonpackage"
           CIBW_BUILD: "cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64"
           CIBW_BUILD_VERBOSITY: 1
         with:
