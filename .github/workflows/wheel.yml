@@ -1,6 +1,7 @@
 name: Build and Publish Documentation and Wheel Index
 
 on:
+  pull_request:
   push:
     branches: [main]
   release:

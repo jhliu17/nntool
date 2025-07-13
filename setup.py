@@ -108,7 +108,7 @@ else:
             "optimize": 1,
             "exclude": ["tests/*"],  # List of glob
         },
-        setup_requires=["cython"],
+        setup_requires=["cython", "./buildkit/cythonpackage"],
         ext_modules=cythonize(
             cython_extensions,
             build_dir="build/cythonpackage",
