@@ -38,6 +38,7 @@ exclude = [
     "venv",
     "*.ipynb",        # Exclude notebooks from ruff checks
     "buildkit",
+    "docs",
 ]
 
 [tool.ruff.lint]

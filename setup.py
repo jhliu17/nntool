@@ -81,9 +81,7 @@ package_info = dict(
 if os.getenv("NNTOOL_PYTHON_BUILD"):
     setup(
         packages=find_packages(exclude=["tests"]),
-        exclude_package_data={
-            "": ["*.pyi"]
-        },  # for source release, ignore all pyi files
+        exclude_package_data={"": ["*.pyi"]},  # for source release, ignore all pyi files
         **package_info,
     )
 else:
