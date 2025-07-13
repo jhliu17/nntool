@@ -25,7 +25,11 @@ def get_csrc_files(folder: str) -> list[str]:
     source_files = []
     for root, dirs, files in os.walk(folder):
         for file in files:
-            if file.endswith(".py") and not file.endswith("__init__.py"):
+            if (
+                file.endswith(".py")
+                and not file.endswith("__init__.py")
+                and not file.startswith(".")
+            ):
                 source_files.append(os.path.join(root, file))
     return source_files
 
@@ -39,7 +43,7 @@ package_info = dict(
         # List your package dependencies here
         # e.g., 'requests>=2.0',
         "tyro",
-        "setuptools>=68.0.0",
+        "setuptools>=68.0.0,<81.0.0",
         "submitit>=1.5.3",
         "matplotlib>=3.8.0",
         "seaborn>=0.13.2",
@@ -77,7 +81,9 @@ package_info = dict(
 if os.getenv("NNTOOL_PYTHON_BUILD"):
     setup(
         packages=find_packages(exclude=["tests"]),
-        exclude_package_data={"": ["*.pyi"]},  # for source release, ignore all pyi files
+        exclude_package_data={
+            "": ["*.pyi"]
+        },  # for source release, ignore all pyi files
         **package_info,
     )
 else:
