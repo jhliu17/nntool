@@ -9,16 +9,29 @@ on:
 jobs:
   pytest:
     runs-on: ubuntu-22.04
+
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - "8888:3306"
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - uses: actions/checkout@v4
+      - uses: koesterlab/setup-slurm-action@v1
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Install packages
         run: |
           NNTOOL_PYTHON_BUILD=1 pip install -e ".[dev]"
