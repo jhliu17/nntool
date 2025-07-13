@@ -25,7 +25,7 @@ livehtml:
 	sphinx-autobuild docs docs/_build -a
 
 releases:
-	CIBW_BEFORE_BUILD="pip install cython; pip install buildkit/cythonpackage" CIBW_BUILD="cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64" cibuildwheel --platform linux
+	CIBW_BEFORE_BUILD="pip install cython==3.0.12; pip install buildkit/cythonpackage" CIBW_BUILD="cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64" cibuildwheel --platform linux
 
 releases_test:
 	CIBW_BEFORE_BUILD="pip install cython; pip install buildkit/cythonpackage" CIBW_BUILD="cp310-manylinux_x86_64" CIBW_BUILD_VERBOSITY=1 cibuildwheel --platform linux
