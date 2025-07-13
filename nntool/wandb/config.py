@@ -5,7 +5,7 @@ import tomli
 import warnings
 
 from dataclasses import dataclass, field
-
+from typing import Union
 from wandb.sdk.lib.disabled import RunDisabled
 from wandb.sdk.wandb_run import Run
 
@@ -67,7 +67,7 @@ def is_wandb_enabled():
     return wandb.run is not None
 
 
-def init_wandb(args: WandbConfig, run_config: dict) -> Run | RunDisabled | None:
+def init_wandb(args: WandbConfig, run_config: dict) -> Union[Run, RunDisabled, None]:
     """initialize wandb and log the configuration
 
     :param args: WandbConfig object

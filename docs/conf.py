@@ -10,6 +10,7 @@ import importlib
 import inspect
 import pathlib
 import subprocess
+from typing import Union
 
 import nntool
 
@@ -45,7 +46,7 @@ autodoc_typehints_format = "short"
 autosummary_ignore_module_all = False
 
 
-def linkcode_resolve(domain: str, info: dict) -> str | None:
+def linkcode_resolve(domain: str, info: dict) -> Union[str, None]:
     module = info.get("module", "")
     fullname = info.get("fullname", "")
 
