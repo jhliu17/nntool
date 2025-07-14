@@ -29,6 +29,7 @@ def get_csrc_files(folder: str) -> list[str]:
                 file.endswith(".py")
                 and not file.endswith("__init__.py")
                 and not file.startswith(".")
+                and file != "__compile__.py"  # Exclude the empty __compile__.py files
             ):
                 source_files.append(os.path.join(root, file))
     return source_files
@@ -49,8 +50,8 @@ package_info = dict(
         "seaborn>=0.13.2",
         "wandb>=0.15.0",
         "tomli>=2.0.1",
-        "Cython==3.0.12",
-        "cythonpackage",
+        "Cython==3.1.2",
+        "cythonpackage==0.2.14",
     ],
     cmdclass={
         "clean_cython": CleanCython,
@@ -88,16 +89,29 @@ else:
     from Cython.Build import cythonize
 
     # Specify the Cython modules to build
-    cython_extensions = [
-        Extension(
-            name="nntool.slurm.csrc.__compile__",
-            sources=get_csrc_files("nntool/slurm/csrc/"),
-        ),
-        Extension(
-            name="nntool.plot.csrc.__compile__",
-            sources=get_csrc_files("nntool/plot/csrc/"),
-        ),
-    ]
+    cython_extensions = []
+
+    # Create separate extensions for each Cython file in slurm/csrc/
+    for source_file in get_csrc_files("nntool/slurm/csrc/"):
+        # Extract module name from file path
+        module_name = source_file.replace("/", ".").replace(".py", "")
+        cython_extensions.append(
+            Extension(
+                name=module_name,
+                sources=[source_file],
+            )
+        )
+
+    # Create separate extensions for each Cython file in plot/csrc/
+    for source_file in get_csrc_files("nntool/plot/csrc/"):
+        # Extract module name from file path
+        module_name = source_file.replace("/", ".").replace(".py", "")
+        cython_extensions.append(
+            Extension(
+                name=module_name,
+                sources=[source_file],
+            )
+        )
     setup(
         packages=find_packages(exclude=["tests"]),
         cythonpackage={
