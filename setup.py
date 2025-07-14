@@ -49,7 +49,7 @@ package_info = dict(
         "seaborn>=0.13.2",
         "wandb>=0.15.0",
         "tomli>=2.0.1",
-        "Cython",
+        "Cython==3.0.12",
         "cythonpackage",
     ],
     cmdclass={
@@ -108,7 +108,6 @@ else:
             "optimize": 1,
             "exclude": ["tests/*"],  # List of glob
         },
-        setup_requires=["cython"],
         ext_modules=cythonize(
             cython_extensions,
             build_dir="build/cythonpackage",

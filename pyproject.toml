@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68.0.0", "wheel", "Cython", "cythonpackage"]
+requires = ["setuptools>=40.8.0", "wheel", "Cython==3.0.12"]
 build-backend = "setuptools.build_meta"
 
 [tool.ruff]
@@ -13,7 +13,6 @@ line-length = 100
 fix = true
 
 # Directories to include/exclude
-include = ["*.py", "*.pyi", "**/pyproject.toml"]
 exclude = [
     ".bzr",
     ".direnv",
