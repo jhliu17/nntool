@@ -1,4 +1,4 @@
-from .csrc import latexify, savefig, is_latexify_enabled
+from .core import latexify, savefig, is_latexify_enabled
 from .context import latexify_plot, enable_latexify
 
 __all__ = [
