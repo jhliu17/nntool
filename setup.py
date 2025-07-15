@@ -92,7 +92,7 @@ else:
     cython_extensions = []
 
     # Create separate extensions for each Cython file in slurm/csrc/
-    for source_file in get_csrc_files("nntool/slurm/csrc/"):
+    for source_file in get_csrc_files("src/nntool/slurm/csrc/"):
         # Extract module name from file path
         module_name = source_file.replace("/", ".").replace(".py", "")
         cython_extensions.append(
@@ -103,7 +103,7 @@ else:
         )
 
     # Create separate extensions for each Cython file in plot/csrc/
-    for source_file in get_csrc_files("nntool/plot/csrc/"):
+    for source_file in get_csrc_files("src/nntool/plot/csrc/"):
         # Extract module name from file path
         module_name = source_file.replace("/", ".").replace(".py", "")
         cython_extensions.append(
