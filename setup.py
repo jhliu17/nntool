@@ -50,7 +50,7 @@ package_info = dict(
         "wandb>=0.15.0",
         "tomli>=2.0.1",
         "Cython==3.0.12",
-        "cythonpackage",
+        "cythonpackage==0.2.14",
     ],
     cmdclass={
         "clean_cython": CleanCython,
