@@ -71,13 +71,13 @@ jobs:
           publish_dir: docs/_build/
           force_orphan: true
 
-      # - name: Upload wheels to PyPI
-      #   if: ${{ github.event_name == 'release' }}
-      #   env:
-      #     PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-      #   run: |
-      #     pip install twine
-      #     twine upload --username __token__ --password $PYPI_TOKEN dist/*.whl
+      - name: Upload wheels to PyPI
+        if: ${{ github.event_name == 'release' }}
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          pip install twine
+          twine upload --username __token__ --password $PYPI_TOKEN dist/*.whl
 
       - name: Create Pull Request for Wheel Index Updates
         uses: peter-evans/create-pull-request@v5
