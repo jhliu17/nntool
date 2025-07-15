@@ -35,7 +35,7 @@ def get_csrc_files(folder: str) -> list[str]:
     return source_files
 
 
-exec(open("nntool/version.py").read())
+exec(open("src/nntool/version.py").read())
 package_info = dict(
     name="nntool",
     version=VERSION,  # noqa: F821 # type: ignore
