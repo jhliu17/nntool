@@ -81,7 +81,8 @@ package_info = dict(
 
 if os.getenv("NNTOOL_PYTHON_BUILD"):
     setup(
-        packages=find_packages(exclude=["tests"]),
+        packages=find_packages(where="src", exclude=["tests"]),
+        package_dir={"": "src"},
         exclude_package_data={"": ["*.pyi"]},  # for source release, ignore all pyi files
         **package_info,
     )
@@ -93,8 +94,8 @@ else:
 
     # Create separate extensions for each Cython file in slurm/csrc/
     for source_file in get_csrc_files("src/nntool/slurm/csrc/"):
-        # Extract module name from file path
-        module_name = source_file.replace("/", ".").replace(".py", "")
+        # Extract module name from file path, removing the src/ prefix
+        module_name = source_file.replace("src/", "").replace("/", ".").replace(".py", "")
         cython_extensions.append(
             Extension(
                 name=module_name,
@@ -104,8 +105,8 @@ else:
 
     # Create separate extensions for each Cython file in plot/csrc/
     for source_file in get_csrc_files("src/nntool/plot/csrc/"):
-        # Extract module name from file path
-        module_name = source_file.replace("/", ".").replace(".py", "")
+        # Extract module name from file path, removing the src/ prefix
+        module_name = source_file.replace("src/", "").replace("/", ".").replace(".py", "")
         cython_extensions.append(
             Extension(
                 name=module_name,
@@ -113,7 +114,8 @@ else:
             )
         )
     setup(
-        packages=find_packages(exclude=["tests"]),
+        packages=find_packages(where="src", exclude=["tests"]),
+        package_dir={"": "src"},
         cythonpackage={
             "inject_ext_modules": False,
             "inject_init": True,
