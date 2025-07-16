@@ -11,8 +11,8 @@ class SlurmConfig:
     Configuration class for SLURM job submission and execution.
 
     Args:
-        mode (Literal["debug", "exec", "local", "slurm"]): Running mode for the job. Options include:
-            "debug" (default, run debugging which will involve pdb), "exec" (alias of local), "local" (run the job locally), or "slurm" (run the job on a SLURM cluster).
+        mode (Literal["debug", "local", "slurm"]): Running mode for the job. Options include:
+            "debug" (default, run debugging which will involve pdb), "local" (run the job locally), or "slurm" (run the job on a SLURM cluster).
 
         job_name (str): The name of the SLURM job. Default is 'Job'.
 

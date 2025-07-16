@@ -2,6 +2,7 @@ import os
 import shlex
 import shutil
 import submitit
+import subprocess
 
 from pathlib import Path
 from typing import Union, Generator, Callable
@@ -212,28 +213,30 @@ class PyTorchDistributedTask(Task):
         # other setup
         env_setup = {}
 
-        # set CUDA visible devices if slurm has scheduled GPUs otherwise use all GPUs (without setting CUDA_VISIBLE_DEVICES)
-        env_setup.update(
-            {"CUDA_VISIBLE_DEVICES": os.environ["SLURM_JOB_GPUS"]}
-            if "SLURM_JOB_GPUS" in os.environ
-            else {}
-        )
+        # set CUDA visible devices if slurm has scheduled GPUs otherwise use all GPUs (without setting
+        # CUDA_VISIBLE_DEVICES)
+        if self.slurm_config.mode == "slurm":
+            env_setup.update(
+                {"CUDA_VISIBLE_DEVICES": os.environ["SLURM_JOB_GPUS"]}
+                if "SLURM_JOB_GPUS" in os.environ
+                else {}
+            )
 
         # other environment variables set by the user
         env_setup.update(self.env_setup_kwargs)
-        self.log(f"env_setup: {env_setup}")
+        self.log(f"Env setup: {env_setup}")
 
         # update environment variables
         os.environ.update(**env_setup)
 
         self.log(nvidia_smi_gpu_memory_stats_str())
-        self.log(f"master: {dist_env.master_addr}:{dist_env.master_port}")
-        self.log(f"rank: {dist_env.rank}")
-        self.log(f"world size: {dist_env.world_size}")
-        self.log(f"local rank: {dist_env.local_rank}")
-        self.log(f"local world size: {dist_env.local_world_size}")
+        self.log(f"Master: {dist_env.master_addr}:{dist_env.master_port}")
+        self.log(f"Rank: {dist_env.rank}")
+        self.log(f"World size: {dist_env.world_size}")
+        self.log(f"Local rank: {dist_env.local_rank}")
+        self.log(f"Local world size: {dist_env.local_world_size}")
         self.log(
-            f"local rank {dist_env.local_rank}: CUDA_VISIBLE_DEVICES {os.environ.get('CUDA_VISIBLE_DEVICES', 'all')}"
+            f"Local rank {dist_env.local_rank}: CUDA_VISIBLE_DEVICES {os.environ.get('CUDA_VISIBLE_DEVICES', 'all')}"
         )
 
         # set distributed arguments
@@ -286,6 +289,9 @@ class PyTorchDistributedTask(Task):
                 except Exception as e:
                     print(f"failed to export distributed environment variables: {e}")
                     return -1
+            elif self.slurm_config.mode == "local":
+                cmd_list = shlex.split(cmd)
+                return subprocess.Popen(cmd_list)
             else:
                 # If not on slurm mode, we can just run the command directly
                 # This is useful for local testing or when running on a single machine
