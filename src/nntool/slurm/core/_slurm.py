@@ -118,7 +118,9 @@ class SlurmFunction:
             )
         elif slurm_config.mode in ("local", "debug"):
             # If CUDA_VISIBLE_DEVICES is set by users, we need to set it to the local job
-            # https://github.com/facebookincubator/submitit/blob/64119dc669a21d69f46c9d9a3f556ce447d238d3/submitit/local/local.py#L241
+            # Refer to:
+            #   1. https://github.com/facebookincubator/submitit/blob/64119dc669a21d69f46c9d9a3f556ce447d238d3/submitit/local/local.py#L203
+            #   2. https://github.com/facebookincubator/submitit/blob/64119dc669a21d69f46c9d9a3f556ce447d238d3/submitit/local/local.py#L241
             if "CUDA_VISIBLE_DEVICES" in os.environ:
                 visible_gpus = os.environ["CUDA_VISIBLE_DEVICES"].split(",")
                 visible_gpus = tuple(int(gpu) for gpu in visible_gpus if gpu.isdigit())
