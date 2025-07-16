@@ -4,7 +4,7 @@ import copy
 from submitit import Job
 from typing import Any, Callable, Literal, Tuple, Union, Dict, List, Optional
 from .config import SlurmConfig
-from .csrc import _SlurmFunction
+from .core import _SlurmFunction
 
 
 class SlurmFunction:

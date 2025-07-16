@@ -34,10 +34,10 @@ Installation
 
 NNTool is tested and supported on the following systems:
 
-* Python 3.9–3.12
+* Python 3.9-3.13
 * Linux systems with Slurm installed
 
-NNTool is available on PyPI and can be installed using pip: https://pypi.org/project/nntool/
+Please contact me if you would like to access the package.
 
 .. code-block:: sh
 

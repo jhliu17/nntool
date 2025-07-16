@@ -72,49 +72,82 @@ class SlurmFunction:
         slurm_parameters_kwargs = self.slurm_params_kwargs
         slurm_submission_kwargs = self.slurm_submit_kwargs
 
-        # select the cluster type, which is based on the submitit library
-        # here we add a special mode called `exec` for running the job in the local machine
+        # Select the cluster type, which is based on the submitit library
+        # Here we add a special mode called `exec` for running the job in the local machine,
         # which is equivalent to the `debug` mode in the submitit library
         cluster_dispatch = {
             "slurm": None,
-            "exec": "local",
             "debug": "debug",
+            "run": "debug",
             "local": "local",
         }
-        executor = submitit.AutoExecutor(
-            folder=slurm_config.output_path,
-            cluster=cluster_dispatch.get(slurm_config.mode, slurm_config.mode),
-        )
 
-        # set additional parameters
-        slurm_additional_parameters = {}
-        if slurm_config.node_list:
-            slurm_additional_parameters["nodelist"] = slurm_config.node_list
-        if slurm_config.node_list_exclude:
-            slurm_additional_parameters["exclude"] = slurm_config.node_list_exclude
-        if slurm_config.mem:
-            slurm_additional_parameters["mem"] = slurm_config.mem
-        slurm_additional_parameters.update(slurm_parameters_kwargs)
+        if slurm_config.mode in ("slurm", "debug", "run"):
+            executor = submitit.AutoExecutor(
+                folder=slurm_config.output_path,
+                cluster=cluster_dispatch.get(slurm_config.mode, slurm_config.mode),
+            )
 
-        # set slurm parameters
-        executor.update_parameters(
-            name=slurm_config.job_name,
-            slurm_partition=slurm_config.partition,
-            nodes=slurm_config.num_of_node,
-            slurm_tasks_per_node=slurm_config.tasks_per_node,
-            slurm_cpus_per_task=slurm_config.cpus_per_task,
-            slurm_gpus_per_node=(
-                slurm_config.gpus_per_task * slurm_config.tasks_per_node
-                if slurm_config.gpus_per_node is None
-                else slurm_config.gpus_per_node
-            ),  # gpu cannot be assigned in the task level
-            timeout_min=slurm_config.timeout_min,
-            # refer to https://samuelstevens.me/writing/submitit#multi-gpu-training-in-torch
-            stderr_to_stdout=slurm_config.stderr_to_stdout,
-            local_setup=slurm_config.setup,
-            slurm_additional_parameters=slurm_additional_parameters,
-            **slurm_submission_kwargs,
-        )
+            # Set additional slurm parameters
+            slurm_additional_parameters = {}
+            if slurm_config.node_list:
+                slurm_additional_parameters["nodelist"] = slurm_config.node_list
+            if slurm_config.node_list_exclude:
+                slurm_additional_parameters["exclude"] = slurm_config.node_list_exclude
+            if slurm_config.mem:
+                slurm_additional_parameters["mem"] = slurm_config.mem
+
+            # Update the slurm additional parameters with the slurm parameters kwargs
+            slurm_additional_parameters.update(slurm_parameters_kwargs)
+
+            executor.update_parameters(
+                name=slurm_config.job_name,
+                slurm_partition=slurm_config.partition,
+                nodes=slurm_config.num_of_node,
+                tasks_per_node=slurm_config.tasks_per_node,
+                cpus_per_task=slurm_config.cpus_per_task,
+                gpus_per_node=(
+                    slurm_config.gpus_per_task * slurm_config.tasks_per_node
+                    if slurm_config.gpus_per_node is None
+                    else slurm_config.gpus_per_node
+                ),  # gpu cannot be assigned in the task level
+                timeout_min=slurm_config.timeout_min,
+                # refer to https://samuelstevens.me/writing/submitit#multi-gpu-training-in-torch
+                stderr_to_stdout=slurm_config.stderr_to_stdout,
+                local_setup=slurm_config.setup,
+                slurm_additional_parameters=slurm_additional_parameters,
+                **slurm_submission_kwargs,
+            )
+        elif slurm_config.mode in ("local",):
+            # If CUDA_VISIBLE_DEVICES is set by users, we need to set it to the local job
+            # Refer to:
+            #   1. https://github.com/facebookincubator/submitit/blob/64119dc669a21d69f46c9d9a3f556ce447d238d3/submitit/local/local.py#L203
+            #   2. https://github.com/facebookincubator/submitit/blob/64119dc669a21d69f46c9d9a3f556ce447d238d3/submitit/local/local.py#L241
+            # if "CUDA_VISIBLE_DEVICES" in os.environ:
+            #     visible_gpus = os.environ["CUDA_VISIBLE_DEVICES"].split(",")
+            #     visible_gpus = tuple(int(gpu) for gpu in visible_gpus if gpu.isdigit())
+            # else:
+            #     visible_gpus = ()
+
+            executor.update_parameters(
+                name=slurm_config.job_name,
+                nodes=slurm_config.num_of_node,
+                tasks_per_node=slurm_config.tasks_per_node,
+                cpus_per_task=slurm_config.cpus_per_task,
+                gpus_per_node=(
+                    slurm_config.gpus_per_task * slurm_config.tasks_per_node
+                    if slurm_config.gpus_per_node is None
+                    else slurm_config.gpus_per_node
+                ),  # gpu cannot be assigned in the task level
+                timeout_min=slurm_config.timeout_min,
+                # refer to https://samuelstevens.me/writing/submitit#multi-gpu-training-in-torch
+                stderr_to_stdout=slurm_config.stderr_to_stdout,
+                local_setup=slurm_config.setup,
+            )
+        else:
+            raise ValueError(
+                f"Unsupported slurm mode: {slurm_config.mode}. Supported modes are: {list(cluster_dispatch.keys())}."
+            )
         return executor
 
     def get_executor(
