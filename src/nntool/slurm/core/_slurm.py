@@ -78,10 +78,11 @@ class SlurmFunction:
         cluster_dispatch = {
             "slurm": None,
             "debug": "debug",
+            "run": "debug",
             "local": "local",
         }
 
-        if slurm_config.mode in ("slurm", "debug"):
+        if slurm_config.mode in ("slurm", "debug", "run"):
             executor = submitit.AutoExecutor(
                 folder=slurm_config.output_path,
                 cluster=cluster_dispatch.get(slurm_config.mode, slurm_config.mode),
