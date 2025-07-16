@@ -80,12 +80,13 @@ class SlurmFunction:
             "debug": "debug",
             "local": "local",
         }
-        executor = submitit.AutoExecutor(
-            folder=slurm_config.output_path,
-            cluster=cluster_dispatch.get(slurm_config.mode, slurm_config.mode),
-        )
 
-        if slurm_config.mode == "slurm":
+        if slurm_config.mode in ("slurm", "debug"):
+            executor = submitit.AutoExecutor(
+                folder=slurm_config.output_path,
+                cluster=cluster_dispatch.get(slurm_config.mode, slurm_config.mode),
+            )
+
             # Set additional slurm parameters
             slurm_additional_parameters = {}
             if slurm_config.node_list:
@@ -116,16 +117,16 @@ class SlurmFunction:
                 slurm_additional_parameters=slurm_additional_parameters,
                 **slurm_submission_kwargs,
             )
-        elif slurm_config.mode in ("local", "debug"):
+        elif slurm_config.mode in ("local",):
             # If CUDA_VISIBLE_DEVICES is set by users, we need to set it to the local job
             # Refer to:
             #   1. https://github.com/facebookincubator/submitit/blob/64119dc669a21d69f46c9d9a3f556ce447d238d3/submitit/local/local.py#L203
             #   2. https://github.com/facebookincubator/submitit/blob/64119dc669a21d69f46c9d9a3f556ce447d238d3/submitit/local/local.py#L241
-            if "CUDA_VISIBLE_DEVICES" in os.environ:
-                visible_gpus = os.environ["CUDA_VISIBLE_DEVICES"].split(",")
-                visible_gpus = tuple(int(gpu) for gpu in visible_gpus if gpu.isdigit())
-            else:
-                visible_gpus = ()
+            # if "CUDA_VISIBLE_DEVICES" in os.environ:
+            #     visible_gpus = os.environ["CUDA_VISIBLE_DEVICES"].split(",")
+            #     visible_gpus = tuple(int(gpu) for gpu in visible_gpus if gpu.isdigit())
+            # else:
+            #     visible_gpus = ()
 
             executor.update_parameters(
                 name=slurm_config.job_name,
@@ -141,7 +142,6 @@ class SlurmFunction:
                 # refer to https://samuelstevens.me/writing/submitit#multi-gpu-training-in-torch
                 stderr_to_stdout=slurm_config.stderr_to_stdout,
                 local_setup=slurm_config.setup,
-                visible_gpus=visible_gpus,
             )
         else:
             raise ValueError(
