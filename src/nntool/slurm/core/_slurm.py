@@ -81,13 +81,12 @@ class SlurmFunction:
             "run": "debug",
             "local": "local",
         }
+        executor = submitit.AutoExecutor(
+            folder=slurm_config.output_path,
+            cluster=cluster_dispatch.get(slurm_config.mode, slurm_config.mode),
+        )
 
         if slurm_config.mode in ("slurm", "debug", "run"):
-            executor = submitit.AutoExecutor(
-                folder=slurm_config.output_path,
-                cluster=cluster_dispatch.get(slurm_config.mode, slurm_config.mode),
-            )
-
             # Set additional slurm parameters
             slurm_additional_parameters = {}
             if slurm_config.node_list:
