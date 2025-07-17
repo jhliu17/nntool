@@ -86,7 +86,7 @@ class SlurmFunction:
             cluster=cluster_dispatch.get(slurm_config.mode, slurm_config.mode),
         )
 
-        if slurm_config.mode in ("slurm", "debug", "run"):
+        if slurm_config.mode in ("slurm", "debug"):
             # Set additional slurm parameters
             slurm_additional_parameters = {}
             if slurm_config.node_list:
@@ -283,7 +283,7 @@ class SlurmFunction:
             # will try to pass the slurm_configs as the first argument
             return self.configure(slurm_config)
 
-    def __before_submit(self, *args, **kwargs):
+    def __before_submit_to_slurm(self, *args, **kwargs):
         """The hook function before submitting the job. It will pack the code and scripts to the slurm output folder if the `pack_code` is set to True in the slurm configuration. Only work before the first submit.
 
         :raises Exception: if the slurm function is not integrated
@@ -307,7 +307,7 @@ class SlurmFunction:
             if self.slurm_config.use_packed_code:
                 self.slurm_params_kwargs.update({"chdir": target_code_root})
 
-    def __after_submit(
+    def __after_submit_to_slurm(
         self,
         submit_results: Union[Job, List[Job], Any] = None,
         *args,
@@ -328,17 +328,62 @@ class SlurmFunction:
         else:
             pass
 
+    @property
+    def _is_valid_mode_for_executor(self) -> bool:
+        return self.slurm_config.mode in ("slurm", "debug", "local")
+
+    @property
+    def _should_be_submitted_to_executor(self) -> bool:
+        """Check whether the slurm function should be submitted to the executor.
+
+        :return: True if the slurm function should be submitted to the executor, False otherwise
+        """
+        is_first_launch = not self.slurm_has_been_set_up()
+        return self._is_valid_mode_for_executor and is_first_launch
+
     def __call__(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
         """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
 
         :raises Exception: if the submit_fn is not set up
         :return: Slurm Job or the return value of the submit_fn
         """
-        self.__before_submit()
-        submit_strategy = self.__dispatch_submit_strategy("submit")
-        submit_results = submit_strategy(*submit_fn_args, **submit_fn_kwargs)
-        self.__after_submit(submit_results)
-        return submit_results
+        if self._should_be_submitted_to_executor:
+            self.__before_submit_to_slurm()
+            submit_strategy = self.__dispatch_submit_strategy("submit")
+            submit_results = submit_strategy(*submit_fn_args, **submit_fn_kwargs)
+            self.__after_submit_to_slurm(submit_results)
+            return submit_results
+        else:
+            return self.submit_fn(*submit_fn_args, **submit_fn_kwargs)
+
+    def submit(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
+        """An alias function to `__call__`.
+
+        :raises Exception: if the submit_fn is not set up
+        :return: Slurm Job or the return value of the submit_fn
+        """
+        return self(*submit_fn_args, **submit_fn_kwargs)
+
+    def map_array(
+        self, *submit_fn_args, **submit_fn_kwargs
+    ) -> Union[Job[Any], List[Job[Any]], Any]:
+        """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
+
+        :raises Exception: if the submit_fn is not set up
+        :return: Slurm Job or the return value of the submit_fn
+        """
+        if (
+            self._should_be_submitted_to_executor
+            and not self.is_distributed()
+            and self.slurm_config.mode == "slurm"
+        ):
+            self.__before_submit_to_slurm()
+            submit_strategy = self.__dispatch_submit_strategy("map_array")
+            submit_results = submit_strategy(*submit_fn_args, **submit_fn_kwargs)
+            self.__after_submit_to_slurm(submit_results)
+            return submit_results
+        else:
+            raise Exception("The `map_array` method is only supported in the slurm mode.")
 
     def __dispatch_submit_strategy(
         self,
@@ -358,28 +403,6 @@ class SlurmFunction:
                 return self.__submit_map_array
         else:
             raise Exception(f"Invalid submit mode: {submit_mode}")
-
-    def submit(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
-        """An alias function to `__call__`.
-
-        :raises Exception: if the submit_fn is not set up
-        :return: Slurm Job or the return value of the submit_fn
-        """
-        return self(*submit_fn_args, **submit_fn_kwargs)
-
-    def map_array(
-        self, *submit_fn_args, **submit_fn_kwargs
-    ) -> Union[Job[Any], List[Job[Any]], Any]:
-        """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
-
-        :raises Exception: if the submit_fn is not set up
-        :return: Slurm Job or the return value of the submit_fn
-        """
-        self.__before_submit()
-        submit_strategy = self.__dispatch_submit_strategy("map_array")
-        submit_results = submit_strategy(*submit_fn_args, **submit_fn_kwargs)
-        self.__after_submit(submit_results)
-        return submit_results
 
     def on_condition(
         self,
@@ -470,7 +493,7 @@ class SlurmFunction:
         self,
         *submit_fn_args,
         **submit_fn_kwargs,
-    ) -> Union[Job, Any]:
+    ) -> Job:
         submit_fn_args, submit_fn_kwargs = self.__get_submit_args(
             *submit_fn_args, **submit_fn_kwargs
         )
@@ -478,31 +501,25 @@ class SlurmFunction:
         # The distributed job in slurm mode will be launched twice:
         #   1. the first launch is to set up the distributed environment
         #   2. the second launch is to run the submit function in the distributed environment directly
-        is_first_launch = not self.slurm_has_been_set_up()
-        if is_first_launch:
-            # The task to be submitted is to request enough resources and set up the distributed environment if
-            # in slurm mode. Otherwise, it will just run the submit function directly.
-            if self.slurm_config.distributed_env_task == "torch":
-                task = PyTorchDistributedTask(
-                    self.slurm_config.distributed_launch_command,
-                    (self.system_argv if self.system_argv is not None else list(sys.argv[1:])),
-                    self.slurm_config,
-                    verbose=True,
-                    **self.slurm_task_kwargs,
-                )
-            else:
-                raise ValueError(
-                    f"Unsupported distributed environment task: {self.slurm_config.distributed_env_task}"
-                )
-
-            # We need to patch the submitit command string to include the task and the second launch
-            # command.
-            with SubmititDistributedCommandContext(self.slurm_config, task):
-                executor = self.get_executor()
-                self.__mark_slurm_has_been_set_up()
-                job = executor.submit(task)
-            return job
+        # The task to be submitted is to request enough resources and set up the distributed environment if
+        # in slurm mode.
+        if self.slurm_config.distributed_env_task == "torch":
+            task = PyTorchDistributedTask(
+                self.slurm_config.distributed_launch_command,
+                (self.system_argv if self.system_argv is not None else list(sys.argv[1:])),
+                self.slurm_config,
+                verbose=True,
+                **self.slurm_task_kwargs,
+            )
         else:
-            # Execute the submit function directly in the created distributed environment at the first launch.
-            # This is the second launch, so we can just run the submit function directly.
-            return self.submit_fn(*submit_fn_args, **submit_fn_kwargs)
+            raise ValueError(
+                f"Unsupported distributed environment task: {self.slurm_config.distributed_env_task}"
+            )
+
+        # We need to patch the submitit command string to include the task and the second launch
+        # command.
+        with SubmititDistributedCommandContext(self.slurm_config, task):
+            executor = self.get_executor()
+            self.__mark_slurm_has_been_set_up()
+            job = executor.submit(task)
+        return job
