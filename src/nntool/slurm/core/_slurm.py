@@ -283,7 +283,7 @@ class SlurmFunction:
             # will try to pass the slurm_configs as the first argument
             return self.configure(slurm_config)
 
-    def __before_submit_to_slurm(self, *args, **kwargs):
+    def __before_submission(self, *args, **kwargs):
         """The hook function before submitting the job. It will pack the code and scripts to the slurm output folder if the `pack_code` is set to True in the slurm configuration. Only work before the first submit.
 
         :raises Exception: if the slurm function is not integrated
@@ -307,7 +307,7 @@ class SlurmFunction:
             if self.slurm_config.use_packed_code:
                 self.slurm_params_kwargs.update({"chdir": target_code_root})
 
-    def __after_submit_to_slurm(
+    def __after_submission(
         self,
         submit_results: Union[Job, List[Job], Any] = None,
         *args,
@@ -348,10 +348,10 @@ class SlurmFunction:
         :return: Slurm Job or the return value of the submit_fn
         """
         if self._should_be_submitted_to_executor:
-            self.__before_submit_to_slurm()
+            self.__before_submission()
             submit_strategy = self.__dispatch_submit_strategy("submit")
             submit_results = submit_strategy(*submit_fn_args, **submit_fn_kwargs)
-            self.__after_submit_to_slurm(submit_results)
+            self.__after_submission(submit_results)
             return submit_results
         else:
             return self.submit_fn(*submit_fn_args, **submit_fn_kwargs)
@@ -377,10 +377,10 @@ class SlurmFunction:
             and not self.is_distributed()
             and self.slurm_config.mode == "slurm"
         ):
-            self.__before_submit_to_slurm()
+            self.__before_submission()
             submit_strategy = self.__dispatch_submit_strategy("map_array")
             submit_results = submit_strategy(*submit_fn_args, **submit_fn_kwargs)
-            self.__after_submit_to_slurm(submit_results)
+            self.__after_submission(submit_results)
             return submit_results
         else:
             raise Exception("The `map_array` method is only supported in the slurm mode.")
