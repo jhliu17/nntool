@@ -1,6 +1,7 @@
 [build-system]
-requires = ["setuptools>=68.0.0,<81.0.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["setuptools<81.0.0", "wheel", "Cython==3.0.12"]
+build-backend = "build_backend"
+backend-path = ["nntool"]
 
 [project]
 name = "nntool"
@@ -12,11 +13,13 @@ keywords = ["deep learning", "neural network", "research"]
 requires-python = ">=3.9"
 dependencies = [
     "tyro",
-    "setuptools>=68.0.0,<81.0.0",
+    "setuptools<81.0.0",
     "submitit>=1.5.3",
     "seaborn>=0.13.2",
     "wandb>=0.15.0",
     "tomli>=2.0.1",
+    "Cython==3.0.12",
+    "cythonpackage==0.2.14",
 ]
 
 [project.optional-dependencies]
@@ -35,13 +38,6 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/jhliu17/nntool"
-
-[tool.setuptools]
-package-dir = { "" = "src" }
-
-[tool.setuptools.packages.find]
-where = ["src"]
-exclude = ["tests"]
 
 [tool.setuptools.package-data]
 "*" = ["!*.pyi"]

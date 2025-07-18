@@ -11,8 +11,8 @@ class SlurmConfig:
     Configuration class for SLURM job submission and execution.
 
     Args:
-        mode (Literal["debug", "run", "local", "slurm"]): Running mode for the job. Options include:
-            "debug" (default, run debugging which will involve pdb if it reachs a breakpoint), "run" (alias "debug" without file logging), "local" (run the job locally by subprocess, without gpu allocations and CUDA_VISIBLE_DEVICES cannot be set), or "slurm" (run the job on a SLURM cluster).
+        mode (Literal["run", "debug", "local", "slurm"]): Running mode for the job. Options include:
+            "run" (default, directly run the function), "debug" (run debugging which will involve pdb if it reachs a breakpoint), "local" (run the job locally by subprocess, without gpu allocations and CUDA_VISIBLE_DEVICES cannot be set), or "slurm" (run the job on a SLURM cluster).
 
         job_name (str): The name of the SLURM job. Default is 'Job'.
 
@@ -70,7 +70,7 @@ class SlurmConfig:
     """
 
     # running mode
-    mode: Literal["debug", "run", "local", "slurm"] = "run"
+    mode: Literal["run", "debug", "local", "slurm"] = "run"
 
     # slurm job name
     job_name: str = "Job"

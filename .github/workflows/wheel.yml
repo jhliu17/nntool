@@ -26,7 +26,7 @@ jobs:
 
       - name: Install packages
         run: |
-          pip install -e ".[dev]"
+          NNTOOL_PYTHON_BUILD=1 pip install -e ".[dev]"
 
       - name: Sphinx build
         run: |
@@ -35,7 +35,7 @@ jobs:
       - name: Build Wheel
         run: |
           pip install build
-          python -m build --wheel
+          NNTOOL_PYTHON_BUILD=1 python -m build --wheel
 
       - name: Update the wheel index
         if: ${{ github.event_name == 'release' }}
@@ -70,14 +70,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/_build/
           force_orphan: true
-
-      # - name: Upload wheels to PyPI
-      #   if: ${{ github.event_name == 'release' }}
-      #   env:
-      #     PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-      #   run: |
-      #     pip install twine
-      #     twine upload --username __token__ --password $PYPI_TOKEN dist/*.whl
 
       - name: Create Pull Request for Wheel Index Updates
         uses: peter-evans/create-pull-request@v5
