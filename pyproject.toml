@@ -1,11 +1,7 @@
 [build-system]
-requires = [
-    "setuptools<81.0.0",
-    "wheel",
-    "Cython==3.0.12",
-    "buildkit/cythonpackage",
-]
-build-backend = "setuptools.build_meta"
+requires = ["setuptools<81.0.0", "wheel", "Cython==3.0.12"]
+build-backend = "build_backend"
+backend-path = ["nntool"]
 
 [project]
 name = "nntool"
