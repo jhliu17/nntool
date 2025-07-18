@@ -24,7 +24,7 @@ pip install --ignore-installed git+https://github.com/jhliu17/nntool.git
 ### Development Installation
 
 ```bash
-pip install -e ".[dev]"
+NNTOOL_PYTHON_BUILD=1 pip install -e ".[dev]"
 ```
 
 ### Testing
@@ -36,9 +36,7 @@ pytest
 ### Build Wheel
 
 ```bash
-pip install -q build
-
-python -m build --wheel
+NNTOOL_PYTHON_BUILD=1 python -m build --wheel
 ```
 
 ## Pre-built Download
