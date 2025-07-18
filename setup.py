@@ -25,12 +25,7 @@ def get_csrc_files(folder: str) -> list[str]:
     source_files = []
     for root, dirs, files in os.walk(folder):
         for file in files:
-            if (
-                file.endswith(".py")
-                and not file.endswith("__init__.py")
-                and not file.startswith(".")
-                and file != "__compile__.py"  # Exclude the empty __compile__.py files
-            ):
+            if file.endswith(".py") and not file.endswith("__init__.py"):
                 source_files.append(os.path.join(root, file))
     return source_files
 
@@ -62,29 +57,16 @@ else:
     from Cython.Build import cythonize
 
     # Specify the Cython modules to build
-    cython_extensions = []
-
-    # Create separate extensions for each Cython file in slurm/csrc/
-    for source_file in get_csrc_files("nntool/slurm/core/"):
-        # Extract module name from file path
-        module_name = source_file.replace("/", ".").replace(".py", "")
-        cython_extensions.append(
-            Extension(
-                name=module_name,
-                sources=[source_file],
-            )
-        )
-
-    # Create separate extensions for each Cython file in plot/csrc/
-    for source_file in get_csrc_files("nntool/plot/core/"):
-        # Extract module name from file path
-        module_name = source_file.replace("/", ".").replace(".py", "")
-        cython_extensions.append(
-            Extension(
-                name=module_name,
-                sources=[source_file],
-            )
-        )
+    cython_extensions = [
+        Extension(
+            name="nntool.slurm.core.__compile__",
+            sources=get_csrc_files("nntool/slurm/core/"),
+        ),
+        Extension(
+            name="nntool.plot.core.__compile__",
+            sources=get_csrc_files("nntool/plot/core/"),
+        ),
+    ]
 
     setup(
         packages=find_packages(exclude=["tests"]),
