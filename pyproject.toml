@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68.0.0,<81.0.0", "wheel"]
+requires = ["setuptools<81.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -12,7 +12,7 @@ keywords = ["deep learning", "neural network", "research"]
 requires-python = ">=3.9"
 dependencies = [
     "tyro",
-    "setuptools>=68.0.0,<81.0.0",
+    "setuptools<81.0.0",
     "submitit>=1.5.3",
     "seaborn>=0.13.2",
     "wandb>=0.15.0",
