@@ -338,8 +338,11 @@ class SlurmFunction:
 
         :return: True if the slurm function should be submitted to the executor, False otherwise
         """
-        is_first_launch = not self.slurm_has_been_set_up()
-        return self._is_valid_mode_for_executor and is_first_launch
+        # If the slurm function is distributed, it should be submitted to the executor only if the slurm has not been set up since the first launch is to set up the distributed environment and the second launch is to run the submit function in the distributed environment directly.
+        if self.is_distributed():
+            return self._is_valid_mode_for_executor and not self.slurm_has_been_set_up()
+        else:
+            return self._is_valid_mode_for_executor
 
     def __call__(self, *submit_fn_args, **submit_fn_kwargs) -> Union[Job, Any]:
         """Run the submit_fn with the given arguments and keyword arguments. The function is non-blocking in the mode of `slurm`, while other modes cause blocking. If there is no given arguments or keyword arguments, the default arguments and keyword arguments will be used.
