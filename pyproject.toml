@@ -1,7 +1,7 @@
 [build-system]
 requires = ["setuptools<81.0.0", "wheel", "Cython==3.0.12"]
 build-backend = "build_backend"
-backend-path = ["nntool"]
+backend-path = ["src/nntool"]
 
 [project]
 name = "nntool"
@@ -38,6 +38,9 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/jhliu17/nntool"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
 
 [tool.setuptools.package-data]
 "*" = ["!*.pyi"]

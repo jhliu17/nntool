@@ -30,7 +30,7 @@ def get_csrc_files(folder: str) -> list[str]:
     return source_files
 
 
-exec(open("nntool/version.py").read())
+exec(open("src/nntool/version.py").read())
 package_info = dict(
     name="nntool",
     version=VERSION,  # noqa: F821 # type: ignore
@@ -49,7 +49,7 @@ package_info = dict(
 
 if os.getenv("NNTOOL_PYTHON_BUILD"):
     setup(
-        packages=find_packages(exclude=["tests"]),
+        packages=find_packages(where="src", exclude=["tests"]),
         exclude_package_data={"": ["*.pyi"]},  # for source release, ignore all pyi files
         **package_info,
     )
@@ -60,16 +60,16 @@ else:
     cython_extensions = [
         Extension(
             name="nntool.slurm.core.__compile__",
-            sources=get_csrc_files("nntool/slurm/core/"),
+            sources=get_csrc_files("src/nntool/slurm/core/"),
         ),
         Extension(
             name="nntool.plot.core.__compile__",
-            sources=get_csrc_files("nntool/plot/core/"),
+            sources=get_csrc_files("src/nntool/plot/core/"),
         ),
     ]
 
     setup(
-        packages=find_packages(exclude=["tests"]),
+        packages=find_packages(where="src", exclude=["tests"]),
         cythonpackage={
             "inject_ext_modules": False,
             "inject_init": True,
