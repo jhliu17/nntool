@@ -30,21 +30,10 @@ def get_csrc_files(folder: str) -> list[str]:
     return source_files
 
 
-exec(open("nntool/version.py").read())
 package_info = dict(
-    name="nntool",
-    version=VERSION,  # noqa: F821 # type: ignore
-    python_requires=">=3.9",
     cmdclass={
         "clean_cython": CleanCython,
     },
-    # Additional metadata
-    author="Junhao Liu",
-    author_email="junhaoliu17@gmail.com",
-    description="NNTool is a package built on top of submitit designed to provide simple abstractions to conduct experiments on Slurm for machine learning research.",
-    license="MIT",
-    keywords="deep learning, neural network, research",
-    url="https://github.com/jhliu17/nntool",  # Project home page
 )
 
 if os.getenv("NNTOOL_PYTHON_BUILD"):
