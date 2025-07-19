@@ -8,7 +8,7 @@ name = "nntool"
 dynamic = ["version"]
 description = "NNTool is a package built on top of submitit designed to provide simple abstractions to conduct experiments on Slurm for machine learning research."
 authors = [{ name = "Junhao Liu", email = "junhaoliu17@gmail.com" }]
-license = "MIT"
+license = "GPL-3.0-only"
 keywords = ["deep learning", "neural network", "research"]
 requires-python = ">=3.9"
 dependencies = [
