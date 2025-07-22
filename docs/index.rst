@@ -37,12 +37,7 @@ NNTool is tested and supported on the following systems:
 * Python 3.9-3.13
 * Linux systems with Slurm installed
 
-Please contact me if you would like to access the package.
-
-.. code-block:: sh
-
-   pip install nntool
-
+Please contact Junhao Liu (junhaoliu17@gmail.com) if you would like to access the package.
 
 .. toctree::
    :caption: Getting started
