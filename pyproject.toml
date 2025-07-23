@@ -20,6 +20,7 @@ dependencies = [
     "tomli>=2.0.1",
     "Cython==3.0.12",
     "cythonpackage==0.2.14",
+    "rich>=13.0.0",
 ]
 
 [project.optional-dependencies]
