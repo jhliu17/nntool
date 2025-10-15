@@ -321,6 +321,8 @@ class SlurmFunction:
                 include_fn=self.pack_code_include_fn,
                 exclude_fn=self.pack_code_exclude_fn,
             )
+            # set sbatch command to change directory for the first launch
+            self.slurm_params_kwargs.update({"chdir": target_code_root})
             self.__mark_slurm_packed_code(target_code_root)
 
     def __after_submission(
