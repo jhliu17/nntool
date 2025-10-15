@@ -171,8 +171,23 @@ class SlurmFunction:
             has_been_set_up = True
         return has_been_set_up
 
+    @staticmethod
+    def slurm_packed_code() -> Optional[str]:
+        """This function checks whether the slurm has been set up with packed code by checking whether `NNTOOL_SLURM_PACKED_CODE` is existed in enviroment variables, which is a special environment variable to indicate that the slurm has been set up with packed code.
+
+        :return: The target code root if the slurm has been set up with packed code, None otherwise
+        """
+        # check whether slurm has been set up
+        packed_code_root = None
+        if os.environ.get("NNTOOL_SLURM_PACKED_CODE", None) is not None:
+            packed_code_root = os.environ.get("NNTOOL_SLURM_PACKED_CODE")
+        return packed_code_root
+
     def __mark_slurm_has_been_set_up(self):
         os.environ["NNTOOL_SLURM_HAS_BEEN_SET_UP"] = "1"
+
+    def __mark_slurm_packed_code(self, target_code_root: str):
+        os.environ["NNTOOL_SLURM_PACKED_CODE"] = target_code_root
 
     def __update_slurm_kwargs(
         self,
@@ -288,6 +303,10 @@ class SlurmFunction:
 
         :raises Exception: if the slurm function is not integrated
         """
+        if self.slurm_packed_code() is not None:
+            # set sbatch command to change directory
+            self.slurm_params_kwargs.update({"chdir": self.slurm_packed_code()})
+
         if self.slurm_has_been_set_up():
             return
 
@@ -302,10 +321,7 @@ class SlurmFunction:
                 include_fn=self.pack_code_include_fn,
                 exclude_fn=self.pack_code_exclude_fn,
             )
-
-            # set sbatch command to change directory
-            if self.slurm_config.use_packed_code:
-                self.slurm_params_kwargs.update({"chdir": target_code_root})
+            self.__mark_slurm_packed_code(target_code_root)
 
     def __after_submission(
         self,
