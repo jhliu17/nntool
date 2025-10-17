@@ -5,7 +5,7 @@ import tomli
 import warnings
 
 from dataclasses import dataclass, field
-from typing import Union
+from typing import Optional, Union
 from wandb.sdk.lib.disabled import RunDisabled
 from wandb.sdk.wandb_run import Run
 
@@ -17,6 +17,8 @@ class WandbConfig:
 
     :param api_key_config_file: The file path to the configuration file containing the wandb API key.
                                 The file should be a toml file with a `[wandb]` section. Default is an empty string.
+
+    :param dir: The directory to save the wandb logs. Default is None.
 
     :param project: The name of the project in wandb. Default is an empty string.
 
@@ -37,6 +39,9 @@ class WandbConfig:
 
     # wandb api key (toml file with [wandb] key field)
     api_key_config_file: str = ""
+
+    # dir to save the wandb logs
+    dir: Optional[str] = None
 
     # project name in wandb
     project: str = ""
@@ -94,6 +99,7 @@ def init_wandb(args: WandbConfig, run_config: dict) -> Union[Run, RunDisabled, N
         args.notes = f"{args.notes + ', ' if args.notes else ''}" + f"git hash: {git_hash}"
 
     wandb_run = wandb.init(
+        dir=args.dir,
         project=project,
         entity=entity,
         name=args.name if args.name else None,
