@@ -21,6 +21,8 @@
       SlurmConfig
       SlurmArgs
       SlurmFunction
+      Task
+      DistributedTaskConfig
       PyTorchDistributedTask
    
    
@@ -35,7 +37,6 @@
       slurm_fn
       slurm_function
       slurm_launcher
-      slurm_distributed_launcher
    
    
 

@@ -17,20 +17,8 @@
 
    
    
-   Functions
-   ---------
-   .. autosummary::
-      :nosignatures:
-   
-      latexify
-      savefig
-      is_latexify_enabled
-   
    
 
    
-   
-   Descriptions
-   ------------
    
    

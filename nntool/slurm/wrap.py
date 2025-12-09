@@ -103,7 +103,8 @@ def slurm_function(
     """
     A decorator to annoate a function to be run in slurm. The function decorated by this decorator should be launched in the way below.
 
-    Deprecated: This function is deprecated and will be removed in future versions. Please use `slurm_fn` instead.
+    Deprecated:
+        This function is deprecated and will be removed in future versions. Please use `slurm_fn` instead.
 
     Example:
         >>> @slurm_function

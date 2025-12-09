@@ -41,10 +41,10 @@ Please contact Junhao Liu (junhaoliu17@gmail.com) if you would like to access th
 
 .. toctree::
    :caption: Getting started
-   :maxdepth: 2
-   :hidden:
 
-   tutorials
+   tutorials/sequential_jobs
+   tutorials/distributed_training
+   tutorials/sharp_bits
 
 
 .. toctree::
@@ -52,4 +52,6 @@ Please contact Junhao Liu (junhaoliu17@gmail.com) if you would like to access th
    :maxdepth: 2
    :hidden:
 
-   api
+   api/nntool.slurm
+   api/nntool.wandb
+   api/nntool.experiment

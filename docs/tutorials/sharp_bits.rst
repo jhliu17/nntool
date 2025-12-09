@@ -1,5 +1,5 @@
-‼️ The Sharp Bits of NNTool
-###########################
+The Sharp Bits of NNTool
+########################
 
 Although the ``nntool`` library is designed to be simple and easy to use, there are some sharp bits that you should be aware of. This section covers some of the sharp bits that you should be aware of when using the ``nntool`` library.
 
