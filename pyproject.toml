@@ -1,7 +1,6 @@
 [build-system]
-requires = ["setuptools<81.0.0", "wheel", "Cython==3.0.12"]
-build-backend = "build_backend"
-backend-path = ["nntool"]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "nntool"
@@ -10,23 +9,13 @@ description = "NNTool is a package built on top of submitit designed to provide 
 authors = [{ name = "Junhao Liu", email = "junhaoliu17@gmail.com" }]
 keywords = ["deep learning", "neural network", "research"]
 requires-python = ">=3.9"
-dependencies = [
-    "tyro",
-    "setuptools<81.0.0",
-    "submitit>=1.5.3",
-    "seaborn>=0.13.2",
-    "wandb>=0.15.0",
-    "tomli>=2.0.1",
-    "Cython==3.0.12",
-    "cythonpackage==0.2.14",
-]
+dependencies = ["tyro", "submitit>=1.5.3", "wandb>=0.15.0", "tomli>=2.0.1"]
 
 [project.optional-dependencies]
 dev = [
     "ruff",
     "accelerate",
     "pytest>=8.0.2",
-    "jax[cpu]>=0.4.0",
     "torch>=2.2.0",
     "sphinx",
     "furo",
@@ -38,6 +27,11 @@ dev = [
 [project.urls]
 Homepage = "https://github.com/jhliu17/nntool"
 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nntool*"]
+exclude = ["buildkit", "docs", "tests"]
+
 [tool.setuptools.package-data]
 "*" = ["!*.pyi"]
 
@@ -46,7 +40,7 @@ version = { attr = "nntool.version.VERSION" }
 
 [tool.ruff]
 # Specify the Python version you're targeting
-target-version = "py311"
+target-version = "py312"
 
 # Set the maximum line length
 line-length = 100
