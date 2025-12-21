@@ -14,8 +14,8 @@ dependencies = ["tyro", "submitit>=1.5.3", "wandb>=0.15.0", "tomli>=2.0.1"]
 [project.optional-dependencies]
 dev = [
     "ruff",
-    "accelerate",
     "pytest>=8.0.2",
+    "accelerate",
     "torch>=2.2.0",
     "sphinx",
     "furo",
@@ -26,6 +26,15 @@ dev = [
 
 [project.urls]
 Homepage = "https://github.com/jhliu17/nntool"
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+torchvision = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -78,3 +87,6 @@ exclude = [
 
 [tool.ruff.lint]
 ignore = ["F405", "F403", "E741", "E712"]
+
+[dependency-groups]
+dev = ["pytest>=8.4.2"]
