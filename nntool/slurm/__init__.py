@@ -1,7 +1,7 @@
 from .config import SlurmConfig, SlurmArgs
 from .wrap import (
-    slurm_function,
     slurm_fn,
+    slurm_function,
     slurm_launcher,
 )
 from .function import SlurmFunction

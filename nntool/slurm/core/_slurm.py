@@ -7,14 +7,16 @@ from functools import partial
 from submitit import Job
 from typing import Any, Callable, Literal, Tuple, Union, Dict, List, Optional
 
+from ._slurm_context import SubmititDistributedCommandContext
 from ..config import SlurmConfig
 from ..task import (
     PyTorchDistributedTask,
+)
+from ..utils import (
     pack_code_files,
     include_code_files,
     exclude_code_folders,
 )
-from ._slurm_context import SubmititDistributedCommandContext
 
 
 class SlurmFunction:
