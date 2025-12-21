@@ -32,11 +32,7 @@ jobs:
 
       - name: Install packages
         run: |
-          uv sync --locked --extra dev
-
-      - name: Sphinx build
-        run: |
-          sphinx-build docs docs/_build
+          uv sync --locked
 
       - name: Build Wheel
         run: |

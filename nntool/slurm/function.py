@@ -4,7 +4,7 @@ import copy
 from submitit import Job
 from typing import Any, Callable, Literal, Tuple, Union, Dict, List, Optional
 from .config import SlurmConfig
-from .core import _SlurmFunction
+from .core import SlurmBackend
 
 
 class SlurmFunction:
@@ -26,7 +26,7 @@ class SlurmFunction:
         Returns:
             the wrapped submit function with configured slurm paramters
         """
-        self.engine = _SlurmFunction(submit_fn, default_submit_fn_args, default_submit_fn_kwargs)
+        self.engine = SlurmBackend(submit_fn, default_submit_fn_args, default_submit_fn_kwargs)
 
     def __create_copy(self) -> "SlurmFunction":
         return copy.copy(self)

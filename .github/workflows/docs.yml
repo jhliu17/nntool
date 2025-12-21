@@ -28,7 +28,7 @@ jobs:
 
       - name: Install packages
         run: |
-          uv sync --locked --extra dev
+          uv sync --locked
 
       - name: Sphinx build
         run: |

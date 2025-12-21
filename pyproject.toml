@@ -8,13 +8,13 @@ dynamic = ["version"]
 description = "NNTool is a package built on top of submitit designed to provide simple abstractions to conduct experiments on Slurm for machine learning research."
 authors = [{ name = "Junhao Liu", email = "junhaoliu17@gmail.com" }]
 keywords = ["deep learning", "neural network", "research"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = ["tyro", "submitit>=1.5.4", "wandb>=0.15.0", "tomli>=2.0.1"]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "ruff",
-    "pytest>=8.0.2",
+    "pytest>=8.4.2",
     "accelerate",
     "torch>=2.2.0",
     "sphinx",
@@ -87,6 +87,3 @@ exclude = [
 
 [tool.ruff.lint]
 ignore = ["F405", "F403", "E741", "E712"]
-
-[dependency-groups]
-dev = ["pytest>=8.4.2"]
