@@ -2,7 +2,7 @@
 
 [![Pytest](https://github.com/jhliu17/nntool/actions/workflows/pytest.yml/badge.svg)](https://github.com/jhliu17/nntool/actions/workflows/pytest.yml) [![Documentation](https://github.com/jhliu17/nntool/actions/workflows/documentation.yml/badge.svg)](https://github.com/jhliu17/nntool/actions/workflows/documentation.yml)
 
-NNTool is a package built on top of submitit designed to provide simple abstractions to conduct experiments on Slurm for machine learning research.
+`nntool` is a package built on top of submitit designed to provide simple abstractions to conduct experiments on Slurm for machine learning research.
 
 ## Installation
 
@@ -24,7 +24,7 @@ pip install --ignore-installed git+https://github.com/jhliu17/nntool.git
 ### Development Installation
 
 ```bash
-NNTOOL_PYTHON_BUILD=1 pip install -e ".[dev]"
+pip install -e ".[dev]"
 ```
 
 ### Testing
@@ -36,10 +36,5 @@ pytest
 ### Build Wheel
 
 ```bash
-NNTOOL_PYTHON_BUILD=1 python -m build --wheel
-```
-
-## Pre-built Download
-```bash
-pip install -f https://jhliu17.github.io/nntool/wheel nntool
+uv build
 ```

@@ -1,4 +1,4 @@
-from ._slurm import SlurmFunction as _SlurmFunction
+from ._slurm import SlurmFunction as SlurmBackend
 
 
-__all__ = ["_SlurmFunction"]
+__all__ = ["SlurmBackend"]

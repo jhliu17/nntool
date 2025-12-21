@@ -1,3 +1,0 @@
-[submodule "test-cythonpackage"]
-	path = test-cythonpackage
-	url = git@github.com:pprados/test-cythonpackage.git
