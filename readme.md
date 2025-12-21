@@ -1,22 +1,42 @@
 # 🚂 NNTool
 
-[![Pytest](https://github.com/jhliu17/nntool/actions/workflows/pytest.yml/badge.svg)](https://github.com/jhliu17/nntool/actions/workflows/pytest.yml) [![Documentation](https://github.com/jhliu17/nntool/actions/workflows/documentation.yml/badge.svg)](https://github.com/jhliu17/nntool/actions/workflows/documentation.yml)
+[![Pytest](https://github.com/jhliu17/nntool/actions/workflows/pytest.yml/badge.svg)](https://github.com/jhliu17/nntool/actions/workflows/pytest.yml) [![Documentation](https://github.com/jhliu17/nntool/actions/workflows/docs.yml/badge.svg)](https://github.com/jhliu17/nntool/actions/workflows/docs.yml)
 
 `nntool` is a package built on top of submitit designed to provide simple abstractions to conduct experiments on Slurm for machine learning research.
 
-## Installation
+## Example
 
-```bash
-pip install git+https://github.com/jhliu17/nntool.git
+```python
 
-# install latest built from sdist
-pip install -f https://jhliu17.github.io/nntool/wheel nntool
+   from nntool.slurm import SlurmConfig, slurm_fn
+
+   @slurm_fn
+   def run_on_slurm(a, b):
+      return a + b
+
+   slurm_config = SlurmConfig(
+      mode="slurm",
+      partition="PARTITION",
+      job_name="EXAMPLE",
+      tasks_per_node=1,
+      cpus_per_task=8,
+      mem="1GB",
+   )
+   job = run_on_slurm[slurm_config](1, b=2) # job is submitted to slurm
+   result = job.result() # block and get the result => 3
 ```
 
-## Reinstallation
+## Installation
+
+nntool is tested and supported on the following systems:
+
+* Python 3.10-3.13
+* Linux systems with Slurm installed
+
+Install nntool via pip
 
 ```bash
-pip install --ignore-installed git+https://github.com/jhliu17/nntool.git
+   pip install nntool
 ```
 
 ## Development
