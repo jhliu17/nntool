@@ -6,7 +6,8 @@
 NNTool
 ======
 
-NNTool is a package built on top of ``submitit`` designed to provide simple abstractions to conduct experiments on Slurm for machine learning research. Below is an example to run a Python function on a slurm cluster using specific configurations.
+nntool is a package designed to provide seamless Python function execution on Slurm for machine learning research, with useful utilities for experiment tracking and management.
+
 
 .. code-block:: python
 
@@ -24,8 +25,8 @@ NNTool is a package built on top of ``submitit`` designed to provide simple abst
       cpus_per_task=8,
       mem="1GB",
    )
-   job = run_on_slurm[slurm_config](1, b=2)
 
+   job = run_on_slurm[slurm_config](1, b=2) # job is submitted to slurm
    result = job.result() # block and get the result => 3
 
 

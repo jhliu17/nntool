@@ -2,7 +2,7 @@
 
 [![Pytest](https://github.com/jhliu17/nntool/actions/workflows/pytest.yml/badge.svg)](https://github.com/jhliu17/nntool/actions/workflows/pytest.yml) [![Documentation](https://github.com/jhliu17/nntool/actions/workflows/docs.yml/badge.svg)](https://github.com/jhliu17/nntool/actions/workflows/docs.yml)
 
-`nntool` is a package built on top of submitit designed to provide simple abstractions to conduct experiments on Slurm for machine learning research.
+`nntool` is a package designed to provide seamless Python function execution on Slurm for machine learning research, with useful utilities for experiment tracking and management.
 
 ## Example
 
@@ -22,6 +22,7 @@
       cpus_per_task=8,
       mem="1GB",
    )
+
    job = run_on_slurm[slurm_config](1, b=2) # job is submitted to slurm
    result = job.result() # block and get the result => 3
 ```
