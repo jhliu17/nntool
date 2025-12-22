@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nntool"
 dynamic = ["version"]
-description = "NNTool is a package built on top of submitit designed to provide simple abstractions to conduct experiments on Slurm for machine learning research."
+description = "nntool is a package designed to provide seamless Python function execution on Slurm for machine learning research, with useful utilities for experiment tracking and management."
 authors = [{ name = "Junhao Liu", email = "junhaoliu17@gmail.com" }]
 keywords = ["deep learning", "neural network", "research"]
 requires-python = ">=3.10"
