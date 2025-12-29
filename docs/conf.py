@@ -83,7 +83,7 @@ templates_path = ["_templates"]
 html_css_files = [
     "custom.css",
 ]
-html_logo = "./_static/apple-touch-icon.png"
+html_logo = "./_static/apple-touch-icon-white.png"
 html_favicon = "./_static/favicon.ico"
 html_title = "nntool"
 html_show_sourcelink = True
