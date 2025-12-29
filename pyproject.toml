@@ -22,9 +22,11 @@ dev = [
     "torch>=2.2.0",
     "sphinx",
     "furo",
-    "myst_parser",
+    "myst-parser",
     "sphinx-autodoc-typehints",
     "sphinx-copybutton",
+    "sphinx-autobuild>=2024.10.3",
+    "sphinx-design>=0.6.1",
 ]
 
 [project.urls]
