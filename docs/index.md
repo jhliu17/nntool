@@ -13,19 +13,21 @@ sd_hide_title: true
 :margin: 4 4 1 2
 
 :::{grid-item}
-:columns: 12 4 4 4
+:columns: 12
 
-```{image} ./_static/apple-touch-icon-white.png
-:width: 80px
-:class: sd-m-auto
+```{image} ./_static/nntool.png
+:width: 1000px
+:class: sd-m-auto sd-rounded-1
 ```
 
 :::
 
 :::{grid-item}
-:columns: 12 8 8 8
+:columns: 12
 :child-align: justify
-:class: sd-text-white sd-fs-3
+:class: sd-text-white sd-fs-5
+
+# NNTool
 
 A package designed to provide seamless Python function execution on Slurm for machine learning research.
 
@@ -43,31 +45,31 @@ Get Started
 
 ::::::
 
-`nntool` is a package designed to provide seamless Python function execution on Slurm for machine learning research, with useful utilities for experiment tracking and management.
+<!-- `nntool` is a package designed to provide seamless Python function execution on Slurm for machine learning research, with useful utilities for experiment tracking and management. -->
 
 ::::{grid} 1 2 2 3
 :margin: 4 4 0 0
 :gutter: 1
 
 :::{grid-item-card} {octicon}`table` Seamless Execution
-:link: grids
+:link: tutorials/sequential_jobs
 :link-type: doc
 
 Execute Python functions on Slurm just like local functions.
 :::
 
 :::{grid-item-card} {octicon}`note` Sequential Jobs and Dependencies
-:link: cards
+:link: tutorials/sequential_jobs
 :link-type: doc
 
-Support mapping sequential jobs and manage job dependencies.
+Map sequential jobs and manage job dependencies.
 :::
 
 :::{grid-item-card} {octicon}`duplicate` Distributed Training
-:link: tabs
+:link: tutorials/distributed_training
 :link-type: doc
 
-Seamlessly extend to distributed jobs.
+Launch distributed jobs in a flexible way.
 :::
 
 ::::
