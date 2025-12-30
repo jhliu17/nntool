@@ -1,4 +1,4 @@
-# 🚂 NNTool
+# 🚂 nntool
 
 [![Pytest](https://github.com/jhliu17/nntool/actions/workflows/pytest.yml/badge.svg)](https://github.com/jhliu17/nntool/actions/workflows/pytest.yml) [![Documentation](https://github.com/jhliu17/nntool/actions/workflows/docs.yml/badge.svg)](https://github.com/jhliu17/nntool/actions/workflows/docs.yml)
 
