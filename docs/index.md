@@ -1,4 +1,6 @@
-# nntool
+---
+sd_hide_title: true
+---
 
 ::::::{div} landing-title
 :style: "padding: 0.1rem 0.5rem 0.6rem 0; background-image: linear-gradient(315deg, #438ff9 0%, #05A 74%); clip-path: polygon(0px 0px, 100% 0%, 100% 100%, 0% calc(100% - 1.5rem)); -webkit-clip-path: polygon(0px 0px, 100% 0%, 100% 100%, 0% calc(100% - 1.5rem));"
@@ -8,15 +10,19 @@
 :gutter: 2 3 3 3
 :margin: 4 4 1 2
 
+:::
+
 :::{grid-item}
 :columns: 12
+:child-align: justify
+:class: sd-text-white sd-fs-3
+
+# nntool
 
 ```{image} ./_static/nntool.png
 :width: 1000px
 :class: sd-m-auto sd-rounded-1
 ```
-
-:::
 
 :::{grid-item}
 :columns: 12
@@ -80,7 +86,7 @@ tutorials/sharp_bits
 ```
 
 ```{toctree}
-:caption: API reference
+:caption: API
 :maxdepth: 2
 
 api
