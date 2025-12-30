@@ -14,7 +14,7 @@ from typing import Union
 
 import nntool
 
-project = "NNTool"
+project = "nntool"
 copyright = "2025"
 author = "Junhao Liu"
 repository = "https://github.com/jhliu17/nntool"
