@@ -53,7 +53,7 @@ class SlurmFunction:
         self.slurm_task_kwargs: Dict[str, str]
         self.system_argv: Optional[List[str]]
         self.pack_code_include_fn: Callable[[str, str], bool]
-        self.pack_code_exclude_fn: Callable[[str, str], bool]
+        self.pack_code_exclude_dir_fn: Callable[[str, str], bool]
 
     def is_configured(self) -> bool:
         """Whether the slurm function has been configured.
@@ -267,7 +267,7 @@ class SlurmFunction:
             include_code_files,
             code_ext=slurm_fn.slurm_config.code_file_suffixes,
         )
-        slurm_fn.pack_code_exclude_fn = partial(
+        slurm_fn.pack_code_exclude_dir_fn = partial(
             exclude_code_folders,
             code_folders=slurm_fn.slurm_config.exclude_code_folders,
         )
@@ -276,7 +276,7 @@ class SlurmFunction:
             slurm_fn.pack_code_include_fn = pack_code_include_fn
 
         if pack_code_exclude_fn is not None:
-            slurm_fn.pack_code_exclude_fn = pack_code_exclude_fn
+            slurm_fn.pack_code_exclude_dir_fn = pack_code_exclude_fn
 
         # mark instantiated
         slurm_fn.__configured = True
@@ -321,7 +321,7 @@ class SlurmFunction:
                 self.slurm_config.code_root,
                 self.slurm_config.output_path,
                 include_fn=self.pack_code_include_fn,
-                exclude_fn=self.pack_code_exclude_fn,
+                exclude_dir_fn=self.pack_code_exclude_dir_fn,
             )
             # set sbatch command to change directory for the first launch
             self.slurm_params_kwargs.update({"chdir": target_code_root})
