@@ -21,8 +21,7 @@ def include_code_files(path: str, root: str, code_ext: list[str]):
 
 def exclude_code_folders(path: str, root: str, code_folders: list[str]):
     return any(
-        os.path.relpath(path, root).startswith(code_folders + os.sep)
-        for code_folders in code_folders
+        os.path.relpath(path, root).startswith(code_folder + os.sep) for code_folder in code_folders
     )
 
 
@@ -35,14 +34,16 @@ def exclude_wandb_fn(path: str, root: str) -> bool:
 def filtered_dir(
     root: str,
     include_fn: Callable[[str, str], bool],
-    exclude_fn: Callable[[str, str], bool],
+    exclude_dir_fn: Callable[[str, str], bool],
 ) -> Generator[str, None, None]:
     """Simple generator to walk a directory."""
 
     for dirpath, _, files in os.walk(root):
+        if exclude_dir_fn(dirpath, root):
+            continue
         for fname in files:
             file_path = os.path.join(dirpath, fname)
-            if include_fn(file_path, root) and not exclude_fn(file_path, root):
+            if include_fn(file_path, root):
                 yield file_path
 
 
@@ -50,24 +51,25 @@ def pack_code_files(
     root: str,
     target_root: str,
     include_fn: Callable[[str, str], bool] = _is_py_or_dockerfile,
-    exclude_fn: Callable[[str, str], bool] = exclude_wandb_fn,
+    exclude_dir_fn: Callable[[str, str], bool] = exclude_wandb_fn,
 ):
     root = os.path.abspath(root)
     code_root = Path(os.path.abspath(root))
     code_target = Path(os.path.abspath(target_root)) / "code"
+
+    # Ensure target directory exists
     if not code_root.exists():
         raise ValueError(f"Code root {code_root} does not exist.")
     if not code_target.exists():
         code_target.mkdir(parents=True)
 
-    for file_path in filtered_dir(root, include_fn, exclude_fn):
+    for file_path in filtered_dir(root, include_fn, exclude_dir_fn):
         save_name = os.path.relpath(file_path, root)
         sub_file_path, file_name = os.path.split(save_name)
         sub_file_full_path = code_target / sub_file_path
         if not sub_file_full_path.exists():
             sub_file_full_path.mkdir(parents=True)
         shutil.copy(file_path, sub_file_full_path / file_name)
-
     return code_target
 
 
