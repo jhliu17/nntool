@@ -1,11 +1,7 @@
-from .config import SlurmConfig, SlurmArgs
-from .wrap import (
-    slurm_fn,
-    slurm_function,
-    slurm_launcher,
-)
-from .function import SlurmFunction
-from .task import Task, DistributedTaskConfig, PyTorchDistributedTask
+from slurmic import SlurmConfig, SlurmArgs
+from slurmic.function import SlurmFunction
+from slurmic.task import Task, DistributedTaskConfig, PyTorchDistributedTask
+from slurmic.wrap import slurm_fn, slurm_function, slurm_launcher
 
 
 __all__ = [

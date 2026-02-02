@@ -7,6 +7,5 @@ nntool
    :toctree: api
    :recursive:
 
-   nntool.slurm
    nntool.wandb
    nntool.experiment
