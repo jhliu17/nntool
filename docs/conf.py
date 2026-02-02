@@ -84,13 +84,13 @@ html_css_files = [
     "custom.css",
 ]
 # html_logo = "./_static/apple-touch-icon-white.png"
-html_favicon = "./_static/favicon.ico"
+# html_favicon = "./_static/favicon.ico"
 html_title = "nntool"
 html_show_sourcelink = True
 html_theme_options = {
-    "light_logo": "apple-touch-icon.png",
-    "dark_logo": "apple-touch-icon.png",
-    "sidebar_hide_name": True,
+    # "light_logo": "apple-touch-icon.png",
+    # "dark_logo": "apple-touch-icon.png",
+    # "sidebar_hide_name": True,
     "source_repository": "https://github.com/jhliu17/nntool",
     "source_branch": "main",
     "source_directory": "docs/",
