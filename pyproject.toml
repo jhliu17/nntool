@@ -5,19 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nntool"
 dynamic = ["version"]
-description = "nntool is a package designed to provide seamless Python function execution on Slurm for machine learning research, with useful utilities for experiment tracking and management."
+description = "nntool is a package designed for machine learning research, with useful utilities for experiment tracking and management."
 authors = [{ name = "Junhao Liu", email = "junhaoliu17@gmail.com" }]
 license = { file = "LICENSE" }
 readme = "readme.md"
 classifiers = ["License :: OSI Approved :: MIT License"]
 keywords = ["deep learning", "neural network", "research"]
 requires-python = ">=3.10"
-dependencies = [
-    "tyro",
-    "wandb>=0.15.0",
-    "tomli>=2.0.1",
-    "slurmic>=0.1.0",
-]
+dependencies = ["tyro", "wandb>=0.15.0", "tomli>=2.0.1", "slurmic>=0.1.0"]
 
 [dependency-groups]
 dev = [
